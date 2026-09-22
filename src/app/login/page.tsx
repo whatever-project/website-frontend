@@ -10,16 +10,27 @@ export default function LoginPage() {
   const [form, setForm] = useState({ usernameOrEmail: "", password: "" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isUnverified, setIsUnverified] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
+    setIsUnverified(false)
     setLoading(true)
     try {
       await authApi.login(form)
       router.push("/dashboard")
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong")
+      if (err instanceof ApiError) {
+        if (err.status === 403 || err.message.toLowerCase().includes("verify")) {
+          setIsUnverified(true)
+          setError("Your email is still unverified. Please check your email to verify your account before logging in.")
+        } else {
+          setError(err.message)
+        }
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -41,8 +52,24 @@ export default function LoginPage() {
           className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 space-y-5"
         >
           {error && (
-            <div className="rounded-lg bg-red-950/40 border border-red-800 px-4 py-3 text-sm text-red-400">
-              {error}
+            <div
+              className={`rounded-xl border p-4 text-sm ${
+                isUnverified
+                  ? "bg-amber-950/40 border-amber-800 text-amber-300"
+                  : "bg-red-950/40 border-red-800 text-red-400"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-lg leading-none">{isUnverified ? "✉️" : "⚠️"}</span>
+                <div className="space-y-1">
+                  <p className="font-semibold text-xs uppercase tracking-wider">
+                    {isUnverified ? "Email Not Verified" : "Sign In Error"}
+                  </p>
+                  <p className={isUnverified ? "text-amber-200/90 text-sm leading-relaxed" : "text-red-300 text-sm"}>
+                    {error}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
