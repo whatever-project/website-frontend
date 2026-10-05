@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { accountApi, ApiError } from "@/lib/api"
 import Link from "next/link"
+import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/parchment"
 
 function VerifyEmailChangeContent() {
   const searchParams = useSearchParams()
@@ -30,48 +31,58 @@ function VerifyEmailChangeContent() {
       })
   }, [token])
 
-  if (status === "loading") {
-    return (
-      <div className="text-center space-y-3">
-        <div className="text-4xl animate-pulse">🔍</div>
-        <p className="text-zinc-400 text-sm">Confirming your new email…</p>
-      </div>
-    )
-  }
-
-  if (status === "success") {
-    return (
-      <div className="text-center space-y-4">
-        <div className="text-4xl">✅</div>
-        <h1 className="text-xl font-bold text-green-300">Email updated!</h1>
-        <p className="text-zinc-400 text-sm">{message}</p>
-        <Link href="/dashboard" className="inline-block mt-4 rounded-lg bg-white text-zinc-900 px-6 py-2.5 text-sm font-semibold hover:bg-zinc-100 transition-colors">
-          Go to dashboard
-        </Link>
-      </div>
-    )
-  }
-
   return (
-    <div className="text-center space-y-4">
-      <div className="text-4xl">❌</div>
-      <h1 className="text-xl font-bold text-red-300">Verification failed</h1>
-      <p className="text-zinc-400 text-sm">{message}</p>
-      <Link href="/dashboard" className="inline-block mt-4 text-sm text-zinc-400 hover:text-white transition-colors">
-        Back to dashboard
-      </Link>
+    <div className="text-center">
+      {status === "loading" && (
+        <p className="parch-label animate-pulse">Confirming your new email…</p>
+      )}
+
+      {status === "success" && (
+        <>
+          <WaxSeal letter="✓" size={56} className="mx-auto" />
+          <h2 className="font-jimthompson mt-4 text-2xl text-[#3a2c1a]">Email Updated!</h2>
+          <InkDivider><Flourish className="h-4 w-4" /></InkDivider>
+          <p className="font-serif2 text-[15px] leading-relaxed text-[#4a3820]">{message}</p>
+          <div className="mt-7">
+            <Link href="/dashboard" className="parch-btn block">
+              Go to Account Settings
+            </Link>
+          </div>
+        </>
+      )}
+
+      {status === "error" && (
+        <>
+          <p className="font-jimthompson text-2xl text-[#8a2a1f]">Verification Failed</p>
+          <InkDivider><Flourish className="h-4 w-4" /></InkDivider>
+          <p className="font-serif2 text-[15px] leading-relaxed text-[#8a2a1f]">{message}</p>
+          <div className="mt-7">
+            <Link href="/dashboard" className="parch-btn-outline inline-block px-8 py-2.5 text-sm">
+              Back to Account Settings
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   )
 }
 
 export default function VerifyEmailChangePage() {
   return (
-    <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-10">
-        <Suspense fallback={<div className="text-zinc-400 text-sm text-center">Loading…</div>}>
-          <VerifyEmailChangeContent />
-        </Suspense>
+    <ParchShell title="Verify Email Change" sub="— Update Your Seal —" backHref="/dashboard">
+      <div className="relative z-20 mx-auto max-w-xl px-6 py-14">
+        <div className="parch-sheet relative p-10 text-center">
+          <SheetCorners />
+          <div className="absolute -top-7 left-1/2 -translate-x-1/2">
+            <WaxSeal letter="✉" size={56} />
+          </div>
+          <div className="mt-4">
+            <Suspense fallback={<p className="parch-label animate-pulse">Loading…</p>}>
+              <VerifyEmailChangeContent />
+            </Suspense>
+          </div>
+        </div>
       </div>
-    </main>
+    </ParchShell>
   )
 }

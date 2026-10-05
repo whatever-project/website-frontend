@@ -4,10 +4,24 @@ import { useState, FormEvent } from "react"
 import { authApi, ApiError } from "@/lib/api"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners, PasswordInput } from "@/components/parchment"
+
+function LetterStack() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-end">
+      <img
+        src="/assets/letter-scene.png"
+        alt=""
+        className="-mr-6 w-[560px] max-w-none [filter:drop-shadow(0_16px_22px_rgba(60,40,15,.42))]"
+      />
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ usernameOrEmail: "", password: "" })
+  const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isUnverified, setIsUnverified] = useState(false)
@@ -24,7 +38,7 @@ export default function LoginPage() {
       if (err instanceof ApiError) {
         if (err.status === 403 || err.message.toLowerCase().includes("verify")) {
           setIsUnverified(true)
-          setError("Your email is still unverified. Please check your email to verify your account before logging in.")
+          setError("Your email is still unverified. Please check your inbox before signing in.")
         } else {
           setError(err.message)
         }
@@ -37,85 +51,122 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Sign in</h1>
-          <p className="text-zinc-500 text-sm mt-2">
-            No account?{" "}
-            <Link href="/signup" className="text-zinc-300 hover:text-white transition-colors">Create one</Link>
-          </p>
-        </div>
-
+    <ParchShell title="Sign In" sub="— The Gates of the Vale —" backHref="/">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[1fr_1fr] lg:gap-32">
+        {/* parchment login form */}
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 space-y-5"
+          className="parch-sheet relative mx-auto w-full max-w-md p-8 sm:p-10 lg:mx-0 lg:ml-16"
         >
+          <SheetCorners />
+          <div className="absolute -top-7 left-1/2 -translate-x-1/2">
+            <WaxSeal letter="✦" size={56} />
+          </div>
+
+          <h2 className="font-jimthompson mt-4 text-center text-3xl text-[#3a2c1a]">
+            จดหมายเชิญกลับหมู่บ้าน
+          </h2>
+          <InkDivider>
+            <Flourish className="h-4 w-4" />
+          </InkDivider>
+
+          {/* Error banner */}
           {error && (
             <div
-              className={`rounded-xl border p-4 text-sm ${
+              className={`mb-4 rounded border p-3 font-ui text-sm ${
                 isUnverified
-                  ? "bg-amber-950/40 border-amber-800 text-amber-300"
-                  : "bg-red-950/40 border-red-800 text-red-400"
+                  ? "border-amber-700/60 bg-amber-100/60 text-amber-900"
+                  : "border-[#8a2a1f]/40 bg-red-50/60 text-[#8a2a1f]"
               }`}
             >
-              <div className="flex items-start gap-3">
-                <span className="text-lg leading-none">{isUnverified ? "✉️" : "⚠️"}</span>
-                <div className="space-y-1">
-                  <p className="font-semibold text-xs uppercase tracking-wider">
-                    {isUnverified ? "Email Not Verified" : "Sign In Error"}
-                  </p>
-                  <p className={isUnverified ? "text-amber-200/90 text-sm leading-relaxed" : "text-red-300 text-sm"}>
-                    {error}
-                  </p>
+              <span className="mr-2">{isUnverified ? "✉️" : "⚠️"}</span>
+              {error}
+              {isUnverified && (
+                <div className="mt-1">
+                  <Link href="/signup" className="underline underline-offset-2 hover:text-amber-700">
+                    Back to sign up →
+                  </Link>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-zinc-400">Username or Email</label>
-            <input
-              id="login-identifier"
-              type="text"
-              value={form.usernameOrEmail}
-              onChange={e => setForm(f => ({ ...f, usernameOrEmail: e.target.value }))}
-              placeholder="username or you@example.com"
-              required
-              autoComplete="username"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
-            />
-          </div>
+          <label className="parch-label mb-1.5 mt-4 block">Username or Email</label>
+          <input
+            id="login-identifier"
+            className="parch-input font-serithai"
+            value={form.usernameOrEmail}
+            onChange={e => setForm(f => ({ ...f, usernameOrEmail: e.target.value }))}
+            placeholder="wanderer or you@example.com"
+            autoComplete="username"
+            required
+          />
 
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-medium text-zinc-400">Password</label>
-              <Link href="/forgot-password" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              id="login-password"
-              type="password"
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-              className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
-            />
+          <label className="parch-label mb-1.5 mt-5 block">Password</label>
+          <PasswordInput
+            id="login-password"
+            className="parch-input w-full font-serithai"
+            placeholder="••••••••••"
+            value={form.password}
+            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+            autoComplete="current-password"
+            required
+          />
+
+          <div className="mt-4 mb-7 flex items-center justify-between">
+            <label className="flex cursor-pointer items-center gap-2.5 font-ui text-[13px] text-[#5d4626]">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={e => setRemember(e.target.checked)}
+                className="parch-check"
+              />
+              Remember me
+            </label>
+            <Link
+              href="/forgot-password"
+              className="font-ui text-[13px] text-[#b3a07c] underline decoration-dotted underline-offset-4 transition hover:text-[#8a6a35]"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <button
             id="login-submit"
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-white text-zinc-900 py-2.5 text-sm font-semibold hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+            className="parch-btn"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "Signing in…" : "Sign In"}
           </button>
+
+          <p className="mt-6 text-center font-ui text-[13px] text-[#8a7350]">
+            No account yet?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
+            >
+              Create one
+            </Link>
+          </p>
+
+          <p className="mt-3 text-center">
+            <Link href="/account" className="font-ui text-[12px] tracking-wider text-[#a68d5f] underline decoration-dashed underline-offset-4 hover:text-[#6b4f22]">
+              ✦ ดูตัวอย่างหน้า Manage Account โดยไม่เข้าสู่ระบบ
+            </Link>
+          </p>
+          <p className="mt-2 text-center">
+            <Link href="/account-alt" className="font-ui text-[12px] tracking-wider text-[#a68d5f] underline decoration-dashed underline-offset-4 hover:text-[#6b4f22]">
+              ✦ ดูตัวอย่างหน้า Manage Account แบบที่ 2 (Profile Picker)
+            </Link>
+          </p>
         </form>
+
+        {/* right side — decorative letter scene */}
+        <div className="relative hidden h-[460px] lg:block">
+          <LetterStack />
+        </div>
       </div>
-    </main>
+    </ParchShell>
   )
 }
