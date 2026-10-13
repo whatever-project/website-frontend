@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { authService } from "@/api/services/auth.service"
 import { ApiError } from "@/api/client"
 import { Link } from "@/i18n/navigation"
-import { InkDivider, Flourish, WaxSeal } from "@/components/ParchmentNew"
+import { InkDivider, Flourish, WaxSeal } from "@/components/Parchment"
 import { useTranslations } from "next-intl"
 import { routes } from "@/config/routes"
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ParchShell, ParchCurvedLabel, Flourish, InkDivider, WaxSeal } from "@/components/ParchmentNew"
+import { ParchShell, ParchCurvedLabel, Flourish, InkDivider, WaxSeal } from "@/components/Parchment"
 import { useTranslations } from "next-intl"
 import { routes } from "@/config/routes"
 import { PROFILES } from "./constants"

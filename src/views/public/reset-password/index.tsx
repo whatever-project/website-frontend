@@ -2,7 +2,7 @@
 
 import { Suspense } from "react"
 import { useTranslations } from "next-intl"
-import { ParchShell, WaxSeal, SheetCorners } from "@/components/ParchmentNew"
+import { ParchShell, WaxSeal, SheetCorners } from "@/components/Parchment"
 import { routes } from "@/config/routes"
 import ResetPasswordForm from "./components/ResetPasswordForm"
 
