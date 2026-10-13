@@ -1,0 +1,22 @@
+{
+  "account": {
+    "pageTitle": "Manage Account",
+    "pageSub": "— Choose Your Soul —",
+    "intro": "Choose your viewing mode or select a character to begin roleplaying — hover over an emblem to read character details.",
+    "statusLabel": "Status",
+    "nameLabel": "Name",
+    "lockedNote": "This character is locked — contact an admin to unlock.",
+    "boardsHeading": "Gates to the Roleplay Boards (Layout Draft)",
+    "noticeBoardLabel": "Notice Board",
+    "noticeBoardTh": "กระดานประกาศ",
+    "forumBoardLabel": "Forum Boards",
+    "forumBoardTh": "บอร์ดกระทู้",
+    "characterSheetLabel": "Character Sheet",
+    "characterSheetTh": "หน้าโปรไฟล์ตัวละคร",
+    "draftNote": "This is a preview of the Manage Account page — no login required.",
+    "profileVisitor": "Visitor Mode",
+    "profileCreate": "Create Character",
+    "statusActive": "Active",
+    "statusLock": "Lock"
+  }
+}

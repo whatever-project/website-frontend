@@ -1,0 +1,20 @@
+{
+  "login": {
+    "pageTitle": "เข้าสู่ระบบ",
+    "pageSub": "— ประตูสู่หุบเขา —",
+    "formHeading": "จดหมายเชิญกลับหมู่บ้าน",
+    "identifier": "ชื่อผู้ใช้หรืออีเมล",
+    "identifierPlaceholder": "ผู้เดินทาง หรือ you@example.com",
+    "password": "รหัสผ่าน",
+    "passwordPlaceholder": "••••••••••",
+    "rememberMe": "จดจำฉัน",
+    "forgotPassword": "ลืมรหัสผ่าน?",
+    "submit": "เข้าสู่ระบบ",
+    "submitting": "กำลังเข้าสู่ระบบ…",
+    "noAccount": "ยังไม่มีบัญชี?",
+    "createOne": "สร้างบัญชีใหม่",
+    "errorUnverified": "อีเมลของคุณยังไม่ได้รับการยืนยัน กรุณาตรวจสอบกล่องจดหมายก่อนเข้าสู่ระบบ",
+    "errorGeneric": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+    "backToSignup": "กลับไปสมัครสมาชิก →"
+  }
+}

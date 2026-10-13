@@ -1,0 +1,44 @@
+{
+  "site": {
+    "name": "Arcane Vale",
+    "tagline": "ดินแดนแห่งเวทมนตร์รอคอยการมาถึงของคุณ",
+    "footerText": "✦ Arcane Vale — ชุมชนโรลเพลย์ในหุบเขาเวทมนตร์ ✦",
+    "backToVillage": "กลับสู่หมู่บ้าน",
+    "arcaneVale": "Arcane Vale"
+  },
+  "breadcrumbs": {
+    "home": "หน้าหลัก",
+    "login": "เข้าสู่ระบบ",
+    "signup": "สมัครสมาชิก",
+    "forgotPassword": "ลืมรหัสผ่าน",
+    "resetPassword": "รีเซ็ตรหัสผ่าน",
+    "verifyEmail": "ยืนยันอีเมล",
+    "verifyEmailChange": "ยืนยันการเปลี่ยนอีเมล",
+    "dashboard": "ตั้งค่าบัญชี",
+    "account": "จัดการบัญชี",
+    "admin": "ผู้ดูแลระบบ",
+    "adminLogs": "บันทึกระบบ"
+  },
+  "nav": {
+    "logIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "signOut": "ออกจากระบบ",
+    "adminLogs": "บันทึกระบบ →"
+  },
+  "common": {
+    "loading": "กำลังโหลด…",
+    "saving": "กำลังบันทึก…",
+    "sending": "กำลังส่ง…",
+    "updating": "กำลังอัปเดต…",
+    "deleting": "กำลังลบ…",
+    "cancel": "ยกเลิก",
+    "back": "กลับ",
+    "close": "ปิด",
+    "next": "ถัดไป",
+    "error": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+    "save": "บันทึก",
+    "confirm": "ยืนยัน",
+    "showPassword": "แสดงรหัสผ่าน",
+    "hidePassword": "ซ่อนรหัสผ่าน"
+  }
+}

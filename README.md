@@ -1,4 +1,10 @@
+[![Frontend CI](https://github.com/whatever-project/website-frontend/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/whatever-project/website-frontend/actions/workflows/frontend-ci.yml)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Project structure
+
+See [docs/STRUCTURE.md](docs/STRUCTURE.md) for the folder layout, routes, i18n setup and known gaps.
 
 ## Getting Started
 

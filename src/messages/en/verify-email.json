@@ -1,0 +1,12 @@
+{
+  "verifyEmail": {
+    "pageTitle": "Verify Email",
+    "pageSub": "— Seal the Pact —",
+    "loading": "Verifying your email…",
+    "successHeading": "Email Verified!",
+    "errorHeading": "Verification Failed",
+    "backToSignUp": "Back to Sign Up",
+    "signIn": "Sign In",
+    "noToken": "No verification token provided."
+  }
+}

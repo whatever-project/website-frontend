@@ -1,0 +1,12 @@
+{
+  "landing": {
+    "welcome": "Welcome",
+    "title": "Wanderer",
+    "subtitle": "A Magical Time Awaits Your Arrival",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "realTime": "● Real time",
+    "realTimeOff": "○ Real time",
+    "timeLabel": "Adjust time of day"
+  }
+}

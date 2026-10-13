@@ -1,0 +1,44 @@
+{
+  "site": {
+    "name": "Arcane Vale",
+    "tagline": "A Magical Time Awaits Your Arrival",
+    "footerText": "✦ Arcane Vale — A Magical Community Roleplay in an Enchanted Valley ✦",
+    "backToVillage": "Back to Village",
+    "arcaneVale": "Arcane Vale"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "login": "Sign In",
+    "signup": "Sign Up",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "verifyEmail": "Verify Email",
+    "verifyEmailChange": "Verify Email Change",
+    "dashboard": "Account Settings",
+    "account": "Manage Account",
+    "admin": "Admin",
+    "adminLogs": "Admin Logs"
+  },
+  "nav": {
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "adminLogs": "Admin Logs →"
+  },
+  "common": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "sending": "Sending…",
+    "updating": "Updating…",
+    "deleting": "Deleting…",
+    "cancel": "Cancel",
+    "back": "Back",
+    "close": "Close",
+    "next": "Next",
+    "error": "Something went wrong. Please try again.",
+    "save": "Save",
+    "confirm": "Confirm",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  }
+}

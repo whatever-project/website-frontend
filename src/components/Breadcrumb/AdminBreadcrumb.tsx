@@ -1,0 +1,5 @@
+import BaseBreadcrumb from "./BaseBreadcrumb"
+
+export default function AdminBreadcrumb() {
+  return <BaseBreadcrumb className="px-6 pt-4 sm:px-12 max-w-6xl mx-auto" />
+}

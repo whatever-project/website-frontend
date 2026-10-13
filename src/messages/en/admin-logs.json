@@ -1,0 +1,33 @@
+{
+  "adminLogs": {
+    "pageTitle": "Admin Logs",
+    "backToAccount": "← Account",
+    "ipRedactedNote": "🔒 IP addresses are redacted for your role",
+    "filterLabel": "Filter",
+    "filterAll": "All logins",
+    "filterSuccess": "Successful only",
+    "filterFailed": "Failed only",
+    "loginHistoryTitle": "Login History",
+    "usernameHistoryTitle": "Username History",
+    "colTime": "Time",
+    "colUsername": "Username",
+    "colRole": "Role",
+    "colStatus": "Status",
+    "colIp": "IP Address",
+    "colUserAgent": "User Agent",
+    "colUserId": "User ID",
+    "colOldUsername": "Old Username",
+    "colNewUsername": "New Username",
+    "statusSuccess": "✓ Success",
+    "statusFailed": "✗ Failed",
+    "noUser": "(no user)",
+    "ipHidden": "— hidden —",
+    "noRecords": "No records found",
+    "prevPage": "← Previous",
+    "nextPage": "Next →",
+    "pageLabel": "Page {page}",
+    "checkingAccess": "Checking access…",
+    "loadingLogs": "Loading…",
+    "failedToLoad": "Failed to load logs"
+  }
+}
