@@ -1,4 +1,4 @@
-import { ParchShell } from "@/components/Parchment"
+import { ParchShell } from "@/components/ParchmentNew"
 import type { ReactNode } from "react"
 
 interface UserShellProps {

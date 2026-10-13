@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { SheetCorners } from "@/components/Parchment"
+import { SheetCorners } from "@/components/ParchmentNew"
 
 export default function Section({ children }: { children: ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { ParchShell, Flourish, InkDivider, WaxSeal, SheetCorners, PasswordInput } from '@/components/Parchment';
+import { ParchShell, Flourish, InkDivider, WaxSeal, SheetCorners, PasswordInput } from '@/components/ParchmentNew';
 import { useRouter } from 'next/navigation';
 import { routes } from '@/config/routes';
 

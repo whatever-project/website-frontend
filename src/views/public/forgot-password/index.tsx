@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react"
 import { authService } from "@/api/services/auth.service"
 import { ApiError } from "@/api/client"
 import { Link } from "@/i18n/navigation"
-import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/Parchment"
+import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/ParchmentNew"
 import { useTranslations } from "next-intl"
 import { routes } from "@/config/routes"
 
