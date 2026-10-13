@@ -1,0 +1,33 @@
+{
+  "adminLogs": {
+    "pageTitle": "บันทึกระบบ",
+    "backToAccount": "← บัญชี",
+    "ipRedactedNote": "🔒 ที่อยู่ IP ถูกซ่อนสำหรับบทบาทของคุณ",
+    "filterLabel": "กรอง",
+    "filterAll": "เข้าสู่ระบบทั้งหมด",
+    "filterSuccess": "สำเร็จเท่านั้น",
+    "filterFailed": "ล้มเหลวเท่านั้น",
+    "loginHistoryTitle": "ประวัติการเข้าสู่ระบบ",
+    "usernameHistoryTitle": "ประวัติการเปลี่ยนชื่อผู้ใช้",
+    "colTime": "เวลา",
+    "colUsername": "ชื่อผู้ใช้",
+    "colRole": "บทบาท",
+    "colStatus": "สถานะ",
+    "colIp": "ที่อยู่ IP",
+    "colUserAgent": "User Agent",
+    "colUserId": "รหัสผู้ใช้",
+    "colOldUsername": "ชื่อผู้ใช้เดิม",
+    "colNewUsername": "ชื่อผู้ใช้ใหม่",
+    "statusSuccess": "✓ สำเร็จ",
+    "statusFailed": "✗ ล้มเหลว",
+    "noUser": "(ไม่มีผู้ใช้)",
+    "ipHidden": "— ซ่อนไว้ —",
+    "noRecords": "ไม่พบบันทึก",
+    "prevPage": "← ก่อนหน้า",
+    "nextPage": "ถัดไป →",
+    "pageLabel": "หน้า {page}",
+    "checkingAccess": "กำลังตรวจสอบสิทธิ์…",
+    "loadingLogs": "กำลังโหลด…",
+    "failedToLoad": "ไม่สามารถโหลดบันทึกได้"
+  }
+}

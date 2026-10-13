@@ -1,5 +1,7 @@
-import "./globals.css";
+import "@/styles/globals.css";
 import React from "react";
+import { getLocale } from "next-intl/server";
+import DraftBadge from "@/components/DraftBadge";
 
 export const metadata = {
   title: {
@@ -9,9 +11,12 @@ export const metadata = {
   description: "A magical community roleplay platform set in an enchanted valley.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Locale from the proxy for [locale] routes; /draft (not proxied) falls back to the default (th)
+  const locale = await getLocale();
+
   return (
-    <html lang="th" className="h-full">
+    <html lang={locale} className="h-full">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -22,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col">
         {children}
+        <DraftBadge />
       </body>
     </html>
   );

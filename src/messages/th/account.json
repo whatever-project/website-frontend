@@ -1,0 +1,22 @@
+{
+  "account": {
+    "pageTitle": "จัดการบัญชี",
+    "pageSub": "— เลือกดวงวิญญาณ —",
+    "intro": "เลือกโหมดการเข้าชม หรือเลือกตัวละครเพื่อเริ่มโรลเพลย์ — วางเมาส์บนตราวงกลมเพื่ออ่านรายละเอียดตัวละคร",
+    "statusLabel": "สถานะ",
+    "nameLabel": "ชื่อ",
+    "lockedNote": "ตัวละครนี้ถูกล็อก — ติดต่อผู้ดูแลเพื่อปลดล็อก",
+    "boardsHeading": "ประตูสู่แดนโรลเพลย์ (แบบร่าง Layout)",
+    "noticeBoardLabel": "Notice Board",
+    "noticeBoardTh": "กระดานประกาศ",
+    "forumBoardLabel": "Forum Boards",
+    "forumBoardTh": "บอร์ดกระทู้",
+    "characterSheetLabel": "Character Sheet",
+    "characterSheetTh": "หน้าโปรไฟล์ตัวละคร",
+    "draftNote": "นี่คือหน้าแสดงตัวอย่าง Manage Account แบบไฟล์แยก — ไม่ต้องเข้าสู่ระบบ",
+    "profileVisitor": "โหมดผู้เยี่ยมชม",
+    "profileCreate": "สร้างตัวละคร",
+    "statusActive": "ใช้งานได้",
+    "statusLock": "ล็อก"
+  }
+}

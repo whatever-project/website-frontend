@@ -1,0 +1,11 @@
+{
+  "verifyEmailChange": {
+    "pageTitle": "Verify Email Change",
+    "pageSub": "— Update Your Seal —",
+    "loading": "Confirming your new email…",
+    "successHeading": "Email Updated!",
+    "errorHeading": "Verification Failed",
+    "backToAccount": "Back to Account Settings",
+    "noToken": "No verification token provided."
+  }
+}
