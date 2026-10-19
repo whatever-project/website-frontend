@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วังวนแห่งเวย์มัวร์ — Main Page Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Sarabun:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7f7f5; --white:#ffffff; --ink:#141414; --line:#1a1a1a;
+  --hair:#d8d8d5; --g1:#ececea; --g2:#dededb; --g3:#bdbdba; --g4:#8f8f8c;
+  --muted:#6f6f6b; --faint:#a9a9a5;
+  --serif:'Playfair Display','Sarabun',serif; --sans:'Sarabun',-apple-system,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scrollbar-width:none}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  padding-bottom:calc(var(--hud) + 34px);--hud:138px;--topbar:60px}
+body.mini{--hud:74px}
+::selection{background:var(--ink);color:var(--paper)}
+::-webkit-scrollbar{width:0;height:0}
+button{font:inherit;cursor:pointer;color:inherit;background:none;border:none}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.wrap{max-width:none;margin:0 auto;padding-left:clamp(30px,4vw,72px);padding-right:clamp(30px,4vw,72px)}
+.ph{position:relative;overflow:hidden;background:repeating-linear-gradient(45deg,var(--g1) 0 14px,var(--g2) 14px 28px);border:1px solid var(--g3);display:flex;align-items:center;justify-content:center}
+.ph::before,.ph::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5}
+.ph::before{background:linear-gradient(to top right,transparent calc(50% - .5px),var(--g4) calc(50% - .5px) calc(50% + .5px),transparent calc(50% + .5px))}
+.ph::after{background:linear-gradient(to bottom right,transparent calc(50% - .5px),var(--g4) calc(50% - .5px) calc(50% + .5px),transparent calc(50% + .5px))}
+.ph-tag{position:relative;z-index:2;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);background:var(--paper);border:1px solid var(--g3);padding:6px 14px;white-space:nowrap}
+.tag{display:inline-block;border:1px solid var(--g3);border-radius:6px;padding:1px 8px;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em}
+.tag.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ink);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;background:var(--white);transition:background .15s,color .15s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.ghost{border-color:var(--g3);color:var(--muted)}
+.btn.ghost:hover{background:var(--g1);color:var(--ink)}
+.rowbtn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px;border-radius:8px;border:1px solid transparent;font-size:13.5px;transition:background .15s,border-color .15s}
+.rowbtn:hover{background:var(--g1);border-color:var(--g3)}
+.badge{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--ink);flex:none}
+.ico{width:20px;height:20px;flex:none}
+/* ============ BRANDMARK — มุมขวาบนของแบนเนอร์ เลื่อนตามแบนเนอร์ ============ */
+.brandmark{position:absolute;top:24px;left:26px;z-index:6;display:flex;align-items:center;gap:10px;cursor:pointer;mix-blend-mode:difference;color:#fff;white-space:nowrap}
+.brandmark .sig{font-size:11px;line-height:1}
+.brandmark b{font-family:var(--serif);font-weight:500;font-size:11px;letter-spacing:.42em}
+.brandmark small{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.34em;opacity:.75;margin-top:3px}
+.brandmark:hover b{text-decoration:underline}
+/* ============ HERO ============ */
+.hero{position:relative;height:100svh;min-height:660px;background:#0e0e0e;overflow:hidden}
+.hero-banner,.hero-map{position:absolute;inset:0;transition:opacity .7s ease,visibility .7s}
+.hero-map{opacity:0;visibility:hidden}
+.hero.is-map .hero-banner{opacity:0;visibility:hidden}
+.hero.is-map .hero-map{opacity:1;visibility:visible}
+.banner-ph{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 14px,transparent 14px 28px),radial-gradient(120% 90% at 70% 20%,#3a3a3a 0%,#232323 45%,#0e0e0e 100%)}
+.banner-ph .frame{position:absolute;inset:74px 26px 26px;border:1px solid rgba(255,255,255,.22);pointer-events:none}
+.banner-ph .frame i{position:absolute;width:14px;height:14px;border:1px solid rgba(255,255,255,.5)}
+.banner-ph .frame i:nth-child(1){top:-1px;left:-1px;border-right:0;border-bottom:0}
+.banner-ph .frame i:nth-child(2){top:-1px;right:-1px;border-left:0;border-bottom:0}
+.banner-ph .frame i:nth-child(3){bottom:-1px;left:-1px;border-right:0;border-top:0}
+.banner-ph .frame i:nth-child(4){bottom:-1px;right:-1px;border-left:0;border-top:0}
+.banner-dim{position:absolute;top:88px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.4);white-space:nowrap}
+.hero-copy{position:absolute;left:clamp(22px,6vw,96px);bottom:clamp(130px,22vh,190px);color:#f2f2f0;max-width:780px}
+.hero-copy .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.4em;color:#b9b9b6;margin-bottom:22px;display:flex;align-items:center;gap:14px;text-transform:uppercase}
+.hero-copy .kicker::before{content:"";width:52px;height:1px;background:#8a8a87}
+.hero-copy h1{font-family:var(--serif);font-weight:900;font-size:clamp(40px,6.6vw,96px);line-height:1.02;letter-spacing:.01em}
+.hero-copy h1 em{font-style:italic;font-weight:400;color:#c9c9c6}
+.hero-copy p{margin-top:24px;font-size:14px;letter-spacing:.22em;color:#b6b6b3;line-height:2.1}
+.hero-issue{position:absolute;right:clamp(22px,6vw,96px);bottom:clamp(130px,22vh,190px);text-align:right;color:#c9c9c6;border-right:1px solid #555;padding-right:22px}
+.hero-issue b{display:block;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.3em;margin-bottom:12px}
+.hero-issue span{display:block;font-size:12px;letter-spacing:.18em;line-height:2.1;color:#9d9d9a}
+.scroll-cue{position:absolute;left:clamp(22px,4.5vw,64px);bottom:36px;font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:#8f8f8c;display:flex;align-items:center;gap:12px}
+.scroll-cue::after{content:"";width:1px;height:34px;background:linear-gradient(#8f8f8c,transparent);animation:cue 2s ease infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.spark{position:absolute;color:rgba(255,255,255,.55);animation:tw var(--d,3s) ease-in-out infinite;pointer-events:none}
+@keyframes tw{0%,100%{opacity:.1;transform:translateY(0)}50%{opacity:.8;transform:translateY(-14px)}}
+.glass-nav{position:absolute;left:50%;transform:translateX(-50%);bottom:92px;display:flex;gap:2px;padding:5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);z-index:5}
+.gnav-btn{position:relative;z-index:2;padding:10px 26px;border-radius:999px;font-size:12.5px;letter-spacing:.14em;color:#cfcfcc;white-space:nowrap;transition:color .25s}
+.gnav-btn.active{color:#141414}
+.gnav-btn:hover{color:#fff}
+.gnav-btn.active:hover{color:#141414}
+#navSlider{position:absolute;top:5px;bottom:5px;border-radius:999px;background:#f2f2f0;transition:left .35s cubic-bezier(.4,0,.2,1),width .35s cubic-bezier(.4,0,.2,1);z-index:1}
+.map-svg{position:absolute;inset:0;width:100%;height:100%}
+.mk{cursor:pointer}
+.mk .ring{fill:none;stroke:#141414;stroke-width:1;opacity:.45}
+.mk .core{fill:#141414}
+.mk:hover .core{fill:#6f6f6b}
+.map-hud{position:absolute;left:clamp(28px,6vw,96px);top:96px;color:#141414;max-width:420px;z-index:3}
+.map-hud .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.4em;color:var(--muted);margin-bottom:16px}
+.map-hud h2{font-family:var(--serif);font-weight:900;font-size:clamp(34px,4.5vw,64px);line-height:1.02}
+.map-hud p{margin-top:16px;font-size:13px;letter-spacing:.1em;line-height:2;color:var(--muted)}
+/* ============ TICKER ============ */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink);color:var(--paper);overflow:hidden}
+.ticker-track{display:flex;width:max-content;animation:tick 26s linear infinite;padding:12px 0;font-family:var(--mono);font-size:12px;letter-spacing:.16em}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes tick{to{transform:translateX(-50%)}}
+.ticker b{color:#fff}
+.ticker .sep{margin:0 22px;opacity:.5}
+.ticker .alert{cursor:pointer;border:1px solid #fff;border-radius:6px;padding:0 8px;margin-right:22px}
+.ticker .alert:hover{background:#fff;color:#141414}
+/* ============ SECTION HEADS — เว้นระยะห่างจากด้านบนมากขึ้น ============ */
+.sec-head{display:flex;align-items:baseline;gap:18px;margin:0 0 8px}
+.sec-head .no{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--muted)}
+.sec-head h2{font-family:var(--serif);font-weight:900;font-size:clamp(28px,3.6vw,52px);letter-spacing:.02em}
+.sec-head .rule{flex:1;height:1px;background:var(--g3);align-self:center}
+.sec-head .tail{font-size:11px;font-family:var(--mono);letter-spacing:.18em;color:var(--muted);white-space:nowrap}
+.sec-sub{font-size:13.5px;color:var(--muted);line-height:1.9;margin-bottom:26px}
+section{padding:clamp(60px,7vw,110px) 0 0}
+/* ============ PATRONS — VERTICAL กะทัดรัด ============ */
+.patrons-v{background:transparent;border:none}
+.patrons-v .pv-row{display:flex;align-items:center;gap:14px;padding:14px 4px;cursor:pointer;border-bottom:none;transition:transform .18s}
+.patrons-v .pv-row:hover{background:transparent;transform:translateX(5px)}
+.patrons-v .pv-row:last-child{border-bottom:none}
+.patrons-v .ph{width:38px;height:38px;padding:0;font-size:7px;flex:none;border-radius:10px}
+.patrons-v b{font-size:14.5px;font-weight:700;display:block;font-family:var(--serif);letter-spacing:.03em}
+.patrons-v span{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--faint)}
+.patrons-v .go{margin-left:auto;color:var(--faint);font-size:15px;opacity:.35;transition:all .18s}
+.patrons-v .pv-row:hover .go{opacity:1;transform:translateX(3px)}
+.patrons-side{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);align-items:start}
+@media(max-width:820px){.patrons-side{grid-template-columns:1fr}}
+.patrons-note{font-size:13px;color:var(--muted);line-height:2;border-left:1px solid var(--g3);padding-left:22px}
+/* ============ HUB — เหตุฉุกเฉินฝั่งซ้าย ============ */
+.hub-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(64px,auto);gap:26px}
+.cell{border:1px solid var(--line);background:var(--white);border-radius:4px;padding:26px;position:relative}
+.cell-dark{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:4px;padding:26px;position:relative}
+.c-label{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--ink);border-bottom:1px solid var(--hair);padding-bottom:12px;margin-bottom:16px}
+.cell-dark .c-label{color:#e6e6e3;border-color:#3a3a3a}
+.cell-emg{grid-column:1/4;grid-row:span 2;display:flex;flex-direction:column;gap:12px}
+.cell-patch{grid-column:4/8;grid-row:span 2}
+.cell-post{grid-column:8/13;grid-row:span 2}
+.cell-board{grid-column:1/13;display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:stretch}
+.cell-board>.c-label{grid-column:1/-1}
+.mini-label{display:flex;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.2em;color:var(--ink);border-bottom:1px solid var(--hair);padding-bottom:12px;margin-bottom:14px}
+.patrons-caption{font-size:11.5px;color:var(--faint);line-height:1.9;margin-top:14px;border-top:1px solid var(--hair);padding-top:12px}
+@media(max-width:900px){.cell-board{grid-template-columns:1fr}}
+.cell-ads{grid-column:1/13;display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.cell-ads .ph{height:110px}
+@media(max-width:1080px){.cell-emg{grid-column:span 12;grid-row:auto}.cell-patch{grid-column:1/7}.cell-post{grid-column:7/13}.cell-ads{grid-template-columns:1fr}}
+@media(max-width:760px){.cell-patch,.cell-post{grid-column:span 12;grid-row:auto}}
+.patch-item{padding:14px 0;border-bottom:1px solid var(--hair)}
+.patch-item:last-child{border-bottom:none}
+.patch-item .ver{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:6px}
+.patch-item h4{font-family:var(--serif);font-size:16.5px;font-weight:700;cursor:pointer}
+.patch-item h4:hover{text-decoration:underline}
+.patch-item p{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:4px}
+.bars{display:flex;gap:4px;margin-top:10px}
+.bars i{height:3px;background:var(--g3);flex:1;max-width:56px}
+.bars i:first-child{background:var(--ink)}
+.post-item{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--hair);cursor:pointer}
+.post-item:last-child{border-bottom:none}
+.post-item:hover h5{text-decoration:underline}
+.post-item .idx{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--g3);min-width:24px}
+.post-item h5{font-size:14px;font-weight:500}
+.post-item .pm{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);margin-top:5px}
+/* Feed แบบ Patch กลม ๆ แยกหมวด */
+.feed-group{padding:10px 0 12px;border-bottom:1px solid var(--hair)}
+.feed-group:last-child{border-bottom:none}
+.feed-cat{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.fc{width:30px;height:30px;border-radius:999px;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;flex:none;background:var(--white)}
+.feed-group.on .fc{background:var(--ink);color:var(--paper)}
+.fc-name{font-size:12.5px;font-weight:600}
+.fc-n{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint)}
+.feed-row{display:flex;flex-direction:column;gap:2px;padding:7px 0 7px 40px;cursor:pointer;position:relative}
+.feed-row::before{content:"";position:absolute;left:14px;top:15px;width:6px;height:6px;border-radius:999px;background:var(--g3)}
+.feed-row:hover b{text-decoration:underline}
+.feed-row b{font-size:12.5px;font-weight:500}
+.feed-row span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--faint);margin-top:2px}
+/* Patch Orbit — หมวดวงกลม + วงแหวนหมุน + รายการโพสต์ใต้แผนภาพ */
+.patch-orbit{position:relative;height:330px;max-width:420px;margin:4px auto 0}
+.orbit-ring{position:absolute;left:50%;top:50%;width:260px;height:260px;transform:translate(-50%,-50%);border:1px dashed var(--g3);border-radius:999px;animation:orbspin 70s linear infinite}
+@keyframes orbspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.orbit-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:999px;border:2px solid var(--ink);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;z-index:2;cursor:pointer;transition:all .15s}
+.orbit-core:hover{background:var(--ink);color:var(--paper)}
+.orbit-core b{font-family:var(--mono);font-size:12px;letter-spacing:.3em;font-weight:500}
+.orbit-core span{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.orbit-core:hover span{color:var(--g2)}
+.orbit-sat{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:999px;border:1px solid var(--ink);background:var(--white);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;line-height:1.5;padding:4px;transition:all .18s}
+.orbit-sat:hover{background:var(--ink);color:var(--paper);box-shadow:0 0 0 5px var(--g1)}
+.orbit-sat.on{background:var(--ink);color:var(--paper)}
+.orbit-sat[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;background:var(--ink);color:var(--paper);border-radius:6px;padding:3px 9px;z-index:5;font-family:var(--sans);letter-spacing:0}
+.orbit-preview{margin-top:10px;border-top:1px dashed var(--g3);padding-top:10px}
+.op-head{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.op-sub{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--faint)}
+.orbit-preview .feed-row::before{display:none}
+.orbit-preview .feed-row b{font-size:12px}
+.emg-title{font-family:var(--serif);font-weight:700;font-size:18px;line-height:1.5}
+.emg-live{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.26em;border:1px solid #fff;border-radius:6px;padding:4px 10px;align-self:flex-start}
+.emg-live .dot{background:#fff;animation:pl 1.6s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.2}}
+.emg-desc{font-size:12.5px;color:#b9b9b6;line-height:1.9}
+.cell-dark .btn{border-color:#fff;background:transparent;color:#fff}
+.cell-dark .btn:hover{background:#fff;color:#141414}
+/* แท็บสลับเหตุฉุกเฉิน/หนังสือพิมพ์ + หน้าหนังสือพิมพ์เวทมนตร์ */
+#emgView{display:flex;flex-direction:column;gap:12px;flex:1}
+#emgView[hidden],#prophetView[hidden]{display:none}
+/* หัวข้อ + Segmented Control เลือกมุมมอง */
+.emg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid #3a3a3a;padding-bottom:14px;margin-bottom:14px;flex-wrap:wrap}
+.emg-htitle b{font-family:var(--serif);font-size:clamp(20px,1.8vw,26px);font-weight:900;color:#fff;display:block;letter-spacing:.02em;line-height:1.15}
+.emg-htitle span{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:#8f8f8c;display:block;margin-top:6px}
+.emg-head-ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.emg-seg{position:relative;display:flex;gap:2px;padding:4px;border-radius:999px;border:1px solid #4a4a4a;background:rgba(255,255,255,.04)}
+.emg-thumb{position:absolute;top:4px;bottom:4px;border-radius:999px;background:#fff;transition:left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1)}
+.etab{position:relative;z-index:2;padding:6px 16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#c9c9c6;cursor:pointer;border:none;background:none;transition:color .2s;white-space:nowrap}
+.etab:hover{color:#fff}
+.etab.on{color:#141414}
+.etab.demo{border:1px dashed #555;border-radius:999px;padding:5px 12px;color:#8f8f8c}
+.etab.demo:hover{color:#fff;border-color:#999}
+/* กล่องเหตุฉุกเฉิน (หนังสือพิมพ์แบบแรก — กระดาษมีกรอบในกล่องดำเสมอ) */
+.cell-emg{border:1px solid var(--line);border-radius:4px;padding:26px;position:relative;display:flex;flex-direction:column}
+.prophet{background:var(--paper);color:var(--ink);padding:16px 18px;border:1px solid #4a4a4a;flex:1;overflow:auto;position:relative}
+/* ประตูนกฮูก — จ่าย 20 เคล ก่อนอ่านหนังสือพิมพ์ */
+.owl-gate{position:absolute;inset:0;background:var(--paper);z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center}
+.owl-svg{width:150px;height:auto;flex:none}
+.owl-txt{font-size:13px;line-height:2;color:var(--ink2);max-width:320px}
+.owl-txt b{color:var(--ink)}
+.owl-note{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint)}
+.coin{opacity:0}
+.owl-gate.paying .coin{animation:cdrop .7s ease-in forwards}
+.owl-gate.paying .coin.c2{animation-delay:.16s}
+.owl-gate.paying .coin.c3{animation-delay:.32s}
+@keyframes cdrop{0%{opacity:1;transform:translate(0,0)}75%{opacity:1}100%{transform:translate(52px,196px);opacity:0}}
+.owl-gate.paid{animation:gatefade .55s ease .1s forwards}
+@keyframes gatefade{to{opacity:0;visibility:hidden}}
+.owl-gate.paid #owlPay{background:var(--ink);color:var(--paper)}
+.pr-mast{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--muted);border-bottom:2px solid var(--ink);padding-bottom:8px;flex-wrap:wrap}
+.pr-title{font-family:var(--serif);font-weight:900;font-size:clamp(20px,1.9vw,28px);text-align:center;letter-spacing:.04em;padding:10px 0 8px;border-bottom:1px solid var(--ink)}
+.pr-head{font-family:var(--serif);font-weight:900;font-size:16.5px;line-height:1.45;text-align:center;padding:12px 0;border-bottom:1px solid var(--g3)}
+.pr-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;padding-top:12px}
+.pr-col p{font-size:11.5px;line-height:1.85;text-align:justify;color:var(--ink2);margin-bottom:8px}
+.pr-col p.pr-lead::first-letter{font-family:var(--serif);font-size:32px;font-weight:900;float:left;line-height:1;margin:3px 7px 0 0;color:var(--ink)}
+.pr-img{height:110px;margin-bottom:6px}
+.pr-cap{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint);text-align:center}
+.pr-sub{font-family:var(--serif);font-weight:700;font-size:13.5px;line-height:1.4;border-top:1px solid var(--g3);padding-top:8px;margin:8px 0 6px}
+.board-main{display:flex;min-height:470px}
+.board-bg{position:relative;flex:1;border:1px solid var(--g3);background:repeating-linear-gradient(0deg,var(--g1) 0 22px,var(--g2) 22px 23px);overflow:hidden}
+.note{position:absolute;width:170px;background:var(--white);border:1px solid var(--g3);padding:12px 14px;cursor:pointer;transition:transform .2s;box-shadow:2px 3px 0 rgba(0,0,0,.12)}
+.note:hover{transform:rotate(0deg) scale(1.04)!important;z-index:3}
+.note b{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.note i{display:block;height:4px;background:var(--g2);margin-bottom:4px}
+.note i:last-of-type{width:70%}
+.note .nd{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--faint);margin-top:8px}
+.note .pin{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:999px;background:var(--ink)}
+.n1{top:38px;left:34px;transform:rotate(-3deg)}
+.n2{top:192px;left:250px;transform:rotate(2deg)}
+.n3{top:66px;left:480px;transform:rotate(-1.5deg)}
+.n4{top:252px;left:700px;transform:rotate(2.5deg)}
+.n5{top:128px;left:920px;transform:rotate(-2deg)}
+@media(max-width:980px){.n4,.n5{display:none}}
+@media(max-width:680px){.n3{display:none}}
+/* ============ QUEST + HONOUR ============ */
+.quest-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:26px}
+@media(max-width:900px){.quest-grid{grid-template-columns:1fr}}
+.pbar{height:10px;border:1px solid var(--ink);border-radius:999px;overflow:hidden}
+.pbar>div{height:100%;background:repeating-linear-gradient(45deg,var(--ink) 0 4px,transparent 4px 8px)}
+.areachip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--g3);border-radius:6px;padding:2px 9px;font-size:11.5px;color:var(--muted);background:var(--white)}
+.areachip.lock{color:var(--faint);border-style:dashed;background:var(--g1)}
+.qstat{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);margin-top:16px}
+.qstat>div{background:var(--white);padding:14px;text-align:center}
+.qstat b{display:block;font-family:var(--serif);font-size:22px;font-weight:700}
+.qstat span{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--muted)}
+.roll{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--hair);font-size:13px}
+.roll:last-child{border-bottom:none}
+.rune{width:22px;height:22px;flex:none;border:1px solid var(--ink);transform:rotate(45deg);display:flex;align-items:center;justify-content:center;background:var(--white)}
+.rune>span{transform:rotate(-45deg);font-size:10px}
+/* ============ LATEST POSTS — การ์ดเลื่อนแนวนอน ============ */
+.post-track{display:flex;gap:20px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:thin}
+.post-card{flex:none;width:252px;border:1px solid var(--line);background:var(--white);padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:10px}
+.post-card .ph{height:120px}
+.post-card h5{font-size:13.5px;font-weight:600;line-height:1.5}
+.post-card .pm{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--faint);line-height:1.8}
+.post-card .rr{margin-top:auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--hair);padding-top:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.post-card:hover{border-color:var(--ink)}
+/* ============ NEW MEMBERS — แบบ layout Sponsor เดิม ============ */
+.member-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+@media(max-width:1080px){.member-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.member-grid{grid-template-columns:repeat(2,1fr)}}
+.member{border:1px solid var(--g3);background:var(--white);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.member:hover{border-color:var(--ink)}
+.member .ph{width:42px;height:42px;border-radius:999px;padding:0;flex:none;font-size:7px}
+.member b{font-size:13px;font-weight:600;display:block;font-family:var(--serif)}
+.member span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--faint)}
+/* ============ FORUM PAGES ============ */
+.f-row{display:grid;grid-template-columns:70px 220px 1fr 60px;gap:24px;align-items:center;padding:26px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.f-row:first-child{border-top:1px solid var(--line)}
+.f-row:hover .f-name{text-decoration:underline}
+.f-row .no{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--g3)}
+.f-row .ph{height:100px}
+.f-name{font-family:var(--serif);font-weight:700;font-size:clamp(20px,2.2vw,30px)}
+.f-th{font-size:12.5px;color:var(--muted);letter-spacing:.1em;margin-top:8px;line-height:1.8}
+.f-meta{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);margin-top:8px}
+.f-row .arrow{font-size:22px;text-align:right;transition:transform .2s}
+.f-row:hover .arrow{transform:translateX(6px)}
+@media(max-width:760px){.f-row{grid-template-columns:44px 1fr 40px;gap:14px}.f-row .ph{display:none}}
+.f-tip{position:fixed;z-index:90;width:300px;background:var(--ink);color:var(--paper);padding:16px;pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;font-size:12.5px;line-height:1.8}
+.f-tip.on{opacity:1;transform:none}
+.f-tip .tt{font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;color:#9d9d9a;margin-bottom:8px}
+.f-tip .latest{margin-top:8px;padding-top:8px;border-top:1px solid #3a3a3a;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#bdbdba}
+.crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--muted);padding-top:66px}
+.crumb a{cursor:pointer;text-decoration:underline}
+.crumb a:hover{color:var(--ink)}
+.page-head{padding-top:76px}
+.page-head h2{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4vw,54px);line-height:1.05}
+.page-head .fd-meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-top:14px}
+.fd-head{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:end;margin:26px 0 0}
+@media(max-width:760px){.fd-head{grid-template-columns:1fr}}
+.fd-head .ph{height:180px}
+.fd-head h2{font-family:var(--serif);font-size:clamp(30px,4vw,54px);font-weight:900;line-height:1.05}
+.fd-meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-top:14px;line-height:2}
+.fd-desc{font-size:13.5px;color:var(--muted);line-height:1.9;margin-top:12px;max-width:640px}
+.sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0 10px}
+@media(max-width:760px){.sub-grid{grid-template-columns:1fr}}
+.sub-card{border:1px solid var(--line);background:var(--white);padding:18px;cursor:pointer}
+.sub-card:hover{border-color:var(--ink)}
+.sub-card h4{font-family:var(--serif);font-size:16px;font-weight:700}
+.sub-card p{font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 12px}
+.thread-head{display:grid;grid-template-columns:1fr 170px 70px 70px 190px;gap:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--muted);border-bottom:1px solid var(--ink);padding:14px 0}
+.thread-row{display:grid;grid-template-columns:1fr 170px 70px 70px 190px;gap:12px;align-items:center;padding:15px 0;border-bottom:1px solid var(--hair);font-size:13px}
+.thread-row:hover{background:var(--g1)}
+.thread-row .tt{cursor:pointer;font-weight:500}
+.thread-row .tt:hover{text-decoration:underline}
+.thread-row .au{font-size:12px;color:var(--muted)}
+.thread-row .num{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.thread-row .lp{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);line-height:1.7}
+@media(max-width:900px){.thread-head,.thread-row{grid-template-columns:1fr 90px 90px}.thread-head span:nth-child(2),.thread-row .au,.thread-head span:nth-child(5),.thread-row .lp{display:none}}
+.pager{display:flex;gap:8px;justify-content:center;margin:30px 0}
+.pager span{border:1px solid var(--g3);padding:5px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.pager .cur{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.back-btn{display:block;margin:0 auto 70px;font-family:var(--mono);font-size:11px;letter-spacing:.26em;padding:12px 26px;border:1px solid var(--ink)}
+.back-btn:hover{background:var(--ink);color:var(--paper)}
+/* ============ FOOTER ============ */
+footer{margin-top:clamp(60px,7vw,110px);border-top:1px solid var(--line);background:transparent;color:var(--ink)}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;padding:clamp(40px,5vw,68px) 0}
+@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
+.foot-grid h3{font-family:var(--serif);font-size:clamp(24px,3vw,40px);font-weight:900;line-height:1.2}
+.fm{font-family:var(--mono);font-size:10px;letter-spacing:.2em;line-height:2.4;color:#9d9d9a}
+.fm b{display:block;color:#e6e6e3;margin-bottom:6px;font-weight:500}
+/* ทะเบียนผู้ใช้ — ดีไซน์ส่วนท้ายแบบใหม่ */
+.foot-grid{grid-template-columns:1.15fr .8fr 1.25fr .85fr}
+@media(max-width:1080px){.foot-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.foot-grid{grid-template-columns:1fr}}
+.fg-head{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:#e6e6e3;margin-bottom:16px}
+.fg-head i{width:7px;height:7px;border:1px solid #8f8f8c;transform:rotate(45deg);flex:none}
+.fg-note{font-size:12px;color:#8f8f8c;margin-bottom:14px;letter-spacing:.04em}
+.fg-flow{font-size:14.5px;line-height:2.4;color:#c9c9c6}
+.fg-flow b{font-weight:600;color:#fff;cursor:default}
+.fg-flow b:hover{text-decoration:underline}
+.fg-flow em{font-style:normal;color:#5c5c59;margin:0 8px}
+.fg-flow small{font-family:var(--mono);font-size:10px;color:#7d7d7a}
+.fg-role{display:flex;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a2a;font-size:14px;color:#c9c9c6}
+.fg-role:last-child{border-bottom:none}
+.fg-role b{color:#fff;font-weight:600;letter-spacing:.04em}
+.fg-role span{font-family:var(--mono);font-size:9.5px;color:#6f6f6b;letter-spacing:.2em}
+.fg-stats{display:flex;flex-direction:column;gap:26px;justify-content:center}
+.fg-stat b{display:block;font-family:var(--serif);font-size:clamp(32px,3.6vw,46px);font-weight:900;color:#fff;line-height:1;letter-spacing:.02em}
+.fg-stat span{font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:#8f8f8c;display:block;margin-top:8px}
+/* ผังดาวทะเบียนผู้ใช้ — ดีไซน์ส่วนท้ายแบบใหม่ */
+.fv-head{padding:clamp(44px,5vw,72px) 0 24px;text-align:center}
+.fv-title{font-family:var(--serif);font-size:clamp(22px,2.6vw,34px);font-weight:900;color:#fff;display:flex;align-items:baseline;justify-content:center;gap:14px;flex-wrap:wrap;letter-spacing:.02em}
+.fv-title span{font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;color:#8f8f8c;font-weight:400}
+.fv-skywrap{position:relative;border-top:1px solid #2c2c2c;border-bottom:1px solid #2c2c2c}
+#fvSky{display:block;width:100%;height:320px}
+.fv-stat{position:absolute;z-index:2}
+.fv-tl{top:22px;left:26px}
+.fv-tr{top:22px;right:26px;text-align:right}
+.fv-stat b{font-family:var(--serif);font-size:clamp(26px,3vw,40px);font-weight:900;color:#fff;display:block;line-height:1}
+.fv-stat span{font-family:var(--mono);font-size:8.5px;letter-spacing:.26em;color:#8f8f8c;display:block;margin-top:7px}
+.fv-online-count{position:absolute;bottom:16px;left:26px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#c9c9c6;z-index:2}
+.fv-online-count b{color:#fff;font-size:14px}
+.fv-names,.fv-recent{display:flex;align-items:baseline;gap:16px;padding:16px 26px 0;flex-wrap:wrap}
+.fv-rl{font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;color:#8f8f8c;flex:none}
+.fv-list{color:#c9c9c6;font-size:13.5px;line-height:2.2}
+.fv-list b{color:#fff;font-weight:600;cursor:default}
+.fv-list b:hover{text-decoration:underline}
+.fv-list em{font-style:normal;color:#5c5c59;margin:0 7px}
+.fv-list small{font-family:var(--mono);font-size:10px;color:#7d7d7a}
+.fv-rn{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:#6f6f6b}
+@media(max-width:820px){.fv-tr{display:none}}
+.foot-base{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #333;padding:18px 0 28px;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;color:#8f8f8c}
+/* Footer ชุดใหม่ — กลุ่มผู้ใช้งาน / สถิติ / ช่องทางติดต่อ */
+.ft-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;color:#8f8f8c;padding-top:clamp(40px,5vw,64px)}
+.ft-roles-head{font-family:var(--serif);font-size:clamp(22px,2.4vw,30px);font-weight:900;color:#fff;margin:14px 0 20px}
+.ft-roles-head span{font-family:var(--sans);font-weight:300;font-size:.55em;color:#8f8f8c;letter-spacing:.08em}
+.ft-roles{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding-bottom:32px;border-bottom:1px solid #2c2c2c}
+@media(max-width:1080px){.ft-roles{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.ft-roles{grid-template-columns:repeat(2,1fr)}}
+.ft-role-card{position:relative;border:1px solid #333;border-radius:12px;padding:18px 16px 14px;overflow:hidden;cursor:pointer;transition:all .2s;background:#161616}
+.ft-role-card:hover{border-color:#e6e6e3;transform:translateY(-3px)}
+.ft-role-card .idx{position:absolute;top:4px;right:10px;font-family:var(--serif);font-style:italic;font-size:26px;color:#2c2c2c}
+.ft-role-card .sh{width:34px;height:34px;border:1px solid #555;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:#e6e6e3}
+.ft-role-card .sh svg{width:18px;height:18px}
+.ft-role-card b{display:block;font-family:var(--serif);font-size:16px;font-weight:700;color:#fff;letter-spacing:.02em}
+.ft-role-card .rc-sub{display:block;margin-top:10px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#8f8f8c}
+.ft-role-card .rc-sub i{font-style:normal;color:#c9c9c6}
+.ft-stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #2c2c2c}
+.ft-stat{padding:26px 10px;text-align:center}
+.ft-stat+.ft-stat{border-left:1px solid #2c2c2c}
+.ft-stat b{font-family:var(--serif);font-size:clamp(30px,3.4vw,44px);font-weight:900;color:#fff;line-height:1}
+.ft-stat span{font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:#8f8f8c;display:block;margin-top:9px}
+.ft-contact{display:flex;align-items:center;gap:10px;padding:22px 0 10px;flex-wrap:wrap}
+.ft-rl{font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;color:#8f8f8c;margin-right:6px}
+.ft-ch{display:inline-flex;align-items:center;gap:8px;border:1px solid #333;border-radius:999px;padding:7px 15px;font-size:12px;color:#c9c9c6;cursor:pointer;transition:all .15s}
+.ft-ch:hover{background:#fff;color:#141414;border-color:#fff}
+.ft-ch svg{width:15px;height:15px;flex:none}
+/* SEC: Latest & Live — ป้ายเทศกาล + แชทลอย + การ์ดโพสต์ */
+.event-banner{display:grid;grid-template-columns:230px 1fr 100px;gap:22px;align-items:center;border:1px solid var(--ink);background:var(--white);padding:16px;margin-bottom:26px}
+.eb-img{height:110px}
+.eb-body h3{font-family:var(--serif);font-size:clamp(18px,2vw,24px);font-weight:900;margin:6px 0 6px}
+.eb-body p{font-size:12.5px;color:var(--muted);line-height:1.8}
+.eb-date{text-align:center;border-left:1px solid var(--hair);padding-left:22px}
+.eb-date b{display:block;font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:900;line-height:1}
+.eb-date span{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--faint);display:block;margin-top:6px}
+@media(max-width:820px){.event-banner{grid-template-columns:1fr}.eb-date{border-left:none;text-align:left;padding-left:0}}
+.lp-grid{display:grid;grid-template-columns:1fr;gap:26px;align-items:stretch}
+.posts-cell,.chat-cell,.status-cell{min-width:0}
+/* โซนคริสตัลแถวโล่ง — ไร้กรอบ ไร้พื้น */
+.status-cell{border:none;background:transparent;padding:0}
+.chat-cell{display:flex;flex-direction:column}
+.live-chat{position:relative;flex:1;min-height:300px;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0 27px,var(--g1) 27px 28px)}
+.bubble{position:absolute;bottom:-30px;max-width:250px;background:var(--white);border:1px solid var(--g3);border-radius:14px;padding:9px 14px;font-size:12.5px;line-height:1.6;box-shadow:2px 3px 0 rgba(0,0,0,.06);animation:floatUp 9s ease-in forwards}
+.bubble span{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--faint);margin-bottom:3px}
+.bubble.alt{background:var(--g1)}
+@keyframes floatUp{0%{opacity:0;transform:translateY(0)}8%{opacity:1}72%{opacity:1}100%{opacity:0;transform:translateY(-330px)}}
+.posts-cell .post-track{padding-bottom:2px}
+/* SEC: Members & Roles — สถิติ + กลุ่มผู้ใช้งานโทนอ่อน */
+.mstat-band{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:var(--white);margin-bottom:10px}
+.mstat{padding:22px 10px;text-align:center}
+.mstat+.mstat{border-left:1px solid var(--hair)}
+.mstat b{font-family:var(--serif);font-size:clamp(26px,2.8vw,38px);font-weight:900;display:block;line-height:1}
+.mstat span{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--muted);display:block;margin-top:8px}
+/* บอร์ดรวม Members & Roles */
+.mr-board{border:1px solid var(--line);background:var(--white)}
+.dc-head{display:flex;align-items:center;justify-content:center;gap:18px;padding-top:32px}
+.dc-head::before,.dc-head::after{content:"";width:min(130px,15vw);height:1px;background:var(--g3)}
+.dc-head b{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.34em;color:var(--ink);white-space:nowrap}
+.dc-sub{text-align:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;color:var(--muted);margin-top:9px}
+.role-circles{display:flex;justify-content:center;gap:clamp(16px,2.6vw,42px);flex-wrap:wrap;padding:26px 18px 34px}
+.rc{text-align:center;cursor:pointer;width:112px}
+.rc .cir{width:88px;height:88px;border-radius:999px;border:1px solid var(--ink);margin:0 auto 13px;display:flex;align-items:center;justify-content:center;transition:all .22s;background:var(--white)}
+.rc:nth-child(2) .cir{background:var(--g1)}
+.rc:nth-child(3) .cir{background:var(--g2)}
+.rc:nth-child(5) .cir{background:var(--g1)}
+.rc:hover .cir{background:var(--ink);border-color:var(--ink);transform:scale(1.07)}
+.rc b{display:block;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.22em;color:var(--ink)}
+.rc span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint);margin-top:6px;line-height:1.7}
+.mr-divider{display:flex;align-items:center;gap:16px;padding:0 24px;margin:2px 0 4px}
+.mr-divider::before,.mr-divider::after{content:"";flex:1;height:1px;background:var(--hair)}
+.mr-divider span{font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;color:var(--muted);white-space:nowrap}
+/* แถบสถิติท้ายบอร์ด — กะทัดรัด คั่นตรา ✦ */
+.mr-stats{display:flex;align-items:center;justify-content:center;gap:clamp(20px,3.4vw,46px);border-top:1px solid var(--hair);padding:20px 22px 24px;flex-wrap:wrap}
+.mrs{text-align:center}
+.mrs b{display:block;font-family:var(--serif);font-size:clamp(22px,2.2vw,30px);font-weight:900;line-height:1;color:var(--ink)}
+.mrs span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.24em;color:var(--muted);margin-top:7px}
+.mrs-sep{font-style:normal;font-size:10px;color:var(--g3)}
+/* เทศกาลแบบแผงภาพแนวตั้ง — กล่องเท่ากัน ป้ายแบบ "Chapter" */
+.vfest3{display:flex;gap:22px;align-items:flex-start;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:16px;margin-bottom:34px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.vf3{flex:0 0 230px;width:230px;cursor:pointer;scroll-snap-align:start}
+.vf3-frame{position:relative;height:300px;border:1px solid var(--ink);background:repeating-linear-gradient(45deg,var(--g1) 0 14px,var(--g2) 14px 28px);display:flex;align-items:center;justify-content:center;overflow:visible}
+.vf3-tab2{position:absolute;left:12px;bottom:0;transform:translateY(50%);background:var(--paper);border:1px solid var(--ink);font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--ink);padding:3px 16px;white-space:nowrap;text-align:center;line-height:1.5}
+.vf3.live .vf3-tab2{background:var(--ink);color:var(--paper)}
+.vf3-tab2.dim{border-style:dashed;color:var(--faint);background:var(--paper)}
+.noev-txt{font-family:var(--mono);font-size:10px;letter-spacing:.4em;color:var(--faint);background:var(--paper);border:1px solid var(--g3);padding:5px 14px}
+.vf3-meta{margin-top:16px}
+.vf3-meta b{display:block;font-family:var(--serif);font-size:16px;font-weight:700}
+.vf3-meta>span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+/* คำอธิบายซ้อนบนกรอบภาพเมื่อชี้ (แบบตัวอย่าง Realm Forums) */
+.vf3-ov{position:absolute;inset:0;z-index:2;background:rgba(247,247,245,.55);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px;text-align:center;opacity:0;transition:opacity .25s ease}
+.vf3:hover .vf3-ov,.vf3.on .vf3-ov{opacity:1}
+.vf3-frame>.ph-tag{position:relative;z-index:3;transition:opacity .25s ease}
+.vf3:hover .vf3-frame>.ph-tag{opacity:.35}
+.vf3-tab2{z-index:4}
+.vf3-ov b{font-family:var(--serif);font-size:16px;font-weight:900;color:var(--ink)}
+.vf3-ov p{font-size:12px;color:var(--muted);line-height:1.8;max-width:190px}
+.vf3-ov span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint)}
+.vf3:hover .vf3-meta b{text-decoration:underline}
+.vf3.noev{cursor:default}
+.vf3.noev:hover .vf3-meta b{text-decoration:none}
+.vf3-img{border-radius:2px;transition:border-color .2s}
+.vf3-tab{position:relative;display:inline-block;background:var(--paper);border:1px solid var(--ink);font-family:var(--mono);font-size:9px;letter-spacing:.18em;padding:3px 12px;margin:-13px 0 10px 14px}
+.vf3.live .vf3-tab{background:var(--ink);color:var(--paper)}
+.vf3-meta b{display:block;font-family:var(--serif);font-size:16px;font-weight:700}
+.vf3-meta>span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.vf3-desc{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s}
+.vf3:hover .vf3-desc,.vf3.on .vf3-desc{max-height:110px;opacity:1}
+.vf3:hover .vf3-meta b{text-decoration:underline}
+.vf3:hover .vf3-img{border-color:var(--ink)}
+.sub-head{font-family:var(--serif);font-size:19px;font-weight:700;margin:30px 0 16px;display:flex;align-items:baseline;gap:10px}
+.sub-head::after{content:"";flex:1;height:1px;background:var(--hair)}
+.roles-light{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:1080px){.roles-light{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.roles-light{grid-template-columns:repeat(2,1fr)}}
+.roles-light .ft-role-card{background:var(--white);border-color:var(--g3)}
+.roles-light .ft-role-card .idx{color:var(--g1)}
+.roles-light .ft-role-card .sh{border-color:var(--line);color:var(--ink)}
+.roles-light .ft-role-card b{color:var(--ink)}
+.roles-light .ft-role-card .rc-sub{color:var(--muted)}
+.roles-light .ft-role-card .rc-sub i{color:var(--ink)}
+.roles-light .ft-role-card:hover{border-color:var(--ink)}
+/* ปฏิทินกิจกรรม */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-head b{font-family:var(--serif);font-size:16px}
+.cal-nav{width:30px;height:30px;border:1px solid var(--g3);border-radius:8px;font-size:16px;background:var(--white)}
+.cal-nav:hover{background:var(--ink);color:var(--paper)}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-align:center;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding-top:10px}
+.cal-day{aspect-ratio:1;border:1px solid var(--hair);border-radius:8px;font-size:12px;background:var(--white);position:relative;transition:all .12s}
+.cal-day:hover:not(:disabled){border-color:var(--ink)}
+.cal-day:disabled{border:none;background:transparent;cursor:default}
+.cal-day.has{font-weight:600;border-color:var(--ink)}
+.cal-day.has::after{content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:999px;background:var(--ink)}
+.cal-day.today{outline:2px solid var(--ink);outline-offset:1px}
+.cal-info{margin-top:12px;border:1px solid var(--g3);border-radius:10px;padding:12px;font-size:12.5px;background:var(--g1)}
+.ft-contact-head{font-family:var(--serif);font-size:clamp(22px,2.4vw,30px);font-weight:900;color:#fff;padding-top:clamp(40px,5vw,64px)}
+.ft-contact-head span{font-family:var(--sans);font-weight:300;font-size:.55em;color:#8f8f8c;letter-spacing:.08em}
+/* แบนเนอร์กิจกรรมแบบการ์ดแนวตั้ง — ชี้/แตะเพื่อขยายอ่านรายละเอียด */
+.vfest{display:flex;gap:14px;height:300px;margin-bottom:30px;overflow-x:auto;padding-bottom:4px}
+.vf-card{position:relative;flex:0 0 112px;border:1px solid var(--g3);border-radius:14px;background:var(--white);cursor:pointer;overflow:hidden;transition:flex-basis .45s cubic-bezier(.4,0,.2,1),border-color .25s}
+.vf-card:hover,.vf-card.on{flex-basis:330px;border-color:var(--ink)}
+.vf-tag{position:absolute;top:14px;left:14px;font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--faint);z-index:2}
+.vf-name{position:absolute;top:44px;left:50%;transform:translateX(-50%);writing-mode:vertical-rl;font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:.26em;white-space:nowrap;color:var(--ink);transition:opacity .22s}
+.vf-card:hover .vf-name,.vf-card.on .vf-name{opacity:0}
+.vf-date{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);transition:opacity .22s;white-space:nowrap}
+.vf-card:hover .vf-date,.vf-card.on .vf-date{opacity:0}
+.vf-body{position:absolute;inset:0;padding:42px 20px 16px;opacity:0;transition:opacity .3s .14s;display:flex;flex-direction:column;gap:8px}
+.vf-card:hover .vf-body,.vf-card.on .vf-body{opacity:1}
+.vf-body b{font-family:var(--serif);font-size:17px;font-weight:900;color:var(--ink)}
+.vf-body p{font-size:12px;color:var(--muted);line-height:1.8}
+.vf-body .vf-when{margin-top:auto;font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--faint)}
+.vf-card.live{background:var(--ink);border-color:var(--ink)}
+.vf-card.live .vf-name,.vf-card.live .vf-date{color:#e6e6e3}
+.vf-card.live .vf-body b{color:#fff}
+.vf-card.live .vf-body p{color:#b9b9b6}
+.vf-card.live .vf-body .vf-when{color:#8f8f8c}
+/* Crystal — คริสตัลสถานะสไตล์ Stories */
+.crystal-rail{display:flex;gap:18px;overflow-x:auto;padding:16px 4px 20px;scrollbar-width:thin;flex:none}
+.crys{flex:none;width:88px;text-align:center;cursor:pointer}
+.crys-ring{width:78px;height:78px;border-radius:999px;border:2px solid var(--ink);padding:5px;background:var(--white);margin:0 auto;transition:all .2s}
+.crys-gem{width:100%;height:100%;border-radius:999px;position:relative;overflow:hidden;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--faint);background:linear-gradient(135deg,#fff 0%,var(--g1) 30%,var(--g2) 55%,var(--g1) 78%,#fff 100%)}
+.crys-gem::before{content:"";position:absolute;inset:0;background:linear-gradient(58deg,transparent 42%,rgba(255,255,255,.9) 50%,transparent 58%),linear-gradient(-38deg,transparent 55%,rgba(255,255,255,.55) 62%,transparent 72%)}
+.crys-gem::after{content:"";position:absolute;top:9%;left:15%;width:26%;height:13%;background:rgba(255,255,255,.95);border-radius:50%;transform:rotate(-24deg)}
+.crys:hover .crys-ring{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,.16);border-width:3px}
+.crys b{display:block;font-size:10.5px;font-weight:600;margin-top:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crys span{display:block;font-family:var(--mono);font-size:8px;color:var(--faint);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crys.new .crys-gem{animation:gemin .5s ease}
+@keyframes gemin{from{transform:scale(.3) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+/* ปุ่มเปิดหน้าต่างปลุกคริสตัล */
+.crys-open{align-self:stretch;border:1px dashed var(--g3);border-radius:12px;padding:13px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--muted);cursor:pointer;transition:all .15s;background:var(--white)}
+.crys-open:hover{border-color:var(--ink);color:var(--ink)}
+.crys-gem img{width:100%;height:100%;object-fit:cover;filter:grayscale(1)}
+.status-cell{display:flex;flex-direction:column}
+.status-map{position:relative;display:flex;flex-direction:column;gap:20px;padding:10px 0 6px;flex:1;justify-content:flex-end}
+.status-map::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--g3)}
+.st-node{position:relative;width:calc(50% - 30px);display:flex;align-items:flex-start;gap:10px;animation:stIn .4s ease}
+.st-node:nth-child(odd){align-self:flex-start}
+.st-node:nth-child(even){align-self:flex-end;flex-direction:row-reverse;text-align:right}
+.st-node:nth-child(even) .sb-react{justify-content:flex-end}
+.st-orb{width:34px;height:34px;border-radius:999px;border:1px solid var(--ink);background:var(--white);font-size:7px;color:var(--faint);display:flex;align-items:center;justify-content:center;flex:none;z-index:1}
+.st-card{flex:1;min-width:0;border:1px solid var(--g3);border-radius:14px;background:var(--white);padding:10px 13px;box-shadow:2px 3px 0 rgba(0,0,0,.05)}
+.st-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.st-node:nth-child(even) .st-top{flex-direction:row-reverse}
+.st-top b{font-size:13px;font-weight:600}
+.st-badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;border:1px solid var(--g3);border-radius:6px;padding:1px 7px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.st-node:nth-child(even) .st-badge{margin-left:0;margin-right:auto}
+.st-num{position:absolute;bottom:-17px;font-family:var(--serif);font-style:italic;font-size:15px;color:var(--g3)}
+.st-node:nth-child(odd) .st-num{right:2px}
+.st-node:nth-child(even) .st-num{left:2px}
+.st-txt{font-size:12.5px;line-height:1.7;color:var(--ink2)}
+.st-node.leaving{animation:stOut .5s ease forwards}
+@keyframes stIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1}}
+@keyframes stOut{to{opacity:0;transform:translateY(14px) scale(.95)}}
+@media(max-width:640px){.status-map::before{left:16px}.st-node,.st-node:nth-child(even){width:100%;align-self:stretch;flex-direction:row;text-align:left}.st-node:nth-child(even) .st-top{flex-direction:row}.st-node:nth-child(even) .sb-react{justify-content:flex-start}.st-node:nth-child(even) .st-badge{margin-left:auto;margin-right:0}.st-num{display:none}}
+.sb-head{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.sb-av{width:30px;height:30px;border-radius:999px;border:1px solid var(--g3);background:var(--g1);font-size:7px;color:var(--faint);display:flex;align-items:center;justify-content:center;flex:none}
+.sb-name{font-size:13px;font-weight:600}
+.sb-time{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--faint);flex:none}
+.sb-txt{font-size:12.5px;line-height:1.7;color:var(--ink2)}
+.sb-react{display:flex;gap:14px;margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.sb-like{cursor:pointer;display:inline-flex;gap:5px;align-items:center;user-select:none}
+.sb-like:hover{color:var(--ink)}
+.sb-like.liked{color:var(--ink);font-weight:600}
+.status-box{border:1px solid var(--g3);border-radius:14px;padding:10px 12px 8px;background:var(--white)}
+.status-box textarea{width:100%;border:none;resize:none;font:inherit;font-size:12.5px;height:48px;background:transparent;color:var(--ink)}
+.status-box textarea:focus{outline:none}
+.sb-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--hair);padding-top:8px}
+/* Footer โทนเดียวกับหน้า — เลย์เอาต์แบบลิงก์คอลัมน์ + โซเชียล + ข้อมูลติดต่อ */
+.foot-base{border-top-color:var(--hair);color:var(--faint)}
+.ft2-links{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:840px;margin:0 auto 36px;text-align:left;padding-top:clamp(44px,6vw,80px)}
+@media(max-width:640px){.ft2-links{grid-template-columns:repeat(2,1fr)}}
+.ft2-col b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.26em;color:var(--muted);margin-bottom:12px}
+.ft2-col a{display:block;font-size:13px;color:var(--ink2);padding:4px 0;cursor:pointer}
+.ft2-col a:hover{color:var(--ink);text-decoration:underline}
+.ft2-social{display:flex;justify-content:center;gap:12px;margin-bottom:28px}
+.ft2-soc{position:relative;width:38px;height:38px;border:1px solid var(--g3);border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .15s}
+.ft2-soc:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ft2-soc svg{width:16px;height:16px}
+.ft2-soc[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:10.5px;background:var(--ink);color:var(--paper);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.ft2-info{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);line-height:2.2;text-align:center;margin-bottom:28px}
+/* ปุ่มเขียนประกาศ + Toast แจ้งเตือน */
+.nl-btn{font-family:var(--mono);font-size:10px;letter-spacing:.14em;border:1px solid var(--ink);border-radius:6px;padding:3px 12px;background:var(--white);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nl-btn:hover{background:var(--ink);color:var(--paper)}
+.toast{position:fixed;left:50%;bottom:calc(var(--hud) + 20px);transform:translate(-50%,12px);background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:10px 20px;border-radius:8px;z-index:300;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.note.usernote{border-color:var(--ink);box-shadow:3px 4px 0 rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+<!-- ============ มุมมอง: หน้าหลัก ============ -->
+<main id="view-home">
+
+  <section class="hero" id="hero" style="padding:0">
+    <a class="brandmark" id="homeLink" aria-label="กลับสู่หน้าหลัก">
+      <span class="sig">✦</span>
+      <span><b>WHATEVER</b><small>WHERE ANYTHING TRANSCENDS EVERYTHING</small></span>
+    </a>
+    <div class="hero-banner">
+      <div class="banner-ph">
+        <div class="frame"><i></i><i></i><i></i><i></i></div>
+        <div class="banner-dim">[ ภาพแบนเนอร์หลัก — 1920 × 1080 ]</div>
+      </div>
+      <div id="sparks"></div>
+      <div class="hero-copy">
+        <div class="kicker">คอมมูนิตี้โรลเพลย์ · โลกแฟนตาซีแห่งเวทมนตร์</div>
+        <h1>วังวนแห่ง<br><em>เวย์มัวร์</em></h1>
+        <p>ทุกเทียนในหอจดหมายเหตุลุกโชนเพื่อเรื่องราวที่ยังไม่จบ<br>สวมบทบาท — สร้างตำนาน — จารึกบทของตัวเอง</p>
+      </div>
+      <div class="hero-issue">
+        <b>จดหมายเหตุ ฉบับที่ IX</b>
+        <span>จากศิลาแรก ถึงยอดหอคอยเหนือฟ้า<br>ก่อตั้ง ค.ศ. 1998 — ปัจจุบัน<br>สมาชิก 12,480 จิตวิญญาณ</span>
+      </div>
+      <div class="scroll-cue">เลื่อนลงเพื่อสำรวจ</div>
+    </div>
+
+    <!-- ชั้นแผนที่ (สลับจากปุ่ม "แผนที่") -->
+    <div class="hero-map">
+      <div class="map-hud">
+        <div class="kicker">สถานที่ในโลกแฟนตาซี</div>
+        <h2>แผนที่<br>ที่มีชีวิต</h2>
+        <p>คลิกหมุดเพื่อเข้าสู่ฟอรั่มของสถานที่นั้น หรือกดปุ่ม «หน้าหลัก» เพื่อกลับสู่แบนเนอร์</p>
+      </div>
+      <svg class="map-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-label="แผนที่ตัวอย่าง">
+        <defs><pattern id="mgrid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#e6e6e3" stroke-width="1"/></pattern></defs>
+        <rect width="1440" height="900" fill="#f7f7f5"/><rect width="1440" height="900" fill="url(#mgrid)"/>
+        <path d="M-40 640 C 260 560, 420 720, 700 660 S 1180 560, 1500 660" fill="none" stroke="#c9c9c6" stroke-width="26" opacity=".7"/>
+        <path d="M-40 640 C 260 560, 420 720, 700 660 S 1180 560, 1500 660" fill="none" stroke="#9a9a97" stroke-width="1" stroke-dasharray="6 6"/>
+        <g stroke="#b5b5b2" stroke-width="1.4" fill="none">
+          <path d="M240 -20 L 300 480 L 240 920"/><path d="M560 -20 L 620 420 L 700 920"/>
+          <path d="M-20 300 L 760 340 L 1500 260"/><path d="M-20 480 L 620 470 L 1500 420"/>
+          <path d="M900 -20 L 880 460 L 980 920"/><path d="M1150 -20 L 1180 480 L 1120 920"/>
+        </g>
+        <g fill="#ececea" stroke="#9a9a97" stroke-width="1">
+          <rect x="330" y="80" width="180" height="150"/><rect x="660" y="60" width="170" height="200"/>
+          <rect x="950" y="90" width="160" height="120" transform="rotate(3 1030 150)"/>
+          <rect x="340" y="380" width="200" height="70"/><rect x="740" y="380" width="110" height="70"/>
+          <rect x="1220" y="300" width="150" height="100" transform="rotate(-4 1295 350)"/>
+          <rect x="700" y="730" width="230" height="120"/><rect x="1020" y="500" width="120" height="120"/>
+          <rect x="420" y="560" width="130" height="60" transform="rotate(5 485 590)"/>
+        </g>
+        <g transform="translate(1330,120)" stroke="#6f6f6b" fill="none">
+          <circle r="34"/><path d="M0 -34 L8 0 L0 34 L-8 0 Z" fill="#141414" stroke="none"/>
+          <text y="-44" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#141414" stroke="none" letter-spacing="2">N</text>
+        </g>
+        <g class="mk" data-mk="kingdom" transform="translate(420,155)"><circle class="ring" r="14"/><circle class="core" r="5"/><text y="-24" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="2" fill="#141414">อาณาจักร</text></g>
+        <g class="mk" data-mk="academy" transform="translate(745,160)"><circle class="ring" r="14"/><circle class="core" r="5"/><text y="-24" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="2" fill="#141414">สถาบันเวทมนตร์</text></g>
+        <g class="mk" data-mk="archive" transform="translate(1030,150)"><circle class="ring" r="14"/><circle class="core" r="5"/><text y="-24" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="2" fill="#141414">จดหมายเหตุ</text></g>
+        <g class="mk" data-mk="under" transform="translate(795,415)"><circle class="ring" r="14"/><circle class="core" r="5"/><text y="34" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="2" fill="#141414">ตรอกเงา</text></g>
+      </svg>
+    </div>
+
+    <nav class="glass-nav" id="glassNav" aria-label="ทางลัดหลัก">
+      <div id="navSlider"></div>
+      <button class="gnav-btn active" data-act="home">หน้าหลัก</button>
+      <button class="gnav-btn" data-act="map">แผนที่</button>
+      <button class="gnav-btn" data-act="calendar">ปฏิทิน</button>
+      <button class="gnav-btn" data-act="forums">ฟอรั่มหลัก</button>
+    </nav>
+  </section>
+
+  <!-- TICKER เหตุการณ์ฉุกเฉิน -->
+  <div class="ticker" aria-label="ประกาศด่วน">
+    <div class="ticker-track" id="tickerTrack">
+      <span><span class="alert" data-open="emergency">◆ เหตุการณ์ฉุกเฉิน</span><b>แผ่นดินไหวแห่งวอร์ด VII</b> กำลังดำเนินอยู่ · 3 เขตได้รับผลกระทบ · ตราที่เจ็ดสั่นระริกใต้ผืนดิน</span><span class="sep">✦</span>
+      <span><b>แพตช์ 3.2.1</b> ปรับสมดุลคาถาป้องกัน — รายละเอียดใน The Grand Hub</span><span class="sep">✦</span>
+      <span><b>ต้อนรับสมาชิกใหม่</b> 128 จิตวิญญาณในสัปดาห์นี้</span><span class="sep">✦</span>
+    </div>
+  </div>
+
+  <!-- ===== SEC.01 · THE GRAND HUB (เหตุฉุกเฉินฝั่งซ้าย · Patrons ข้างกระดานประกาศ) ===== -->
+  <section class="hub wrap" id="sec-hub">
+    <div class="sec-head reveal"><h2>The Grand Hub</h2><div class="rule"></div></div>
+    <p class="sec-sub reveal">ศูนย์กลางแห่งคัมภีร์ข่าวของชุมชน — เหตุการณ์ฉุกเฉินเด่นฝั่งซ้ายสุด แพตช์และโพสต์ถัดมา กระดานประกาศแบบโน้ตแปะกว้างเต็มแถว และป้ายโฆษณาปิดท้าย</p>
+    <div class="hub-grid reveal d1">
+      <div class="cell-dark cell-emg" id="emgCell">
+        <div class="emg-head">
+          <div class="emg-htitle"><b id="emgLabel">เหตุการณ์ฉุกเฉิน</b><span id="emgSub">LIVE · แผ่นดินไหวแห่งวอร์ด VII — กำลังดำเนินอยู่</span></div>
+          <div class="emg-head-ctrl" id="emgTabs">
+            <div class="emg-seg" id="emgSeg">
+              <div class="emg-thumb" id="emgThumb"></div>
+              <button class="etab on" data-view="emg">เหตุการณ์ฉุกเฉิน</button>
+              <button class="etab" data-view="news">หนังสือพิมพ์</button>
+            </div>
+            <button class="etab demo" id="emgDemo">จำลอง: เหตุฉุกเฉิน เปิด</button>
+          </div>
+        </div>
+        <div id="emgView">
+          <span class="emg-live"><span class="dot"></span>กำลังดำเนินอยู่</span>
+          <div class="emg-title">แผ่นดินไหวแห่งวอร์ด VII — เขตตะวันตกสั่นสะเทือน</div>
+          <div class="ph" style="height:130px;flex:none;border-color:#4a4a4a"><span class="ph-tag">[ภาพประกอบเหตุการณ์]</span></div>
+          <div class="emg-desc">“พื้นตลาดยกตัวขึ้นเหมือนลมหายใจที่สูดเข้า และทุกเทียนในหอจดหมายเหตุเอนตัวไปทางวอร์ด VII พร้อมกัน เบื้องล่าง มีบางสิ่งเก่าแก่กำลังพลิกตัวในหลับใหล”</div>
+          <div class="emg-desc">รายงานเมื่อ 2 ชม.ที่แล้ว · เขตที่ได้รับผลกระทบ 3 เขต</div>
+          <button class="btn" data-open="emergency" style="margin-top:auto;align-self:flex-start">เข้าสู่กระทู้เหตุการณ์</button>
+        </div>
+        <div class="prophet" id="prophetView" hidden>
+          <div class="pr-mast"><span>ฉบับที่ 1,127 · วันจันทร์ที่ 14 เดือนหิมะ 1127</span><span>ส่งโดยนกฮูกสื่อสาร</span><span>ราคา 1 นิกเคิล</span></div>
+          <div class="pr-title">THE VEYMOUR PROPHET</div>
+          <div class="pr-head">ตราที่เจ็ดสั่นระริกเป็นครั้งแรกในรอบศตวรรษ — สภาเวทมนตร์เรียกประชุมด่วนเวลาพลบค่ำ</div>
+          <div class="pr-cols">
+            <div class="pr-col">
+              <div class="ph pr-img"><span class="ph-tag">[ภาพประกอบข่าว]</span></div>
+              <p class="pr-cap">ภาพบันทึกโดยผู้สื่อข่าว: แสงเย็นสีครามใต้ประตูวอร์ด VII</p>
+              <p class="pr-txt pr-lead">เมื่อค่ำคืนที่ผ่านมา ชาวเมืองชั้นล่างได้ยินเสียงต่ำสั่นสะเทือนใต้ฝ่าเท้า อาจารย์ประจำสถาบันเวทมนตร์ยืนยันว่าเสียงดังกล่าวมาจากตราที่เจ็ด ซึ่งไม่เคยตอบสนองต่อสิ่งใดมาก่อนในบันทึกทั้งปวง…</p>
+              <p class="pr-txt">ผู้เชี่ยวชาญด้านตราสารโบราณกล่าวเพียงสั้น ๆ ว่า “มันไม่ควรตื่น” ก่อนจะปิดประตูห้องทำงานและไม่ตอบคำถามใด ๆ อีก ทำเนียบราชการออกประกาศขอให้ประชาชนอยู่ในที่พักหลังพลบค่ำจนกว่าจะมีคำสั่งใหม่…</p>
+            </div>
+            <div class="pr-col">
+              <h4 class="pr-sub">สภาเวทมนตร์เรียกประชุมด่วน</h4>
+              <p class="pr-txt">ที่ประชุมสภาจะเปิดโถงใหญ่ของทำเนียบเวลาพลบค่ำ ผู้เข้าร่วมถูกขอให้นำเทียนกันฝันมาเองอย่างน้อยเล่มละหนึ่ง ผู้คุมหอปฏิเสธที่จะให้ความเห็นเกี่ยวกับวาระการประชุม…</p>
+              <h4 class="pr-sub">ตลาดจันทรายังคงเปิดตามปกติ</h4>
+              <p class="pr-txt">แม้มีความไม่สงบ ผู้ค้าในตลาดจันทรายืนยันว่าจะเปิดแผงตามปกติ “หากตราอยากให้เราปิดร้าน มันควรทำเมื่อศตวรรษที่แล้วไปแล้ว” เจ้าของแผงเทียนกล่าวกับผู้สื่อข่าว…</p>
+            </div>
+            <div class="pr-col">
+              <h4 class="pr-sub">สายเลือดผู้พิทักษ์เคลื่อนไหว</h4>
+              <p class="pr-txt">แหล่งข่าววงในระบุว่าเหล่าผู้พิทักษ์คัมภีร์ทั้งห้าลำดับถูกเรียกตัวกลับหอจดหมายเหตุตะวันตกก่อนฟ้าสาง ยังไม่มีคำยืนยันใด ๆ จากสภา…</p>
+              <div class="ph pr-img" style="height:90px"><span class="ph-tag">[โฆษณา]</span></div>
+              <p class="pr-cap">เช่าแผงเทียน ตลาดจันทรา — ติดต่อทำเนียบราชการ</p>
+              <p class="pr-txt">พยากรณ์อากาศ: หิมะเบาในคืนนี้ เหมาะแก่การจดบันทึกและการเฝ้าระวัง…</p>
+            </div>
+          </div>
+          <div class="owl-gate" id="owlGate" style="display:none">
+            <svg class="owl-svg" viewBox="0 0 220 250" aria-label="นกฮูกผู้ส่งหนังสือพิมพ์">
+              <ellipse cx="110" cy="128" rx="58" ry="68" fill="none" stroke="#141414" stroke-width="2"/>
+              <path d="M62 66 L74 34 L92 58 Z" fill="none" stroke="#141414" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M158 66 L146 34 L128 58 Z" fill="none" stroke="#141414" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="88" cy="96" r="20" fill="none" stroke="#141414" stroke-width="2"/>
+              <circle cx="132" cy="96" r="20" fill="none" stroke="#141414" stroke-width="2"/>
+              <circle cx="88" cy="96" r="6" fill="#141414"/><circle cx="132" cy="96" r="6" fill="#141414"/>
+              <path d="M110 108 L101 122 L119 122 Z" fill="#141414"/>
+              <path d="M52 118 Q40 150 58 172" fill="none" stroke="#141414" stroke-width="2"/>
+              <path d="M168 118 Q180 150 162 172" fill="none" stroke="#141414" stroke-width="2"/>
+              <path d="M84 194 L84 208 M94 194 L94 208 M126 194 L126 208 M136 194 L136 208" stroke="#141414" stroke-width="2"/>
+              <rect x="68" y="208" width="84" height="6" fill="#141414"/>
+              <path d="M150 200 Q152 214 160 218" fill="none" stroke="#141414" stroke-width="1.5"/>
+              <path d="M160 218 L176 218 L180 240 L156 240 Z" fill="none" stroke="#141414" stroke-width="1.5"/>
+              <path d="M160 224 L176 224" stroke="#141414" stroke-width="1"/>
+              <circle class="coin c1" cx="108" cy="26" r="4" fill="none" stroke="#141414" stroke-width="1.5"/>
+              <circle class="coin c2" cx="118" cy="12" r="4" fill="none" stroke="#141414" stroke-width="1.5"/>
+              <circle class="coin c3" cx="112" cy="40" r="4" fill="none" stroke="#141414" stroke-width="1.5"/>
+            </svg>
+            <p class="owl-txt">กรุณาหย่อนเหรียญใส่ถุงที่ผูกขานกฮูก<br>จำนวน <b>20 เคล</b> เพื่อรับหนังสือพิมพ์ฉบับวันนี้</p>
+            <button class="btn" id="owlPay">หย่อนเหรียญ 20 เคล</button>
+            <p class="owl-note">นกฮูกจะรอจนกว่าคุณจะจ่าย — มันไม่เคยกลับไปว่างเปล่า</p>
+          </div>
+        </div>
+      </div>
+      <div class="cell cell-patch">
+        <div class="c-label"><b>PATCH NOTES · แพตช์อัปเดต</b></div>
+        <div id="patchList"></div>
+      </div>
+      <div class="cell cell-post">
+        <div class="c-label"><b>PATCH CATEGORIES · หมวดแพตช์</b></div>
+        <div class="patch-orbit" id="patchOrbit"><div class="orbit-ring"></div>
+          <button class="orbit-core" data-open="patchlog"><b>PATCH</b><span>v3.2.1</span></button>
+        </div>
+        <div class="orbit-preview" id="orbitPreview"></div>
+      </div>
+      <div class="cell cell-board">
+        <div class="c-label"><b>PUBLIC NOTICE BOARD · กระดานประกาศสาธารณะ</b><button class="nl-btn" id="noteOpen">+ เขียนประกาศ · 20 เคล</button></div>
+        <div class="board-side">
+          <div class="mini-label"><b>PATRONS · ผู้สนับสนุน</b></div>
+          <div class="patrons-v" id="patronList"></div>
+          <p class="patrons-caption">ตราสัญลักษณ์ของเหล่าผู้สนับสนุนห้อยอยู่เหนือห้องอ่านตะวันตกมาหลายปี — แต่ละตราคือหนึ่งเรื่องราวที่ซื้อด้วยความเชื่อมั่น ไม่ใช่เงิน</p>
+        </div>
+        <div class="board-main">
+        <div class="board-bg" id="boardBg">
+          <div class="note n1" data-board="0"><span class="pin"></span><b>เช่าแผงเทียน ตลาดจันทรา</b><i></i><i></i><div class="nd">โดย อัครเสนาบดีเฟนน์</div></div>
+          <div class="note n2" data-board="1"><span class="pin"></span><b>สอนอักขระม่านหมอก</b><i></i><i></i><i></i><div class="nd">ระฆังแรกฟรี</div></div>
+          <div class="note n3" data-board="2"><span class="pin"></span><b>แมลงปีกทอง รับนักดนตรี</b><i></i><i></i><div class="nd">สมัครภายใน 05 ก.ย.</div></div>
+          <div class="note n4" data-board="0"><span class="pin"></span><b>รับจ้างเขียนจดหมายรัก</b><i></i><div class="nd">เก็บเงินหลังอ่าน</div></div>
+          <div class="note n5" data-board="1"><span class="pin"></span><b>ขายแผนที่หอคอย</b><i></i><i></i><div class="nd">ฉบับปรับตำแหน่งใหม่</div></div>
+        </div>
+        </div>
+      </div>
+      <div class="cell-ads">
+        <div class="ph"><span class="ph-tag">[ ป้ายโฆษณา — 600×110 ]</span></div>
+        <div class="ph"><span class="ph-tag">[ ป้ายโฆษณา — 600×110 ]</span></div>
+        <div class="ph"><span class="ph-tag">[ ป้ายโฆษณา — 600×110 ]</span></div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== SEC.03 · THE SEVENTH SEAL ===== -->
+  <section class="quest wrap" id="sec-quest">
+    <div class="sec-head reveal"><h2>The Seventh Seal</h2><div class="rule"></div></div>
+    <p class="sec-sub reveal">เนื้อเรื่องหลักของชุมชนทั้งมวล — ตราที่เจ็ดไม่เคยถูกสร้างมาเพื่อตื่น และความคืบหน้าทุกเปอร์เซ็นต์คือตราสารที่ชุมชนร่วมกันจารึก</p>
+    <div class="quest-grid reveal d1">
+      <div class="cell">
+        <div class="c-label"><b>MAIN STORY · เนื้อเรื่องหลัก</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:4px"><span class="mut" style="color:var(--muted)">ความคืบหน้าของชุมชน</span><b style="font-variant-numeric:tabular-nums">68%</b></div>
+        <div class="pbar"><div style="width:68%"></div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:14px 0">
+          <span class="areachip">เมืองชั้นล่าง</span><span class="areachip">ตลาดใหญ่</span><span class="areachip">หอจดหมายเหตุตะวันตก</span><span class="areachip">สะพานจันทรา</span><span class="areachip">สวนน้ำค้างแข็ง</span>
+          <span class="areachip lock">วอร์ด VII — ปิดผนึก</span><span class="areachip lock">ใต้พิภพ — ปิดผนึก</span><span class="areachip lock">ยอดหอคอย — ปิดผนึก</span>
+        </div>
+        <div class="qstat">
+          <div><b>5/8</b><span>พื้นที่ปลดล็อก</span></div>
+          <div><b>12/20</b><span>ความสำเร็จของคุณ</span></div>
+          <div><b>พลบค่ำ</b><span>ภารกิจปัจจุบัน</span></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" data-open="quest">รายละเอียดเควส</button>
+          <button class="btn ghost" data-open="achieve">กระดานเกียรติยศ</button>
+        </div>
+      </div>
+      <div class="cell">
+        <div class="c-label"><b>HONOUR ROLL · กระดานเกียรติยศ</b></div>
+        <div id="honorList"></div>
+      </div>
+    </div>
+    <h3 class="sub-head reveal">เหตุการณ์สำคัญถัดไป · Upcoming Events</h3>
+    <div class="vfest3 reveal d1">
+      <div class="vf3 live">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">LIVE · คืนนี้</span>
+          <div class="vf3-ov"><b>งานเต้นรำใต้แสงจันทร์</b><p>แต่งกายชุดราตรีม่านหมอก เข้าร่วมฟรี ดนตรีสดจากแมลงปีกทองตลอดค่ำคืน</p><span>ทุ่มครึ่ง · สะพานจันทรา</span></div></div>
+        <div class="vf3-meta"><b>งานเต้นรำใต้แสงจันทร์</b><span>ทุ่มครึ่ง · สะพานจันทรา</span></div>
+      </div>
+      <div class="vf3">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">21 หิมะ</span>
+          <div class="vf3-ov"><b>ตลาดจันทราปิดฤดูกาล</b><p>ลดแลกแจกแถมยกแผงทั้งตลาด ก่อนปิดยาวถึงฤดูใบไม้ผลิ</p><span>เต็มวัน · ตลาดใหญ่</span></div></div>
+        <div class="vf3-meta"><b>ตลาดจันทราปิดฤดูกาล</b><span>ตลาดใหญ่ · เต็มวัน</span></div>
+      </div>
+      <div class="vf3">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">25 หิมะ</span>
+          <div class="vf3-ov"><b>ประลองเวทสนามเปิด</b><p>ชมฟรีทุกฉาก นักเรียนทุกชั้นปีเข้าร่วมได้ ผู้ชนะได้ถ้วยจันทรา</p><span>บ่ายสอง · สถาบันเวทมนตร์</span></div></div>
+        <div class="vf3-meta"><b>ประลองเวทสนามเปิด</b><span>สถาบันเวทมนตร์ · บ่ายสอง</span></div>
+      </div>
+      <div class="vf3">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">28 หิมะ</span>
+          <div class="vf3-ov"><b>งานเลี้ยงปิดเดือนหิมะ</b><p>ดนตรี เต้นรำ และประกาศผู้มีเกียรติยศประจำเดือนหน้าเวทีใหญ่</p><span>ค่ำคืน · หอจดหมายเหตุ</span></div></div>
+        <div class="vf3-meta"><b>งานเลี้ยงปิดเดือนหิมะ</b><span>หอจดหมายเหตุ · ค่ำคืน</span></div>
+      </div>
+      <div class="vf3">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">30 หิมะ</span>
+          <div class="vf3-ov"><b>ค่ำคืนแห่งดนตรีใต้พิภพ</b><p>วงลับจากโรงเตี๊ยมแมลงปีกทองเล่นเปิดหมวก เข้าฟรี เสียบทิปตามศรัทธา</p><span>สามทุ่ม · ตรอกเงา</span></div></div>
+        <div class="vf3-meta"><b>ค่ำคืนแห่งดนตรีใต้พิภพ</b><span>ตรอกเงา · สามทุ่ม</span></div>
+      </div>
+      <div class="vf3">
+        <div class="vf3-frame"><span class="ph-tag">[ภาพกิจกรรม]</span><span class="vf3-tab2">02 น้ำค้าง</span>
+          <div class="vf3-ov"><b>เทศกาลเปิดม่านหมอก</b><p>ขบวนแห่เปิดฤดูกาลใหม่ ร้านค้าแต่ละเขตเปิดโปรโมชันพร้อมกัน</p><span>ตลอดวัน · ทั่วอาณาจักร</span></div></div>
+        <div class="vf3-meta"><b>เทศกาลเปิดม่านหมอก</b><span>ทั่วอาณาจักร · ตลอดวัน</span></div>
+      </div>
+      <div class="vf3 noev">
+        <div class="vf3-frame"><span class="noev-txt">NO EVENT</span><span class="vf3-tab2 dim">No Event</span></div>
+        <div class="vf3-meta"><b>ยังไม่มีกิจกรรม</b><span>รอประกาศจากสภาเวทมนตร์</span></div>
+      </div>
+      <div class="vf3 noev">
+        <div class="vf3-frame"><span class="noev-txt">NO EVENT</span><span class="vf3-tab2 dim">No Event</span></div>
+        <div class="vf3-meta"><b>ยังไม่มีกิจกรรม</b><span>รอประกาศจากสภาเวทมนตร์</span></div>
+      </div>
+      <div class="vf3 noev">
+        <div class="vf3-frame"><span class="noev-txt">NO EVENT</span><span class="vf3-tab2 dim">No Event</span></div>
+        <div class="vf3-meta"><b>ยังไม่มีกิจกรรม</b><span>รอประกาศจากสภาเวทมนตร์</span></div>
+      </div>
+      <div class="vf3 noev">
+        <div class="vf3-frame"><span class="noev-txt">NO EVENT</span><span class="vf3-tab2 dim">No Event</span></div>
+        <div class="vf3-meta"><b>ยังไม่มีกิจกรรม</b><span>รอประกาศจากสภาเวทมนตร์</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEC.04 · LATEST POSTS (การ์ดแนวนอน) ===== -->
+  <section class="wrap" id="sec-posts">
+    <div class="sec-head reveal"><h2>Live Updates</h2><div class="rule"></div></div>
+    <p class="sec-sub reveal">ชีพจรของชุมชนในค่ำคืนนี้ — โพสต์ล่าสุด และคริสตัลสถานะที่สมาชิกปลุกขึ้นมาบ่นระบาย</p>
+    <div class="lp-grid reveal d1">
+      <div class="cell posts-cell">
+        <div class="c-label"><b>LATEST POSTS · โพสต์ล่าสุด</b></div>
+        <div class="post-track" id="postTrack"></div>
+      </div>
+    </div>
+    <div class="status-cell reveal d1" style="margin-top:26px">
+      <div class="c-label"><b>CRYSTAL · คริสตัลแห่งสถานะ</b><button class="nl-btn" id="crysOpenBtn">✦ ปลุกคริสตัล</button></div>
+      <div class="crystal-rail" id="crystalRail"></div>
+    </div>
+  </section>
+
+  <!-- ===== SEC.05 · NEW MEMBERS (แบบ layout Sponsor เดิม) ===== -->
+  <section class="wrap" id="sec-members">
+    <div class="sec-head reveal"><h2>Members</h2><div class="rule"></div></div>
+    <p class="sec-sub reveal">ภาพรวมชุมชนแห่งเวย์มัวร์ — สมาชิกใหม่ที่เพิ่งข้ามม่านหมอกมาถึง และกลุ่มผู้ใช้งานทั้งห้า</p>
+    <div class="mr-board reveal d1">
+      <div class="dc-head"><b>ROLES · กลุ่มผู้ใช้งาน</b></div>
+      <div class="dc-sub">เลือกสายของคุณ — ห้าสายเลือดแห่งเวย์มัวร์</div>
+      <div class="role-circles" id="roleCircles"></div>
+      <div class="mr-divider"><span>สมาชิกใหม่ · NEW ARRIVALS</span></div>
+      <div class="member-grid" id="memberGrid" style="padding:22px 22px 26px"></div>
+      <div class="mr-stats">
+        <div class="mrs"><b>12,480</b><span>สมาชิกทั้งหมด</span></div>
+        <i class="mrs-sep">✦</i>
+        <div class="mrs"><b>79</b><span>ออนไลน์วันนี้</span></div>
+        <i class="mrs-sep">✦</i>
+        <div class="mrs"><b>983</b><span>ออนไลน์สูงสุด</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ มุมมอง: หน้าฟอรั่มหลัก (แยกหน้า) ============ -->
+<main id="view-forums" hidden>
+  <div class="wrap">
+    <div class="page-head">
+      <div class="crumb" style="padding-top:0"><a id="crumbHomeF">หน้าหลัก</a> / MAIN FORUMS</div>
+      <h2 style="margin-top:18px">Main Forums</h2>
+      <div class="fd-meta">ทางเข้ารวมของฟอรั่มหลักทั้งสี่หมวด · ชี้เมาส์อ่านคำอธิบาย · คลิกเพื่อเข้าสู่ฟอรั่มและฟอรั่มย่อย</div>
+    </div>
+    <div style="margin-top:34px" id="forumList"></div>
+  </div>
+</main>
+
+<!-- ============ มุมมอง: รายละเอียดฟอรั่ม ============ -->
+<main id="view-forum" hidden>
+  <div class="wrap">
+    <div class="crumb">MAIN FORUMS / <a id="crumbHome">ทั้งสี่หมวด</a> / <span id="crumbForum"></span></div>
+    <div class="fd-head">
+      <div class="ph"><span class="ph-tag">[ แบนเนอร์ฟอรั่ม ]</span></div>
+      <div>
+        <h2 id="fdName"></h2>
+        <div class="fd-meta" id="fdMeta"></div>
+        <div class="fd-desc" id="fdDesc"></div>
+      </div>
+    </div>
+    <div class="sec-head" style="margin-top:38px"><span class="no">SUB</span><h2 style="font-size:22px">ฟอรั่มย่อย · Sub-Forums</h2><div class="rule"></div></div>
+    <div class="sub-grid" id="subGrid"></div>
+    <div class="thread-head"><span>กระทู้ / THREAD</span><span>ผู้ตั้ง</span><span>ตอบ</span><span>อ่าน</span><span>โพสต์ล่าสุด</span></div>
+    <div id="threadList"></div>
+    <div class="pager"><span>‹</span><span class="cur">1</span><span>2</span><span>3</span><span>…</span><span>›</span></div>
+    <button class="back-btn" id="backBtn">← กลับสู่หน้าฟอรั่มหลัก</button>
+  </div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="ft2-links">
+      <div class="ft2-col"><b>สำรวจ</b><a>หน้าหลัก</a><a>แผนที่โลก</a><a>ตำนาน</a><a>ปฏิทินกิจกรรม</a></div>
+      <div class="ft2-col"><b>ฟอรั่ม</b><a>อาณาจักรเวย์มัวร์</a><a>สถาบันเวทมนตร์</a><a>ตรอกเงาใต้เมือง</a><a>จดหมายเหตุ</a></div>
+      <div class="ft2-col"><b>ชุมชน</b><a>กฎระเบียบ</a><a>สนับสนุนเรา</a><a>ทีมงานสภา</a><a>สมัครผู้คุมหอ</a></div>
+      <div class="ft2-col"><b>ติดต่อ</b><a>ส่งจดหมายถึงสภา</a><a>รายงานปัญหา</a><a>เสนอแนะ</a></div>
+    </div>
+    <div class="ft2-social">
+      <span class="ft2-soc" data-tip="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+      <span class="ft2-soc" data-tip="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10h-6l-2 3-2-3H5z"/><path d="M9 10h.01M15 10h.01"/></svg></span>
+      <span class="ft2-soc" data-tip="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h3v4h-3v3h4l-1 4h-3v9h-4v-9H7v-4h3V8a4 4 0 0 1 4-4z"/></svg></span>
+      <span class="ft2-soc" data-tip="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="4"/><path d="M17 7h.01"/></svg></span>
+      <span class="ft2-soc" data-tip="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></span>
+    </div>
+    <div class="ft2-info">แอตแลนเทียมแห่งเวย์มัวร์ ชั้น 3B หอจดหมายเหตุตะวันตก<br>สายด่วนนกฮูกสื่อสาร 1127 · owl@whatever.example<br>เปิดทำการทุกค่ำค่ำจนถึงรุ่งสาง</div>
+    <div class="foot-base"><span>© 2026 Whatever — Where Anything Transcends Everything</span><span>MONO WIREFRAME · V 2.2 · ข้อมูลจำลองทั้งหมด</span></div>
+  </div>
+</footer>
+
+<div class="f-tip" id="fTip"><div class="tt">เกี่ยวกับหมวดนี้</div><div class="desc" id="tipDesc"></div><div class="latest" id="tipLatest"></div></div>
+<style>
+/* ============ CENTRAL HUD — โดมครึ่งวงกลม + ไอคอนรอบขอบโค้ง ============ */
+body{--hud:212px}
+body.mini{--hud:88px}
+.hud{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:70;width:min(660px,calc(100vw - 24px));height:184px;background:var(--paper);border:1px solid var(--ink);border-radius:330px 330px 18px 18px / 184px 184px 18px 18px;box-shadow:0 16px 40px rgba(0,0,0,.32);transition:all .35s cubic-bezier(.4,0,.2,1)}
+.hud::before{content:"";position:absolute;inset:4px;border:1px solid var(--g3);border-radius:326px 326px 14px 14px / 180px 180px 14px 14px;pointer-events:none}
+/* พื้นท้องฟ้าเต็มแผงครึ่งวงกลม */
+.hud-sky{position:absolute;inset:5px;border-radius:321px 321px 12px 12px / 175px 175px 12px 12px;overflow:hidden;background:repeating-linear-gradient(45deg,var(--g1) 0 12px,var(--g2) 12px 24px);z-index:0}
+.hud-sky .ph{position:absolute;inset:0;border:none;background:transparent;font-size:10px}
+.moon3{position:absolute;top:14px;right:44px;width:17px;height:17px;border-radius:999px;border:1px solid var(--ink);background:var(--white)}
+body.mini .hud-sky{border-radius:70px 70px 10px 10px}
+.hud-spark{position:absolute;font-size:9px;color:var(--g3);pointer-events:none;line-height:1;z-index:5}
+.sp1{top:14px;left:34%}
+.sp2{top:6px;right:38%}
+.sp3{bottom:16px;left:48%}
+.hzL{position:absolute;inset:0;z-index:9;pointer-events:none}
+.hzL>*{pointer-events:auto}
+#pav3{position:absolute;transform:translate(-50%,-50%);width:116px;height:116px;border-radius:999px;border:2px solid var(--ink);padding:0;background:var(--g1);font-size:8px;color:var(--faint);display:block;z-index:2;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+#idolStack{position:absolute;inset:0;pointer-events:none;z-index:3}
+#idolStack .hicon{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+#namePlate{position:absolute;transform:translateX(-50%);z-index:3}
+.idol-stack{display:flex;flex-direction:column;gap:7px}
+.hicon{position:relative;width:32px;height:32px;border-radius:999px;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center;transition:all .15s;flex:none;background:var(--white)}
+.hicon:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.hicon:hover .badge{background:var(--paper);color:var(--ink)}
+.pav2{position:relative;width:60px;height:60px;border-radius:999px;border:2px solid var(--ink);padding:0;background:var(--g1);font-size:8px;color:var(--faint);flex:none;display:none}
+.nameplate{position:relative;border:1px solid var(--ink);border-radius:9px;background:var(--white);padding:5px 14px;text-align:center;z-index:9}
+.nameplate::before{content:"";position:absolute;inset:2px;border:1px solid var(--g3);border-radius:6px;pointer-events:none}
+.nameplate b{display:block;font-family:var(--serif);font-style:italic;font-size:13px;line-height:1.2;color:var(--ink)}
+.nameplate span{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--muted);margin-top:2px;white-space:nowrap}
+.hzC{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2}
+.sky-dome{display:flex;flex-direction:column;align-items:center;gap:7px}
+.sky-window{position:relative;width:212px;height:70px;border:1px solid var(--ink);border-radius:120px 120px 10px 10px;background:repeating-linear-gradient(45deg,var(--g1) 0 12px,var(--g2) 12px 24px)}
+.sky-window .ph{position:absolute;inset:0;border:none;background:transparent;border-radius:inherit;font-size:10px}
+.moon2{position:absolute;top:16px;right:22px;width:15px;height:15px;border-radius:999px;border:1px solid var(--ink);background:var(--white);z-index:1}
+.sky-hill{position:absolute;bottom:-14px;width:64%;height:34px;border:1px solid var(--g3);border-radius:50%;background:var(--g1)}
+.sh1{left:-8%}
+.sh2{right:-10%;width:56%}
+.sky-cond{position:absolute;top:9px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--ink);background:var(--paper);border:1px solid var(--g3);border-radius:999px;padding:2px 11px;white-space:nowrap;z-index:2}
+.plaque{position:relative;border:1px solid var(--ink);border-radius:11px;background:var(--white);padding:7px 28px 6px;text-align:center}
+.plaque::before{content:"";position:absolute;inset:3px;border:1px solid var(--g3);border-radius:8px;pointer-events:none}
+.pl-date{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink2);white-space:nowrap}
+.snk{width:12px;height:12px;flex:none}
+.pl-time{display:block;font-family:var(--serif);font-size:20px;font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pl-real{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;color:var(--faint);margin-top:3px}
+/* ไอคอนนำทางวงกลมเรียงรอบขอบโค้ง */
+.rim-wrap{position:absolute;inset:0;z-index:7;pointer-events:none}
+.rim-wrap .sc{position:absolute;pointer-events:auto;transform:translate(-50%,-50%)}
+.rim-wrap .sc:hover{transform:translate(-50%,-58%)}
+/* ลูกศรเลื่อนแถบนำทางบนโค้ง */
+.rim-arrow{position:absolute;z-index:8;width:26px;height:26px;border-radius:999px;border:1px solid var(--g3);background:var(--white);font-size:14px;line-height:1;cursor:pointer;transition:all .15s}
+.rim-arrow:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+#rimPrev{left:12px;bottom:12px}
+#rimNext{right:70px;bottom:16px}
+body.mini .rim-arrow{display:none}
+.sc{position:relative;width:62px;height:62px;border-radius:999px;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;background:var(--white);transition:left .3s ease,top .3s ease,opacity .25s ease,background .15s,color .15s;box-shadow:0 3px 8px rgba(0,0,0,.16)}
+.sc:hover{background:var(--ink);color:var(--paper)}
+.sc:hover .badge{background:var(--paper);color:var(--ink)}
+.sc[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;background:var(--ink);color:var(--paper);border-radius:6px;padding:3px 10px;z-index:5}
+.cbtn{position:absolute;right:30px;bottom:18px;z-index:8;width:32px;height:32px;border-radius:8px;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--white)}
+.cbtn:hover{border-color:var(--ink)}
+.cbtn[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;background:var(--ink);color:var(--paper);border-radius:6px;padding:2px 9px;z-index:5}
+.fabBadge{display:none;top:-4px;right:-4px}
+.mini-status{display:none;align-items:center;gap:8px;border:1px solid var(--ink);border-radius:999px;padding:8px 16px;background:var(--white);font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
+.mini-status b{font-variant-numeric:tabular-nums}
+.mini-row{display:none;gap:8px;overflow-x:auto;max-width:42vw;padding:2px;scrollbar-width:thin;align-items:center}
+.mini-row .sc{width:34px;height:34px;flex:none;box-shadow:none}
+.mini-row .sc .ico{width:16px;height:16px}
+/* สถานะย่อ: แถบบาง ไอคอนเป็นแถวเลื่อน */
+body.mini .hud{width:auto;min-width:min(720px,calc(100vw - 24px));height:76px;border-radius:80px;display:flex;align-items:center;gap:14px;padding:0 20px}
+body.mini .hud::before{border-radius:76px}
+body.mini .hzL{position:static;inset:auto;display:flex;align-items:center;gap:9px;pointer-events:auto}
+body.mini #pav3{position:static;transform:none;width:38px;height:38px;border-width:1px;display:block}
+body.mini #idolStack{position:static;inset:auto;transform:none;display:flex;flex-direction:row;gap:6px;pointer-events:auto}
+body.mini #idolStack .hicon{position:static;transform:none;box-shadow:none}
+body.mini #namePlate{display:none}
+body.mini .hicon{width:29px;height:29px}
+body.mini .hzC{position:static;transform:none}
+body.mini .sky-dome{display:none}
+body.mini .rim-wrap{display:none}
+body.mini .mini-status{display:flex}
+body.mini .mini-row{display:flex}
+body.mini .cbtn{position:static;margin-left:auto}
+body.mini .fabBadge{display:flex}
+@media(max-width:1200px){.sky-window{width:230px}}
+@media(max-width:980px){.sky-window{width:200px;height:80px}.hzL{left:22px}.cbtn{right:20px}}
+@media(max-width:820px){.nameplate{display:none}.pl-real{display:none}}
+@media(max-width:700px){.sky-dome{display:none}body:not(.mini) .mini-status{display:flex}body:not(.mini) .hzC{position:absolute;left:50%;bottom:20px}}
+.pop{position:fixed;z-index:75;left:20px;bottom:calc(var(--hud) + 18px);width:250px;display:none;background:var(--paper);border:1px solid var(--ink);border-radius:12px;padding:12px;box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.pop.on{display:block}
+.ovl{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;padding:20px 20px calc(var(--hud) + 18px);background:rgba(20,20,20,.35);backdrop-filter:blur(2px)}
+.ovl.on{display:flex}
+.pnl{display:none;width:min(920px,100%);max-height:100%;overflow:auto;background:var(--paper);border:1px solid var(--ink);border-radius:14px;padding:5px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.pnl.on{display:block;animation:rise .25s ease-out}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.pnl>.in{border:1px solid var(--g3);border-radius:10px;padding:16px 18px}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.phead h3{margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px}
+.phead h3::before{content:"";width:8px;height:8px;border:1px solid var(--ink);transform:rotate(45deg)}
+.xbtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center;background:var(--white)}
+.xbtn:hover{background:var(--ink);color:var(--paper)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid var(--g3);border-radius:999px;padding:4px 14px;font-size:12.5px;background:var(--white)}
+.tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.slot{aspect-ratio:1;border:1px solid var(--g3);border-radius:8px;padding:2px;display:flex;background:var(--white)}
+.slot .ph{flex:1;font-size:9px;border-style:solid;padding:2px}
+.slot.sel{border:2px solid var(--ink)}
+.maptag{position:absolute;transform:translate(-50%,-50%);border:1px solid var(--ink);background:var(--paper);border-radius:999px;padding:3px 12px;font-size:11.5px;display:flex;gap:4px;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.maptag:hover,.maptag.sel{background:var(--ink);color:var(--paper)}
+.maptag.lock{border-style:dashed;color:var(--muted)}
+.chatlog{display:flex;flex-direction:column;gap:10px;max-height:230px;overflow:auto;border:1px solid var(--g3);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--g1)}
+.msg{display:flex;gap:10px;font-size:13px}
+.msg .av{width:26px;height:26px;border-radius:999px;border:1px solid var(--g3);background:var(--white);flex:none}
+.msg .nm{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--muted);margin-bottom:3px}
+.msgbox{display:flex;gap:8px}
+.msgbox input{flex:1;font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--g3);border-radius:8px;background:var(--white)}
+.msgbox input:focus{outline:1px solid var(--ink)}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.12s}
+</style>
+
+<!-- ============ HUD ============ -->
+  <div class="hud" id="hud">
+  <div class="hud-sky"><div class="ph">[ภาพท้องฟ้า]</div><div class="moon3" title="กลางคืน — จำลอง"></div><div class="sky-hill sh1"></div><div class="sky-hill sh2"></div></div>
+  <span class="hud-spark sp1">✦</span><span class="hud-spark sp2">✦</span><span class="hud-spark sp3">✦</span>
+  <div class="hz hzL" id="hzL">
+    <div class="idol-stack" id="idolStack">
+      <button class="hicon" data-open="pm" aria-label="จดหมายส่วนตัว"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="badge" id="pmBadge">3</span></button>
+      <button class="hicon" data-open="notif" aria-label="การแจ้งเตือน"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="badge" id="ntBadge">5</span></button>
+      <button class="hicon" data-open="account" aria-label="บัญชี"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
+    </div>
+    <button class="pav2" id="pav3" data-open="profile" aria-label="โปรไฟล์ตัวละคร">[รูป]</button>
+    <div class="nameplate" id="namePlate"><b>เอเลียน วอส</b><span>เลเวล 14 · ผู้พิทักษ์คัมภีร์ลำดับสาม</span></div>
+  </div>
+  <div class="hz hzC">
+    <div class="mini-status"><svg class="snk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M4 6l16 12M20 6 4 18"/></svg><b class="mclock">21:47</b><span>·</span><span>หิมะเบา -2°C</span></div>
+  </div>
+  <div class="sc-set" id="scSet" style="display:none">
+      <button class="sc" data-tip="แผนที่โลก" data-open="map"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></button>
+      <button class="sc" data-tip="คริสตัลแชท" data-open="chat"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 9l7 12 7-12-7-6z"/><path d="M5 9h14"/></svg></button>
+      <button class="sc" data-tip="หนังสือคาถา" data-open="lore"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></button>
+      <button class="sc" data-tip="กระเป๋าไอเทม" data-open="inv"><span class="badge">2</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M16 5l3 3M13 8l2 2"/></svg></button>
+      <button class="sc" data-tip="กระเป๋าเงิน — 1,240 อาร์เจนต์" data-open="purse"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></button>
+      <button class="sc" data-tip="ภูตนำทาง" data-open="fairy"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10M12 4c-3 0-5 2-5 5 0 2 2 3 5 3M12 4c3 0 5 2 5 5 0 2-2 3-5 3"/><path d="M8 21c1-2 3-3 4-3s3 1 4 3"/></svg></button>
+      <button class="sc" data-tip="บันทึกเควส" data-open="quest"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></button>
+      <button class="sc" data-tip="เข็มทิศ" data-open="map"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-4 1 2-5 4-1z"/></svg></button>
+  </div>
+  <button class="rim-arrow" id="rimPrev" aria-label="เลื่อนไอคอนกลับ">‹</button>
+  <button class="rim-arrow" id="rimNext" aria-label="เลื่อนไอคอนถัดไป">›</button>
+  <div class="rim-wrap" id="rimWrap"></div>
+  <button class="cbtn" id="hudToggle" aria-label="ย่อ/ขยาย HUD" data-tip="ย่อ HUD">
+    <svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    <span class="badge fabBadge" id="fabBadge">8</span>
+  </button>
+  <div class="mini-row" id="miniRow"></div>
+</div>
+
+<div class="pop" id="popAccount">
+  <div style="font-weight:600;margin-bottom:8px;font-family:var(--disp)">บัญชีผู้ใช้</div>
+  <button class="rowbtn" data-open="profile">โปรไฟล์ตัวละคร</button>
+  <button class="rowbtn">ตั้งค่า — การแสดงผลและตราสัญลักษณ์</button>
+  <button class="rowbtn">ค่ายคุ้มครองความเป็นส่วนตัว</button>
+  <button class="rowbtn" style="border:1px solid var(--ink);margin-top:6px;justify-content:center">ออกจากระบบ</button>
+  <div style="margin-top:8px;font-size:12px;color:var(--muted)">จำลองเท่านั้น — ไม่มีระบบบัญชีจริง</div>
+</div>
+
+<div class="ovl" id="ovl">
+  <div class="pnl" id="p-info"><div class="in">
+    <div class="phead"><h3 id="infoTitle">รายละเอียด</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div id="infoBody"></div>
+  </div></div>
+
+  <div class="pnl" id="p-profile"><div class="in">
+    <div class="phead"><h3>โปรไฟล์ตัวละคร</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      <div class="ph" style="width:130px;height:160px"><span class="ph-tag">[ภาพเหมือน]</span></div>
+      <div style="flex:1;min-width:240px">
+        <div style="font-size:18px;font-weight:700;font-family:var(--disp)">เอเลียน วอส</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">ผู้พิทักษ์คัมภีร์ลำดับสาม · วงแห่งจดหมายเงียบสงบ</div>
+        <div style="font-size:12.5px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px">
+          <span class="dim">เลเวล</span><span>14</span>
+          <span class="dim">ชื่อเสียง</span><span>2,310</span>
+          <span class="dim">กิลด์</span><span>สภาเทียนไขว้</span>
+          <span class="dim">ที่พัก</span><span>หอจดหมายเหตุตะวันตก ห้อง 3B</span>
+          <span class="dim">เข้าร่วม</span><span>เดือนหิมะ ปี 1125</span>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="tag solid">ความสำเร็จ 12</span><span class="tag">กระทู้ 34</span><span class="tag">คัมภีร์ 89</span></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="pnl" id="p-note"><div class="in">
+    <div class="phead"><h3>เขียนประกาศลงกระดาน</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div class="ph" style="height:64px;margin-bottom:12px"><span class="ph-tag">[ตำแหน่งปัก: แถวล่างของกระดาน]</span></div>
+    <div class="status-box" style="margin-bottom:12px">
+      <textarea id="noteInput" placeholder="เขียนประกาศของคุณ… เช่น รับซื้อแผนที่หอคอย ให้ราคาดี นัดรับที่สะพานจันทรา"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="noteSend">เผยแพร่ — เสีย 20 เคล</button>
+      <span class="tag" id="kellTag">ยอดคงเหลือ 1,240 เคล</span>
+    </div>
+    <p style="margin-top:10px;font-size:12px;color:var(--muted)">ประกาศจะถูกปักบนกระดานทันทีที่เผยแพร่ · ข้อมูลจำลอง ไม่มีการหักเงินจริง</p>
+  </div></div>
+
+  <div class="pnl" id="p-crys"><div class="in">
+    <div class="phead"><h3>ปลุกคริสตัลแห่งสถานะ</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div style="margin-bottom:10px"><span class="sb-av" style="display:inline-flex">[รูป]</span> <b style="font-size:13px">เอเลียน วอส</b> <span class="dim" style="font-size:11px;color:var(--faint)">— คริสตัลนี้จะลอยขึ้นแถวหน้าสุด</span></div>
+    <textarea id="crysText" placeholder="บ่น ระบาย เล่าเรื่อง หรือพูดอะไรก็ได้ที่อยากให้ชุมชนรู้…" style="width:100%;border:1px solid var(--g3);border-radius:12px;resize:vertical;font:inherit;font-size:13px;padding:12px;min-height:96px;background:var(--white);color:var(--ink)"></textarea>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn ghost" id="crysImgBtn" type="button">อัปโหลดรูป</button>
+      <input type="file" id="crysFile" accept="image/*" hidden>
+      <span id="crysFileName" style="font-size:11px;color:var(--faint)">ยังไม่ได้เลือกรูป</span>
+    </div>
+    <div id="crysPreview" hidden style="margin-top:10px"><img id="crysImgPrev" alt="พรีวิวรูป" style="max-height:150px;border:1px solid var(--g3);border-radius:8px;filter:grayscale(1)"></div>
+    <div class="sb-foot" style="margin-top:12px"><button class="btn" id="crysSend">ปลุกคริสตัล</button></div>
+  </div></div>
+
+  <div class="pnl" id="p-pm"><div class="in">
+    <div class="phead"><h3>จดหมายส่วนตัว</h3><span class="tag" id="pmCount">3 ฉบับที่ยังไม่ได้อ่าน</span><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div id="pmList"></div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted)">คลิกจดหมายเพื่อทำเครื่องหมายว่าอ่านแล้ว · ข้อมูลจำลอง</div>
+  </div></div>
+
+  <div class="pnl" id="p-notif"><div class="in">
+    <div class="phead"><h3>การแจ้งเตือน</h3><span class="tag">2 จากผู้ดูแล · 3 จากที่ติดตาม</span><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div id="ntList"></div>
+  </div></div>
+
+  <div class="pnl" id="p-map"><div class="in">
+    <div class="phead"><h3>แผนที่โลก — เวย์มัวร์และแดนม่านหมอก</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div style="position:relative">
+      <div class="ph" style="height:320px"><span class="ph-tag">[แผนที่โลก — ลายเส้นแบบวาดมือ]</span></div>
+      <button class="maptag" style="left:22%;top:30%" data-loc="lowercity">เมืองชั้นล่าง</button>
+      <button class="maptag" style="left:45%;top:55%" data-loc="bazaar">ตลาดใหญ่</button>
+      <button class="maptag" style="left:70%;top:25%" data-loc="moonbridge">สะพานจันทรา</button>
+      <button class="maptag lock" style="left:32%;top:74%" data-loc="ward7">วอร์ด VII · ปิดผนึก</button>
+      <button class="maptag lock" style="left:80%;top:70%" data-loc="spire">ยอดหอคอย · ปิดผนึก</button>
+    </div>
+    <div id="locInfo" style="margin-top:12px;border:1px solid var(--g3);border-radius:10px;padding:12px;font-size:12.5px">เลือกสถานที่บนแผนที่เพื่อดูข้อมูล</div>
+  </div></div>
+
+  <div class="pnl" id="p-chat"><div class="in">
+    <div class="phead"><h3>ห้องคริสตัล — ห้องส่วนกลาง</h3><span class="tag">24 ท่านในห้อง</span><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div class="chatlog" id="chatLog">
+      <div class="msg"><span class="av"></span><span><div class="nm">มิเรล · 21:52</div><div>แผ่นดินไหวทำหมึกหล่นใส่โต๊ะเลย มีใครเป็นเหมือนกันมั้ย</div></span></div>
+      <div class="msg"><span class="av"></span><span><div class="nm">ดอร์น · 21:53</div><div>ได้ยินเสียงตราที่วอร์ด VII ดังระริกถึงสะพานจันทราเลย</div></span></div>
+      <div class="msg"><span class="av"></span><span><div class="nm">ผู้คุมหอ · 21:55</div><div>ขอให้ทุกท่านสงบ ที่ประชุมสภาจะเปิดเวลาพลบค่ำ</div></span></div>
+    </div>
+    <div class="msgbox"><input id="chatInput" placeholder="พูดผ่านคริสตัล…" aria-label="ข้อความ"><button class="btn" id="chatSend">ส่ง</button></div>
+  </div></div>
+
+  <div class="pnl" id="p-inv"><div class="in">
+    <div class="phead"><h3>กระเป๋าไอเทม — ย่ามนักเดินทาง</h3><span class="tag solid">1,240 อาร์เจนต์</span><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="display:grid;grid-template-columns:repeat(4,68px);gap:8px" id="invGrid"></div>
+      <div style="flex:1;min-width:210px;border:1px solid var(--g3);border-radius:10px;padding:12px;font-size:12.5px" id="invDetail">เลือกไอเทมเพื่อดูรายละเอียด</div>
+    </div>
+  </div></div>
+
+  <div class="pnl" id="p-fairy"><div class="in">
+    <div class="phead"><h3>ปิ๊บ — ภูตนำทาง</h3><span class="tag">ผู้ช่วยของคุณ</span><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div class="tabs" id="fairyTabs">
+      <button class="tab on" data-t="guide">คู่มือการเล่น</button>
+      <button class="tab" data-t="active">เควสที่กำลังทำ</button>
+      <button class="tab" data-t="done">เควสที่สำเร็จแล้ว</button>
+      <button class="tab" data-t="npc">สมุดบันทึก NPC</button>
+      <button class="tab" data-t="friends">รายชื่อเพื่อน</button>
+    </div>
+    <div id="fairyBody" style="font-size:12.5px;line-height:1.8"></div>
+  </div></div>
+
+  <div class="pnl" id="p-cal"><div class="in">
+    <div class="phead"><h3>ปฏิทินกิจกรรม — เดือนหิมะ 1127</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div class="cal-head"><button class="cal-nav" id="calPrev" aria-label="เดือนก่อน">‹</button><b id="calTitle">เดือนหิมะ · FROSTFALL 1127</b><button class="cal-nav" id="calNext" aria-label="เดือนถัดไป">›</button></div>
+    <div class="cal-dow"><span>จัน</span><span>อัง</span><span>พุธ</span><span>พฤ</span><span>ศุก</span><span>เสาร์</span><span>อาทิ</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-info" id="calInfo">เลือกวันที่ที่มีจุดเพื่อดูกิจกรรม · วันนี้คือวันที่ 14</div>
+  </div></div>
+
+  <div class="pnl" id="p-lore"><div class="in">
+    <div class="phead"><h3>ห้องสมุดตำนาน — สารานุกรมม่านหมอก</h3><button class="xbtn" data-close aria-label="ปิด"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
+    <div style="font-size:12.5px;display:flex;flex-direction:column;gap:8px">
+      <button class="rowbtn" data-lore="seals"><b style="font-weight:600">ตราทั้งเจ็ด</b><span style="margin-left:auto;font-size:11px;color:var(--faint)">เล่มที่ I</span></button>
+      <button class="rowbtn" data-lore="bells"><b style="font-weight:600">ระฆังทั้งเก้าของเวย์มัวร์</b><span style="margin-left:auto;font-size:11px;color:var(--faint)">เล่มที่ II</span></button>
+      <button class="rowbtn" data-lore="alley"><b style="font-weight:600">ตรอกชมพู — ประวัติศาสตร์ฝ่ายตรงข้าม</b><span style="margin-left:auto;font-size:11px;color:var(--faint)">เล่มที่ III</span></button>
+    </div>
+    <div id="loreBody" style="margin-top:10px;border-top:1px solid var(--hair);padding-top:10px;font-size:12.5px;color:var(--muted)">เลือกบทความเพื่ออ่านสรุป</div>
+  </div></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const body=document.body,ovl=$('#ovl'),pop=$('#popAccount'),hero=$('#hero');
+
+/* ---------- นาฬิกาโลก ---------- */
+let wt=21*60+47;
+const fmt=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function tick(){$$('.mclock').forEach(e=>e.textContent=fmt(wt));
+ const d=new Date();const rc=$('#realClock');if(rc)rc.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+setInterval(()=>{wt++;tick()},2000);tick();
+
+/* ---------- ประกายเวท ---------- */
+const sp=$('#sparks');
+for(let i=0;i<26;i++){const s=document.createElement('span');s.className='spark';s.textContent='✦';
+ s.style.left=(4+Math.random()*92)+'%';s.style.top=(12+Math.random()*66)+'%';
+ s.style.fontSize=(7+Math.random()*9)+'px';s.style.setProperty('--d',(2+Math.random()*3.5)+'s');
+ s.style.animationDelay=(Math.random()*3)+'s';sp.appendChild(s)}
+
+/* ---------- Ticker ---------- */
+const tt=$('#tickerTrack');tt.innerHTML+=tt.innerHTML;
+
+/* ---------- Reveal ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+$$('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- มุมมอง 3 หน้า ---------- */
+function show(id){['view-home','view-forums','view-forum'].forEach(v=>$('#'+v).hidden=v!==id);window.scrollTo({top:0,behavior:'instant'})}
+function goHome(){show('view-home');hero.classList.remove('is-map');setNav(gbtns[0]);window.scrollTo({top:0,behavior:'smooth'})}
+function openForumsPage(){show('view-forums')}
+$('#homeLink').addEventListener('click',goHome);
+$('#crumbHomeF').addEventListener('click',goHome);
+
+/* ---------- ฟอรั่มหลัก + ฟอรั่มย่อย ---------- */
+const forums={
+ kingdom:{no:'01',name:'อาณาจักรเวย์มัวร์',en:'THE KINGDOM',desc:'หัวใจของโลก — เมืองหลวงที่ปกคลุมด้วยหิมะตลอดปี ที่นี่เป็นทั้งบ้าน ตลาด และสนามรบทางการเมือง',
+  meta:'กระทู้ 1,240 · สมาชิก 3,480 · อัปเดตล่าสุด 4 นาทีที่แล้ว',
+  subs:[
+   {n:'ย่านการค้า',en:'THE MARKETS',d:'ตลาดจันทรา แผงของชำร่วย และการต่อรองที่ไม่มีใครยอมใคร',t:412},
+   {n:'ถิ่นที่อยู่',en:'RESIDENCES',d:'หมู่บ้านชานเมือง คฤหาสน์เก่า และห้องเช่าเหนือร้านช่างกุญแจ',t:238},
+   {n:'ทำเนียบราชการ',en:'THE CIVIC HALL',d:'คำสั่งศาล ตราประทับ และจดหมายราชการที่เปลี่ยนชะตาคนเป็นร้อย',t:196}],
+  threads:[
+   {t:'ตลาดจันทราเปิดรับผู้เช่าแผง — ฤดูหิมะนี้',a:'อัครเสนาบดีเฟนน์',r:87,v:1240,lp:'มิเรล · 2 นาทีที่แล้ว',tag:'ปักหมุด'},
+   {t:'ขายบ้านหลังเก่าริมคลอง — ราคาต่อรองได้ (มีภูตติดบ้าน)',a:'คุณนายเฮเธอร์วิค',r:41,v:803,lp:'ดอร์น · 16 นาทีที่แล้ว',tag:''},
+   {t:'คำสั่งศาลฉบับที่ 1127-09: เคอร์ฟิวย่านชานเมือง',a:'ทำเนียบราชการ',r:203,v:3450,lp:'ผู้คุมหอ · 1 ชม.ที่แล้ว',tag:'ประกาศ'},
+   {t:'รับจ้างส่งของข้ามเขต — จ่ายเป็นเงินหรือความลับ',a:'นักจดหมายกริฟฟอน',r:12,v:210,lp:'เวน · 3 ชม.ที่แล้ว',tag:''},
+   {t:'บ้านพักตากอากาศใต้สะพานจันทรา — เปิดให้เยี่ยมชม',a:'โอเดตต์ ฟรอสต์',r:6,v:98,lp:'— · เมื่อวาน',tag:''}]},
+ academy:{no:'02',name:'สถาบันเวทมนตร์',en:'THE ACADEMY',desc:'หอคอยหกชั้นที่ครู่แรกมีเพียงชั้นเดียว — อีกห้าชั้นคือความรู้ที่ยังไม่มีผู้ใดเรียนรู้จบ',
+  meta:'กระทู้ 860 · สมาชิก 2,150 · อัปเดตล่าสุด 12 นาทีที่แล้ว',
+  subs:[
+   {n:'หอคอยเรียนรู้',en:'THE TOWER',d:'บทเรียนเวท คำถามในชั้นเรียน และงานเขียนที่อาจารย์ไม่เคยพอใจ',t:344},
+   {n:'สนามฝึกเวท',en:'THE GROUNDS',d:'ประลองเวท เก็บเลเวล และบันทึกสนามที่ไม่ควรลบออกจากความทรงจำ',t:287},
+   {n:'ห้องสมุดต้องห้าม',en:'THE FORBIDDEN STACKS',d:'เข้าได้เฉพาะผู้ผ่านคำสาบาน — หนังสือที่เลือกผู้อ่าน ไม่ใช่กลับกัน',t:112}],
+  threads:[
+   {t:'สรุปข้อสอบใบอนุญาตคาถาป้องกันขั้นสาม (ฉบับรอด)',a:'เวน อัศวินกุญแจเก้า',r:156,v:2890,lp:'มิเรล · 5 นาทีที่แล้ว',tag:'ปักหมุด'},
+   {t:'ใครเห็นหนังสือเล่มนั้นบนชั้นสามบ้าง',a:'นิสิตปีสี่ที่ไม่ระบุชื่อ',r:64,v:1310,lp:'ผู้คุมหอ · 40 นาทีที่แล้ว',tag:'ลึกลับ'},
+   {t:'จับคู่ฝึกเวทธาตุน้ำ — รับสมัครผู้ไม่กลัวเปียก',a:'อาจารย์คอร์เวน',r:23,v:412,lp:'ดอร์น · 2 ชม.ที่แล้ว',tag:''},
+   {t:'บันทึกสนามประลอง: ผมแพ้ให้นกฮูกของอาจารย์',a:'คาสเปียน รู',r:98,v:1760,lp:'— · เมื่อวาน',tag:''}]},
+ under:{no:'03',name:'ตรอกเงาใต้เมือง',en:'THE UNDERCROFT',desc:'สิ่งที่ตกลงไปใต้เวย์มัวร์ไม่ได้หายไป — มันแค่เปลี่ยนมือ ตรอกเงาไม่มีแสงแดด แต่มีทุกอย่างอื่น',
+  meta:'กระทู้ 530 · สมาชิก 940 · อัปเดตล่าสุด 1 นาทีที่แล้ว',
+  subs:[
+   {n:'ตลาดมืด',en:'THE NIGHT MARKET',d:'ของที่ไม่มีที่มา ในราคาที่ไม่มีการต่อรอง',t:201},
+   {n:'โรงเตี๊ยมลับ',en:'THE HIDDEN TAVERN',d:'ข่าวลือซื้อขายด้วยเหล้า และเงื่อนงำซื้อขายด้วยเงียบ',t:166},
+   {n:'สมาคมลอบสังหรณ์',en:'THE WHISPER GUILD',d:'รับจ้างทุกอย่าง ยกเว้นสิ่งที่คุณเพิ่งจะพูด',t:98}],
+  threads:[
+   {t:'ซื้อแผนที่หอคอยฉบับจริง — รับประกันไม่มีกับดัก',a:'คนไร้ชื่อหน้าบ่อน้ำ',r:31,v:520,lp:'— · 20 นาทีที่แล้ว',tag:'ระวัง'},
+   {t:'รับจ้างนำทางลงใต้พิภพ — ต้องเคยได้ยินเสียงตราผ่านตัว',a:'พี่เลี้ยงตรอกเงา',r:47,v:890,lp:'ดอร์น · 1 ชม.ที่แล้ว',tag:''},
+   {t:'โรงเตี๊ยมแมลงปีกทอง — คืนนี้มีดนตรีสด',a:'มาดามอิโตะ',r:74,v:1450,lp:'มิเรล · 4 ชม.ที่แล้ว',tag:'งานเลี้ยง'}]},
+ archive:{no:'04',name:'จดหมายเหตุ',en:'THE ARCHIVE',desc:'ที่ซึ่งเรื่องราวทุกเรื่องถูกเก็บรักษา — ทั้งที่เขียนด้วยหมึก และที่เขียนด้วยเลือด',
+  meta:'กระทู้ 1,860 · สมาชิก 4,020 · อัปเดตล่าสุด 30 นาทีที่แล้ว',
+  subs:[
+   {n:'ตำนานและประวัติศาสตร์',en:'LORE & HISTORY',d:'ยุคก่อตั้ง สงครามระฆัง และความจริงที่สภาไม่อยากให้จดบันทึก',t:640},
+   {n:'นิยายชุมชน',en:'COMMUNITY TALES',d:'เรื่องเล่าที่ชุมชนร่วมกันแต่งต่อ บรรทัดละผู้เขียนคนละคน',t:512},
+   {n:'โต๊ะร่ายแห่งความรู้',en:'THE SCRIPTORIUM',d:'คู่มือกลไกเกม แบบฟอร์มตัวละคร และคำตัดสินของผู้คุมหอ',t:389}],
+  threads:[
+   {t:'สรุปยุคก่อตั้งเวย์มัวร์ ฉบับอ่านจบในคืนเดียว',a:'ผู้คุมหอ',r:312,v:5210,lp:'มิเรล · 28 นาทีที่แล้ว',tag:'ปักหมุด'},
+   {t:'นิยายร่วมเขียน: จดหมายฉบับสุดท้ายจากวอร์ด VII — ต่อท่อนนี้',a:'ชุมชนนักประพันธ์',r:188,v:3100,lp:'เวน · 1 ชม.ที่แล้ว',tag:'ร่วมเขียน'},
+   {t:'คำตัดสินข้อพิพาท: ภูตผีนับเป็น NPC หรือผู้เล่น',a:'สภาเวทมนตร์',r:95,v:1720,lp:'ผู้คุมหอ · 5 ชม.ที่แล้ว',tag:'กฎ'},
+   {t:'แบบฟอร์มตัวละครฉบับปรับใหม่ ปี 1127 — ดาวน์โหลด',a:'โต๊ะร่ายแห่งความรู้',r:64,v:1210,lp:'— · เมื่อวาน',tag:''}]}};
+
+$('#forumList').innerHTML=Object.entries(forums).map(([k,f])=>`
+ <div class="f-row reveal" data-forum="${k}">
+   <div class="no">${f.no}</div>
+   <div class="ph"><span class="ph-tag">[${f.en}]</span></div>
+   <div><div class="f-name">${f.name}</div><div class="f-th">${f.desc}</div><div class="f-meta">${f.meta}</div></div>
+   <div class="arrow">→</div>
+ </div>`).join('');
+$$('#forumList .reveal').forEach(el=>io.observe(el));
+
+/* ---------- Glass Nav ---------- */
+const slider=$('#navSlider'),gbtns=$$('.gnav-btn');
+function moveSlider(btn){slider.style.left=btn.offsetLeft+'px';slider.style.width=btn.offsetWidth+'px'}
+function setNav(btn){gbtns.forEach(b=>b.classList.remove('active'));btn.classList.add('active');moveSlider(btn)}
+window.addEventListener('resize',()=>moveSlider($('.gnav-btn.active')));
+requestAnimationFrame(()=>moveSlider($('.gnav-btn.active')));
+$('#glassNav').addEventListener('click',e=>{
+  const b=e.target.closest('.gnav-btn');if(!b)return;setNav(b);
+  if(b.dataset.act==='home')goHome();
+  if(b.dataset.act==='map')hero.classList.toggle('is-map');
+  if(b.dataset.act==='calendar'){hero.classList.remove('is-map');openPanel('cal');renderCal()}
+  if(b.dataset.act==='forums')openForumsPage();
+});
+
+/* ---------- หน้ารายละเอียดฟอรั่ม ---------- */
+function openForum(key){
+  const f=forums[key];if(!f)return;
+  show('view-forum');
+  $('#crumbForum').textContent=f.name;$('#fdName').textContent=f.name+' · '+f.en;
+  $('#fdMeta').textContent=f.meta;$('#fdDesc').textContent=f.desc;
+  $('#subGrid').innerHTML=f.subs.map(s=>`<div class="sub-card" data-sub="${s.n}"><div style="display:flex;justify-content:space-between;align-items:baseline"><h4>${s.n}</h4><span class="tag">${s.en}</span></div><p>${s.d}</p><span class="mono" style="font-size:11px;letter-spacing:.12em;color:var(--faint)">${s.t} กระทู้ →</span></div>`).join('');
+  $('#threadList').innerHTML=f.threads.map(t=>`<div class="thread-row"><span class="tt">${t.tag?`<span class="tag" style="margin-right:6px">${t.tag}</span>`:''}${t.t}</span><span class="au">${t.a}</span><span class="num">${t.r}</span><span class="num">${t.v}</span><span class="lp">${t.lp}</span></div>`).join('');
+}
+$('#backBtn').addEventListener('click',openForumsPage);
+$('#crumbHome').addEventListener('click',openForumsPage);
+$('#forumList').addEventListener('click',e=>{const r=e.target.closest('.f-row');if(r)openForum(r.dataset.forum)});
+document.addEventListener('click',e=>{const m=e.target.closest('.mk');if(m)openForum(m.dataset.mk)});
+
+/* ---------- Tooltip ฟอรั่ม ---------- */
+const tip=$('#fTip');
+$('#forumList').addEventListener('mouseover',e=>{const r=e.target.closest('.f-row');if(!r)return;
+  const f=forums[r.dataset.forum];tip.classList.add('on');
+  $('#tipDesc').textContent=f.desc;
+  $('#tipLatest').textContent='ล่าสุด: '+f.threads[0].t+' — '+f.threads[0].lp;});
+$('#forumList').addEventListener('mousemove',e=>{const r=e.target.closest('.f-row');if(!r)return;
+  tip.style.left=Math.min(e.clientX+18,innerWidth-320)+'px';tip.style.top=(e.clientY+18)+'px'});
+$('#forumList').addEventListener('mouseout',e=>{if(e.target.closest('.f-row'))tip.classList.remove('on')});
+
+/* ---------- แพตช์ / โพสต์ ---------- */
+const patches=[
+ {v:'3.2.1',t:'ความเงียบแห่งใต้พิภพ',c:'ระบบ',d:'14 ต.ค.',body:'ใต้พิภพบังคับใช้ช่วงเวลาเงียบสงบ 22:00–06:00 ตามเวลาโลก ค่ายกันเสียงถูกปรับใหม่เพื่อให้ฉากที่เริ่มก่อนเคอร์ฟิวดำเนินต่อได้โดยไม่สะดุด'},
+ {v:'3.2.0',t:'ปรับสมดุล: การผูกพันวิญญาณคู่',c:'สมดุล',d:'9 ต.ค.',body:'การผูกพันวิญญาณคู่คำนวณจากความยาวฉาก แทนจำนวนโพสต์ — ฉากยาวให้ +2 แต้มต่อบท และสแปมไม่ได้อะไรเลย'},
+ {v:'3.1.9',t:'ตลาดจันทรากลับมาเปิด',c:'อีเวนต์',d:'4 ต.ค.',body:'ตลาดจันทราเปิดทุกวันจันทร์ถึงวันเสาร์ ตลอดเดือนหิมะนี้ สมัครเช่าแผงได้ที่ทำเนียบราชการในอาณาจักร'},
+ {v:'3.1.8',t:'แก้ปัญหาพอร์ทัลคลาดเคลื่อนในปีกตะวันตก',c:'แก้บั๊ก',d:'1 ต.ค.',body:'แก้ไขกรณีพอร์ทัลส่งผู้อ่านไปยังกระทู้ปีที่ผิด (ขออภัยผู้ที่ไปร่วมงานเลี้ยงในปี 1099 โดยไม่ได้ตั้งใจ)'}];
+$('#patchList').innerHTML=patches.map((p,i)=>`<div class="patch-item"><div class="ver"><span>${p.v} — ${p.d}</span><span class="tag ${p.c==='อีเวนต์'?'solid':''}">${p.c}</span></div><h4 data-patch="${i}">${p.t}</h4><p>${p.body.slice(0,64)}…</p><div class="bars"><i></i><i></i><i></i><i></i></div></div>`).join('');
+$('#patchList').addEventListener('click',e=>{const h=e.target.closest('[data-patch]');if(!h)return;const p=patches[+h.dataset.patch];
+ openInfo('แพตช์ '+p.v+' — '+p.t,`<div style="font-size:12.5px;line-height:1.8"><div style="margin-bottom:8px;display:flex;gap:6px"><span class="tag ${p.c==='อีเวนต์'?'solid':''}">${p.c}</span><span class="tag">${p.d}</span></div><p>${p.body}</p><div class="ph" style="margin-top:10px;height:90px"><span class="ph-tag">[ภาพประกอบแพตช์]</span></div></div>`)});
+
+const posts=[
+ {t:'การต่อรองบนสะพานจันทรา',a:'มิเรล คิว',f:'ย่านการค้า',d:'6 นาที',r:14,v:312},
+ {t:'อพยพวอร์ด VII — กระทู้เช็กชื่อผู้รอด',a:'ผู้คุมหอ',f:'ทำเนียบราชการ',d:'22 นาที',r:87,v:1240},
+ {t:'ดอกเบี้ยเงินฝากแข็งตัว คิดยังไง',a:'ดอร์น เอช',f:'ย่านการค้า',d:'1 ชม.',r:6,v:98},
+ {t:'เสียงระริกใต้พิภพตอบกลับ — บันทึกสนาม',a:'เอเลียน วอส',f:'ใต้พิภพ',d:'2 ชม.',r:31,v:455},
+ {t:'รับสมัครผู้ร่วมฉากที่ประชุมสภาเวลาพลบค่ำ',a:'เวน อัศวินกุญแจเก้า',f:'สถาบันเวทมนตร์',d:'4 ชม.',r:9,v:210},
+ {t:'สรุปยุคก่อตั้งเวย์มัวร์ ฉบับอ่านจบในคืนเดียว',a:'ผู้คุมหอ',f:'จดหมายเหตุ',d:'28 นาที',r:312,v:5210},
+ {t:'คำสั่งศาลฉบับที่ 1127-09: เคอร์ฟิวย่านชานเมือง',a:'ทำเนียบราชการ',f:'ทำเนียบราชการ',d:'3 ชม.',r:203,v:3450},
+ {t:'สรุปข้อสอบใบอนุญาตคาถาป้องกันขั้นสาม (ฉบับรอด)',a:'เวน อัศวินกุญแจเก้า',f:'สถาบันเวทมนตร์',d:'5 ชม.',r:156,v:2890},
+ {t:'นิยายร่วมเขียน: จดหมายฉบับสุดท้ายจากวอร์ด VII',a:'ชุมชนนักประพันธ์',f:'จดหมายเหตุ',d:'6 ชม.',r:188,v:3100},
+ {t:'โรงเตี๊ยมแมลงปีกทอง — คืนนี้มีดนตรีสด',a:'มาดามอิโตะ',f:'ตรอกเงา',d:'7 ชม.',r:74,v:1450}];
+/* Patch Category Browser — รางหมวด + พื้นที่โพสต์ */
+const orbitData={
+ 'UX/UI':[['ปรับเมนูตั้งค่าใหม่ทั้งหมด','2 ชม.'],['ธีมกลางคืนของห้องสนทนา','5 ชม.'],['ทางลัดคีย์บอร์ดบนกระดานประกาศ','เมื่อวาน']],
+ 'Lore & Story':[['ตำนานตราที่เจ็ด ฉบับเต็ม','28 นาที'],['จดหมายฉบับสุดท้ายจากวอร์ด VII','1 ชม.'],['สายเลือดแห่งผู้พิทักษ์คัมภีร์','3 ชม.']],
+ 'Bloodkin':[['สายเลือดบริสุทธิ์ยังคงแข็งแกร่งไหม','40 นาที'],['รายชื่อสายเลือดที่หายไปในสงครามระฆัง','2 ชม.'],['ลูกผสมม่านหมอก: กฎใหม่','เมื่อวาน']],
+ 'System':[['ความเงียบแห่งใต้พิภพ — คู่มือเคอร์ฟิว','14 ต.ค.'],['พอร์ทัลคลาดเคลื่อน สรุปสาเหตุ','1 ต.ค.'],['ค่ายกันเสียงทำงานอย่างไร','3 วัน']],
+ 'Quest':[['ตราที่เจ็ด: บทที่ 12 “พลบค่ำ”','20 นาที'],['ส่งเหรียญผู้พายเรือ — เช็กลิสต์','4 ชม.'],['เควสลับสนามฝึกเวทเปิดแล้ว','1 วัน']],
+ 'Events':[['ตลาดจันทราสัปดาห์สุดท้าย','6 ชม.'],['งานเต้นรำใต้แสงจันทร์ — รายชื่อคู่','1 วัน'],['ล่าสมบัติใต้พิภพ (จำกัดเวลา)','2 วัน']],
+ 'Balance':[['ปรับสมดุลคาถาป้องกันขั้นสาม','9 ต.ค.'],['วิญญาณคู่: จากโพสต์เป็นฉาก','8 ต.ค.'],['แพตช์โน้ตย้อนหลังทั้งหมด','รายสัปดาห์']]};
+const orbitCats=['UX/UI','Lore & Story','Bloodkin','System','Quest','Events','Balance'];
+$('#patchOrbit').insertAdjacentHTML('beforeend',orbitCats.map((c,i)=>{const a=-90+i*(360/orbitCats.length);
+ return `<button class="orbit-sat" data-cat="${c}" data-tip="${orbitData[c][0][0]}" style="transform:rotate(${a}deg) translateY(-130px) rotate(${-a}deg)">${c.replace(/ & /,'<br>&amp; ')}</button>`}).join(''));
+function renderOrbit(cat){$$('.orbit-sat').forEach(s=>s.classList.toggle('on',s.dataset.cat===cat));
+ $('#orbitPreview').innerHTML=`<div class="op-head"><span class="tag solid">${cat}</span><span class="op-sub">โพสต์ล่าสุดในหมวด · ${orbitData[cat].length} รายการ</span></div>`+orbitData[cat].map((p,j)=>`<div class="feed-row" data-cat="${cat}" data-pi="${j}" style="padding-left:2px;padding-top:6px;padding-bottom:6px"><b>${p[0]}</b><span>${p[1]}</span></div>`).join('')}
+renderOrbit('UX/UI');
+document.addEventListener('click',e=>{const s=e.target.closest('.orbit-sat');if(s){renderOrbit(s.dataset.cat);return}
+ const r=e.target.closest('#orbitPreview .feed-row');if(!r)return;const c=r.dataset.cat,p=orbitData[c][+r.dataset.pi];
+ openInfo(c+' — '+p[0],`<div style="font-size:12.5px;line-height:1.8"><p style="color:var(--muted)">หมวด ${c} · อัปเดต ${p[1]}</p><p style="font-style:italic;color:var(--muted)">“…ย่อหน้าเปิดของโพสต์จะแสดงที่นี่ ส่วนเนื้อเต็มเปิดได้ในฟอรั่มจริง”</p><button class="btn">เปิดโพสต์</button> <span style="color:var(--faint)">ลิงก์จำลอง</span></div>`)});
+function openPost(i){const p=posts[i];
+ openInfo(p.t,`<div style="font-size:12.5px;line-height:1.8"><p style="color:var(--muted)">${p.a} · ${p.f} · อัปเดต ${p.d}ที่แล้ว · ${p.r} ตอบกลับ · อ่าน ${p.v}</p><p class="mut" style="font-style:italic">“…ย่อหน้าเปิดของกระทู้จะแสดงที่นี่ ส่วนฉากเต็มเปิดได้ในฟอรั่มจริง”</p><button class="btn">เปิดกระทู้</button> <span class="dim">ลิงก์จำลอง</span></div>`)}
+/* การ์ดโพสต์แนวนอน (SEC.04) */
+$('#postTrack').innerHTML=posts.map((p,i)=>`<div class="post-card" data-pc="${i}"><div class="ph"><span class="ph-tag">[ภาพกระทู้]</span></div><h5>${p.t}</h5><div class="pm">${p.a} · ${p.f}<br>${p.d}ที่แล้ว</div><div class="rr"><span>${p.r} ตอบกลับ</span><span>${p.v} อ่าน →</span></div></div>`).join('');
+$('#postTrack').addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(b)openPost(+b.dataset.pc)});
+
+/* ---------- เกียรติยศ ---------- */
+const honor=[
+ {n:'เวน อัศวินกุญแจเก้า',q:'ความเงียบของระฆังทั้งเก้า',w:'2 ชม.ที่แล้ว'},
+ {n:'ดอร์น ฮัลโลเวย์',q:'สามบัญชี คำโกหกเดียว',w:'5 ชม.ที่แล้ว'},
+ {n:'มิเรล คิว',q:'เทียนเล่มหนึ่งถวายผู้พายเรือ',w:'เมื่อวานนี้'},
+ {n:'บราเธอร์แอนสเซล',q:'สิ่งที่หลับอยู่ใต้วอร์ด VII',w:'2 วันที่แล้ว'}];
+$('#honorList').innerHTML=honor.map(h=>`<div class="roll"><div class="rune"><span>✦</span></div><span style="flex:1"><b style="font-weight:600">${h.n}</b><span style="font-size:12px;color:var(--muted)"> สำเร็จเควส “${h.q}”</span></span><span style="font-size:12px;color:var(--faint)">${h.w}</span></div>`).join('');
+$('#honorList').addEventListener('click',e=>{const i=[...$$('#honorList .roll')].indexOf(e.target.closest('.roll'));if(i<0)return;const h=honor[i];
+ openInfo('ความสำเร็จ — '+h.n,`<div style="font-size:12.5px;line-height:1.8"><div class="rune" style="margin-bottom:8px"><span>✦</span></div><p><b style="font-weight:600">${h.n}</b> สำเร็จเควส “${h.q}” ${h.w}</p><p style="color:var(--faint)">รูนได้รับ: 3 · ชื่อเสียง: +120 · จดลงกระดานเกียรติยศแล้ว</p></div>`)});
+
+/* ---------- สมาชิกใหม่ (แบบ layout Sponsor เดิม) ---------- */
+const citizens=[{n:'อิโซลด์ เวน',r:'ผู้ถักตำนาน',c:'เมืองชั้นล่าง',w:'8 ก.ค.'},{n:'คาสเปียน รู',r:'ผู้เคาะระฆัง',c:'สถาบันเวท',w:'8 ก.ค.'},{n:'โอเดตต์ ฟรอสต์',r:'ช่างวาดแผนที่',c:'สะพานจันทรา',w:'7 ก.ค.'},{n:'ไซลัส เกรย์',r:'ผู้พิทักษ์สุสาน',c:'ตรอกเงา',w:'6 ก.ค.'},{n:'ลูเซีย มาร์ช',r:'นักเล่นนิทาน',c:'ย่านการค้า',w:'5 ก.ค.'}];
+$('#memberGrid').innerHTML=citizens.map((c,i)=>`<div class="member" data-citi="${i}"><span class="ph">[รูป]</span><span><b>${c.n}</b><span>${c.r} · ${c.w}</span></span></div>`).join('');
+$('#memberGrid').addEventListener('click',e=>{const b=e.target.closest('[data-citi]');if(!b)return;const c=citizens[+b.dataset.citi];
+ openInfo(c.n,`<div style="display:flex;gap:14px"><div class="ph" style="width:90px;height:110px"><span class="ph-tag">[รูป]</span></div><div style="font-size:12.5px;line-height:1.8"><b style="font-weight:600;font-size:15px">${c.n}</b><div style="color:var(--muted)">${c.r} · เดินทางมาถึง ${c.c} · ยังไม่มีกระทู้</div><button class="btn" style="margin-top:8px">ส่งจดหมายต้อนรับ</button> <span style="color:var(--faint)">จำลอง</span></div></div>`)});
+
+/* ---------- Patrons — VERTICAL ---------- */
+const patrons=[['ตระกูลอาร์เจนติ','PATRON SINCE 1123'],['สภาเทียนไขว้','PATRON SINCE 1124'],['มอธ แอนด์ มิร์เรอร์','PATRON SINCE 1125'],['ไปรษณีย์กริฟฟอนเวย์มัวร์','PATRON SINCE 1126'],['โรงกลั่นยาราตรี','PATRON SINCE 1127']];
+$('#patronList').innerHTML=patrons.map(p=>`<div class="pv-row"><span class="ph">[โลโก้]</span><span><b>${p[0]}</b><span>${p[1]}</span></span><span class="go">→</span></div>`).join('');
+$('#patronList').addEventListener('click',e=>{const b=e.target.closest('.pv-row');if(!b)return;
+ openInfo(b.querySelector('b').textContent,`<div style="font-size:12.5px;line-height:1.8"><div class="ph" style="height:80px;margin-bottom:8px"><span class="ph-tag">[แบนเนอร์ผู้สนับสนุน]</span></div><p style="color:var(--muted)">ตราสัญลักษณ์ของพวกเขาห้อยอยู่เหนือห้องอ่านตะวันตกมาหลายปีแล้ว</p></div>`)});
+
+/* ---------- กระดานประกาศ ---------- */
+const boards=[{t:'เช่าแผงเทียน ตลาดจันทรา',p:'อัครเสนาบดีเฟนน์',tag:'การค้า'},{t:'สอนอักขระม่านหมอก — ระฆังแรกฟรี',p:'แม่ชีคอร์เวน',tag:'การสอน'},{t:'แมลงปีกทอง รับนักดนตรี',p:'มาดามอิโตะ',tag:'กิลด์'}];
+$('#boardBg').addEventListener('click',e=>{const n=e.target.closest('.note');if(!n||n.dataset.board===undefined)return;const x=boards[+n.dataset.board];
+ openInfo(x.t,`<div style="font-size:12.5px;line-height:1.8"><p style="color:var(--muted)">โดย ${x.p} · ${x.tag}</p><div class="ph" style="margin:8px 0;height:90px"><span class="ph-tag">[ภาพประกอบประกาศ]</span></div><p style="color:var(--muted)">เนื้อความเต็มของประกาศจะแสดงที่นี่ พร้อมตัวเลือกตอบกลับและสมัคร</p><button class="btn">ติดต่อ ${x.p}</button> <span style="color:var(--faint)">จำลอง</span></div>`)});
+
+/* ---------- หน้าต่างลอย ---------- */
+function openPanel(id){$$('.pnl').forEach(p=>p.classList.remove('on'));$('#p-'+id).classList.add('on');ovl.classList.add('on');pop.classList.remove('on')}
+function openInfo(t,b){$('#infoTitle').textContent=t;$('#infoBody').innerHTML=b;openPanel('info')}
+function closeAll(){ovl.classList.remove('on');pop.classList.remove('on')}
+ovl.addEventListener('click',e=>{if(e.target===ovl)closeAll()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+
+const openers={profile:1,pm:1,notif:1,map:1,chat:1,inv:1,fairy:1,lore:1};
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-close]');if(c){closeAll();return}
+  const o=e.target.closest('[data-open]');if(!o)return;const k=o.dataset.open;
+  if(k==='account'){pop.classList.toggle('on');return}
+  if(k==='purse'){openInfo('กระเป๋าเงิน — 1,240 อาร์เจนต์',`<div style="font-size:12.5px;line-height:1.8"><p>เงินสดของคุณ แยกจากไอเทมในคลัง</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="tag solid">อาร์เจนต์ 1,240</span><span class="tag">ทองคำก้อน 3</span><span class="tag">ตราประทับ 12</span></div><p style="color:var(--faint);margin-top:8px">ข้อมูลจำลอง — ไม่ได้เชื่อมต่อระบบเศรษฐกิจจริง</p></div>`);return}
+  if(k==='patchlog'){openInfo('แพตช์ล็อก — ทุกรุ่น',patches.map(p=>`<div class="roll"><span style="flex:1"><b style="font-weight:600">${p.v}</b><span style="font-size:12px;color:var(--muted)"> — ${p.t}</span></span><span class="tag ${p.c==='อีเวนต์'?'solid':''}">${p.c}</span></div>`).join(''));return}
+  if(k==='quest'){openInfo('เนื้อเรื่องหลัก — ตราที่เจ็ด',`<div style="font-size:12.5px;line-height:1.8"><p style="color:var(--muted)">ตราใต้วอร์ด VII ไม่เคยถูกสร้างมาเพื่อตื่น ความคืบหน้าชุมชน 68% — ที่ประชุมสภาต้องเปิดเวลาพลบค่ำ</p><p>ภารกิจปัจจุบันของคุณ: <b>ร่วมที่ประชุมสภาเวลาพลบค่ำ</b> · ความสำเร็จส่วนตัว 12/20 · พื้นที่ที่ชุมชนปลดล็อกแล้ว 5/8</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="tag solid">กำลังดำเนินการ</span><span class="tag">ชุมชน 68%</span><span class="tag">ของคุณ 12/20</span></div></div>`);return}
+  if(k==='achieve'){openInfo('กระดานเกียรติยศ',honor.map(h=>`<div class="roll"><div class="rune"><span>✦</span></div><span style="flex:1"><b style="font-weight:600">${h.n}</b><span style="font-size:12px;color:var(--muted)"> — “${h.q}”</span></span><span style="font-size:12px;color:var(--faint)">${h.w}</span></div>`).join(''));return}
+  if(k==='emergency'){openInfo('แผ่นดินไหวแห่งวอร์ด VII — กำลังดำเนินอยู่',`<div style="font-size:12.5px;line-height:1.8"><p style="color:var(--muted)">รายงานเมื่อ 2 ชม.ที่แล้ว · 3 เขตได้รับผลกระทบ · สถานะ: ยังดำเนินอยู่</p><p style="font-style:italic">“พื้นตลาดยกตัวขึ้นเหมือนลมหายใจที่สูดเข้า และทุกเทียนในหอจดหมายเหตุเอนตัวไปทางวอร์ด VII พร้อมกัน เบื้องล่าง มีบางสิ่งเก่าแก่กำลังพลิกตัวในหลับใหล”</p><div class="ph" style="margin:10px 0;height:100px"><span class="ph-tag">[ภาพประกอบฉาก]</span></div><button class="btn">เข้าสู่กระทู้เหตุการณ์เต็ม</button> <span style="color:var(--faint)">ลิงก์จำลอง</span></div>`);return}
+  if(openers[k])openPanel(k);
+});
+
+/* ---------- แชท ---------- */
+$('#chatSend').addEventListener('click',()=>{const inp=$('#chatInput'),v=inp.value.trim();if(!v)return;const d=new Date();
+ $('#chatLog').insertAdjacentHTML('beforeend',`<div class="msg"><span class="av"></span><span><div class="nm">เอเลียน วอส · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</div><div class="tx"></div></span></div>`);
+ const last=$('#chatLog').lastElementChild;last.querySelector('.tx').textContent=v;inp.value='';$('#chatLog').scrollTop=1e6});
+$('#chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#chatSend').click()});
+
+/* ---------- จดหมาย / แจ้งเตือน (+ badge บนวงกลมย่อ) ---------- */
+function updateFab(){const p=+($('#pmBadge').textContent||0),n=+($('#ntBadge').textContent||0),t=p+n;
+ const fb=$('#fabBadge');fb.textContent=t;fb.style.display=t?'flex':'none'}
+const pms=[{f:'เวน อัศวินกุญแจเก้า',s:'ที่ประชุมสภาเย็นนี้ — มาด้วยมั้ย?',t:'1 ชม.',u:1},{f:'ผู้คุมหอ',s:'คำร้องขอเข้าวอร์ด VII อนุมัติแล้ว',t:'3 ชม.',u:1},{f:'มิเรล คิว',s:'ตอบ: การต่อรองบนสะพานจันทรา',t:'เมื่อวานนี้',u:1},{f:'อัครเสนาบดีเฟนน์',s:'ใบแจ้งหนี้แผงเช่า ประจำเดือนหิมะ',t:'2 วัน',u:0}];
+function renderPm(){$('#pmList').innerHTML=pms.map((m,i)=>`<button class="rowbtn" data-pm="${i}">${m.u?'<span class="dot"></span>':'<span style="width:8px;flex:none"></span>'}<span style="flex:1"><b style="font-weight:600">${m.f}</b><div style="font-size:11.5px;color:var(--muted)">${m.s}</div></span><span style="font-size:11.5px;color:var(--faint)">${m.t}</span></button>`).join('');
+ const n=pms.filter(m=>m.u).length;$('#pmCount').textContent=n+' ฉบับที่ยังไม่ได้อ่าน';$('#pmBadge').textContent=n;$('#pmBadge').style.display=n?'flex':'none';updateFab()}
+renderPm();
+$('#pmList').addEventListener('click',e=>{const b=e.target.closest('[data-pm]');if(!b)return;pms[+b.dataset.pm].u=0;renderPm()});
+
+const nts=[{t:'ผู้คุมหอ โพสต์ใน “อพยพวอร์ด VII”',k:'ผู้ดูแล',u:1},{t:'บำรุงรักษาระบบ: วันเสาร์ 02:00–04:00 น.',k:'ผู้ดูแล',u:1},{t:'มีตอบกลับใหม่ใน “การต่อรองบนสะพานจันทรา”',k:'ติดตาม',u:1},{t:'เหตุการณ์ “แผ่นดินไหว” มีอัปเดต',k:'ติดตาม',u:1},{t:'เวน กล่าวถึงคุณใน สถาบันเวทมนตร์',k:'ติดตาม',u:1}];
+function renderNt(){$('#ntList').innerHTML=nts.map((n,i)=>`<button class="rowbtn" data-nt="${i}">${n.u?'<span class="dot"></span>':'<span style="width:8px;flex:none"></span>'}<span style="flex:1">${n.t}</span><span class="tag">${n.k}</span></button>`).join('');
+ const c=nts.filter(n=>n.u).length;$('#ntBadge').textContent=c;$('#ntBadge').style.display=c?'flex':'none';updateFab()}
+renderNt();
+$('#ntList').addEventListener('click',e=>{const b=e.target.closest('[data-nt]');if(!b)return;nts[+b.dataset.nt].u=0;renderNt()});
+
+/* ---------- แผนที่ / ไอเทม / ภูต / ตำนาน ---------- */
+const locs={lowercity:{n:'เมืองชั้นล่าง',s:'ปลดล็อกแล้ว — บ้านของบันไดตลาดและโรงเตี๊ยมพันหลัง'},bazaar:{n:'ตลาดใหญ่',s:'ปลดล็อกแล้ว — แผงตลาดจันทราเปิดให้เช่าสัปดาห์นี้'},moonbridge:{n:'สะพานจันทรา',s:'ปลดล็อกแล้ว — ค่าผ่านทาง: ความลับหนึ่งชิ้น จ่ายปลายทาง'},ward7:{n:'วอร์ด VII',s:'ปิดผนึก — ต้นกำเนิดแผ่นดินไหว ที่ประชุมสภาอาจเปิดได้เวลาพลบค่ำ'},spire:{n:'ยอดหอคอย',s:'ปิดผนึก — ไปได้เฉพาะหลังตราที่เจ็ดถูกเย็บกลับ'}};
+document.addEventListener('click',e=>{const m=e.target.closest('[data-loc]');if(!m)return;$$('.maptag').forEach(x=>x.classList.remove('sel'));m.classList.add('sel');const l=locs[m.dataset.loc];
+ $('#locInfo').innerHTML=`<b style="font-weight:600">${l.n}</b><div style="color:var(--muted)">${l.s}</div>`});
+
+const items=[{n:'ปากกาอักขระม่านหมอก',t:'เครื่องมือ',d:'เขียนได้เฉพาะความจริง — ลำบากใจในงานเลี้ยง',q:1},{n:'กุญแจเงินจันทรา',t:'กุญแจ',d:'เข้ากับลูกบิดที่คุณยังไม่เจอ',q:1},{n:'น้ำยาเทียนไขว้',t:'ของใช้',d:'ฟื้นสมาธิ รสชาติเหมือนไขปลาและความมุ่งมั่น',q:4},{n:'เหรียญผู้พายเรือ',t:'ของสะสม',d:'ใช้ได้หนึ่งการข้ามฟาก อย่าใช้เบา ๆ',q:1},{n:'สมุดบัญชีเปล่า',t:'บันทึก',d:'หน้ากระดาษจะนับตัวเองเมื่อไม่มีใครมอง',q:2},{n:null},{n:null},{n:null}];
+function renderInv(){$('#invGrid').innerHTML=items.map((it,i)=>`<button class="slot" data-slot="${i}">${it?`<span class="ph">${it.t}</span>`:'<span class="ph" style="border-style:dashed">ว่าง</span>'}</button>`).join('')}
+renderInv();
+$('#invGrid').addEventListener('click',e=>{const b=e.target.closest('[data-slot]');if(!b)return;const it=items[+b.dataset.slot];$$('.slot').forEach(s=>s.classList.remove('sel'));
+ if(!it){$('#invDetail').innerHTML='<span style="color:var(--faint)">ช่องว่าง</span>';return}b.classList.add('sel');
+ $('#invDetail').innerHTML=`<b style="font-weight:600;font-size:14px">${it.n}</b> <span class="tag">${it.t}</span><div style="color:var(--muted);margin-top:6px">${it.d}</div><div style="color:var(--faint);margin-top:8px">จำนวน: ${it.q}</div>`});
+
+const fairy={guide:'<p><b style="font-weight:600">ยินดีที่รู้จัก นักจดหมาย</b> ข้าคือปิ๊บ โพสต์ในฟอรั่มย่อยเพื่อเริ่มฉากใหม่ มองท้องฟ้าที่ HUD ให้ดี — อารมณ์ของเวย์มัวร์เปลี่ยนตามสภาพอากาศ และอย่าเซ็นสัญญาในตรอกชมพูโดยไม่อ่านหน้าสอง</p><p style="color:var(--faint)">แท็บด้านบน: เควสที่กำลังทำ เควสที่ปิดจบ ทุกคนที่คุณเคยพบ และทุกคนที่พร้อมตอบจดหมายของคุณ</p>',
+active:'<div class="roll"><span style="flex:1">ร่วมที่ประชุมสภาเวลาพลบค่ำ</span><span class="tag solid">หลัก · 68%</span></div><div class="roll"><span style="flex:1">ส่งเหรียญผู้พายเรือให้ครบ</span><span class="tag">เสริม · 40%</span></div><div class="roll"><span style="flex:1">จับเสียงระริกใต้พิภพ</span><span class="tag">เสริม · 15%</span></div>',
+done:'<div class="roll"><span style="flex:1">เทียนเล่มหนึ่งถวายผู้พายเรือ</span><span style="font-size:12px;color:var(--faint)">ปี 1126</span></div><div class="roll"><span style="flex:1">ระฆังสามดัง โดยไร้ลม</span><span style="font-size:12px;color:var(--faint)">ปี 1126</span></div>',
+npc:'<div class="roll"><span class="ph" style="width:28px;height:28px;border-radius:999px;padding:0;flex:none;font-size:8px">[NPC]</span><span style="flex:1">ผู้คุมหอ <span style="font-size:12px;color:var(--muted)">— ผู้พิทักษ์แอตแลนเทียม</span></span><span class="tag">เคยพบ</span></div><div class="roll"><span class="ph" style="width:28px;height:28px;border-radius:999px;padding:0;flex:none;font-size:8px">[NPC]</span><span style="flex:1">มาดามอิโตะ <span style="font-size:12px;color:var(--muted)">— เจ้าของแมลงปีกทอง</span></span><span class="tag">เคยพบ</span></div><div class="roll"><span class="ph" style="width:28px;height:28px;border-radius:999px;padding:0;flex:none;font-size:8px">[NPC]</span><span style="flex:1">บราเธอร์แอนสเซล <span style="font-size:12px;color:var(--muted)">— ผู้พิทักษ์สุสานวอร์ด VII</span></span><span class="tag">เคยพบ</span></div>',
+friends:'<div class="roll"><span style="flex:1">เวน อัศวินกุญแจเก้า</span><span style="font-size:12px;color:var(--faint)">ออนไลน์ · สถาบันเวท</span></div><div class="roll"><span style="flex:1">มิเรล คิว</span><span style="font-size:12px;color:var(--faint)">ออนไลน์ · ย่านการค้า</span></div><div class="roll"><span style="flex:1">ดอร์น เอช</span><span style="font-size:12px;color:var(--faint)">ไม่อยู่</span></div>'};
+$('#fairyBody').innerHTML=fairy.guide;
+$('#fairyTabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;$$('#fairyTabs .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#fairyBody').innerHTML=fairy[t.dataset.t]});
+
+const lore={seals:'<p style="color:var(--muted)">ตราทั้งเจ็ดกั้นม่านหมอกไว้เหนือเวย์มัวร์ หกชิ้นสลักโดยผู้ก่อตั้ง ส่วนชิ้นที่เจ็ดมาปรากฏเอง ห้ามจดหมายเหตุเก็ง แต่ห้องเก็บของเต็มไปด้วยการเก็ง</p>',
+bells:'<p style="color:var(--muted)">เวย์มัวร์มีระฆังเก้าลูก แต่เคาะเพียงแปดลูก ว่าลูกไหนเงียบ ขึ้นอยู่กับว่าถามใคร — และการถามถือเป็นการเสียมารยาท</p>',
+alley:'<p style="color:var(--muted)">ตรอกชมพูได้ชื่อจากอุบัติเหตุสีย้อมปี 1091 และได้ชื่อเสียงจากทุกอย่างที่เกิดขึ้นหลังจากนั้น สัญญาที่เซ็นในตรอกนี้มีผลบังคับในเขตอำนาจสามแห่ง สองแห่งเป็นของคนเป็น</p>'};
+document.addEventListener('click',e=>{const l=e.target.closest('[data-lore]');if(l)$('#loreBody').innerHTML=lore[l.dataset.lore]});
+
+/* ---------- กลุ่มผู้ใช้งาน / สถิติ / ช่องทางติดต่อ (ส่วนท้าย) ---------- */
+const ftRoles=[['Wate Spirits',2318,21],['Avera',1846,17],['Ever',3102,15],['Wanderer',2954,16],['Daevarn',2260,10]];
+$('#roleCircles').innerHTML=ftRoles.map((r,i)=>'<div class="rc" data-ri="'+i+'"><span class="cir"></span><b>'+r[0].toUpperCase()+'</b><span>'+r[1].toLocaleString()+' สมาชิก · '+r[2]+' ออนไลน์</span></div>').join('');
+$('#roleCircles').addEventListener('click',e=>{const c=e.target.closest('.rc');if(!c)return;const r=ftRoles[+c.dataset.ri];
+ openInfo('กลุ่มผู้ใช้งาน — '+r[0],'<div style="font-size:12.5px;line-height:1.8"><div class="rune" style="margin-bottom:8px"><span>✦</span></div><p><b style="font-weight:600">'+r[0]+'</b> — สมาชิก '+r[1].toLocaleString()+' ท่าน · ออนไลน์วันนี้ '+r[2]+' ท่าน</p><p style="color:var(--faint)">ข้อมูลกลุ่ม เงื่อนไขการเข้าร่วม และกระทู้เฉพาะกลุ่มจะแสดงที่นี่</p><button class="btn">ดูหน้ากลุ่ม</button> <span style="color:var(--faint)">ลิงก์จำลอง</span></div>')});
+let emgActive=true;let newsPaid=false;
+function moveThumb(btn){const th=$('#emgThumb');if(!th||!btn)return;th.style.left=btn.offsetLeft+'px';th.style.width=btn.offsetWidth+'px'}
+function setEmgView(v){$$('.etab[data-view]').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+ $('#emgView').hidden=v!=='emg';$('#prophetView').hidden=v!=='news';
+ $('#emgLabel').textContent=v==='emg'?'เหตุการณ์ฉุกเฉิน':'The Veymour Prophet';
+ $('#emgSub').textContent=v==='emg'?'LIVE · แผ่นดินไหวแห่งวอร์ด VII — กำลังดำเนินอยู่':'ฉบับประจำค่ำคืน · วันจันทร์ที่ 14 เดือนหิมะ 1127';
+ requestAnimationFrame(()=>moveThumb($('.etab[data-view].on')));
+ $('#owlGate').style.display=(v==='news'&&!newsPaid)?'flex':'none'}
+window.addEventListener('resize',()=>moveThumb($('.etab[data-view].on')));
+setEmgView('emg');
+$('#emgTabs').addEventListener('click',e=>{const b=e.target.closest('.etab');if(!b)return;
+ if(b.id==='emgDemo'){emgActive=!emgActive;b.textContent='จำลอง: เหตุฉุกเฉิน '+(emgActive?'เปิด':'ปิด');
+  $('#emgSeg').style.display=emgActive?'flex':'none';
+  setEmgView(emgActive?'emg':'news');return}
+ setEmgView(b.dataset.view)});
+$('#owlPay').addEventListener('click',()=>{if(newsPaid)return;const g=$('#owlGate');const btn=$('#owlPay');
+ g.classList.add('paying');btn.disabled=true;btn.textContent='กำลังหย่อนเหรียญ…';
+ setTimeout(()=>{newsPaid=true;g.classList.add('paid');btn.textContent='จ่ายแล้ว — อ่านได้เลย';
+  setTimeout(()=>{g.style.display='none'},650)},1250)});
+
+/* ---------- Live Chat ถูกถอดออกตามคำขอ ---------- */
+
+const calEvents={5:['วันเปิดตลาดจันทราฤดูหิมะ'],14:['ที่ประชุมสภาเวลาพลบค่ำ','แผ่นดินไหวแห่งวอร์ด VII'],17:['งานเต้นรำใต้แสงจันทร์'],21:['ตลาดจันทราปิดฤดูกาล'],25:['ประลองเวทสนามเปิด'],28:['งานเลี้ยงปิดเดือนหิมะ']};
+function renderCal(){const g=document.getElementById('calGrid');if(!g)return;
+ g.innerHTML=[...Array(35)].map((_,i)=>{const d=i-1;const ok=d>=1&&d<=30;const ev=ok&&calEvents[d];
+  return '<button class="cal-day'+(ev?' has':'')+(d===14?' today':'')+'" data-day="'+d+'"'+(ok?'':' disabled')+'>'+(ok?d:'')+'</button>'}).join('')}
+document.addEventListener('click',e=>{const c=e.target.closest('.cal-day');if(!c||c.disabled)return;
+ const d=+c.dataset.day;const ev=calEvents[d];
+ $('#calInfo').innerHTML='<b style="font-weight:600">วันที่ '+d+' เดือนหิมะ 1127</b>'+(ev?'<div style="margin-top:4px;color:var(--muted)">'+ev.map(x=>'• '+x).join('<br>')+'</div>':'<div style="margin-top:4px;color:var(--faint)">ไม่มีกิจกรรมในวันนี้</div>')});
+$('#calPrev').addEventListener('click',()=>$('#calInfo').textContent='เดือนก่อนหน้า — ตัวอย่างนี้จำลองเฉพาะเดือนหิมะ 1127');
+$('#calNext').addEventListener('click',()=>$('#calInfo').textContent='เดือนถัดไป — ตัวอย่างนี้จำลองเฉพาะเดือนหิมะ 1127');
+
+/* ---------- เขียนประกาศลงกระดาน (เสีย 20 เคล) ---------- */
+let kell=1240;const NOTE_COST=20;
+const noteSlots=[{l:36,t:336},{l:256,t:336},{l:476,t:336},{l:696,t:336},{l:916,t:336}];
+let userNotes=0;
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);
+ requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),400)},2800)}
+function addNote(v){const bg=document.getElementById('boardBg');const s=noteSlots[userNotes%noteSlots.length];userNotes++;
+ const n=document.createElement('div');n.className='note usernote';
+ n.style.left=s.l+'px';n.style.top=s.t+'px';n.style.transform='rotate('+(userNotes%2?-2:2)+'deg)';n.style.zIndex=6;
+ n.innerHTML='<span class="pin"></span><b>'+v.replace(/</g,'&lt;').slice(0,60)+'</b><i></i><i></i><div class="nd">โดย เอเลียน วอส · เมื่อสักครู่</div>';
+ bg.appendChild(n);
+ n.animate([{transform:'scale(.6) rotate(0deg)',opacity:0},{transform:'scale(1.06)',opacity:1},{transform:'scale(1) rotate('+(userNotes%2?-2:2)+'deg)'}],{duration:380,easing:'ease-out'})}
+$('#noteOpen').addEventListener('click',()=>openPanel('note'));
+$('#noteSend').addEventListener('click',()=>{const ta=$('#noteInput');const v=ta.value.trim();if(!v)return;
+ kell-=NOTE_COST;ta.value='';closeAll();
+ addNote(v);
+ $('#kellTag').textContent='ยอดคงเหลือ '+kell.toLocaleString()+' เคล';
+ toast('จ่าย '+NOTE_COST+' เคล — เหลือ '+kell.toLocaleString()+' เคล · ประกาศถูกปักบนกระดานแล้ว')});
+
+/* ---------- ฟีดสเตตัส + คลิกกิจกรรม ---------- */
+/* ---------- Crystal — คริสตัลสถานะสไตล์ Stories ---------- */
+let crystalData=[{n:'Cisenn W. Moire',t:'3 นาทีที่แล้ว',x:'เขียนจดหมายถึงตัวเองในอีก 10 ปี แล้วฝากไว้กับนกฮูก หวังว่ามันจะไม่ขโมยกิน',img:'crys-cisenn.jpg',l:2,c:1},{n:'Pinkberry Perlman',t:'26 นาทีที่แล้ว',x:'ตื่นดึก โต๊ะปูกิน ตื่นดึก โต๊ะปูกิน ชีวิตก็วนลูปแบบนี้แหละ',l:1,c:0},{n:'Lopez Zhou',t:'1 ชม.ที่แล้ว',x:'เปิดมาสะอึ๊ด รูปหายหมด T…T ใครเก็บแฟ้มรูปของเราไป',l:0,c:3},{n:'Nyx De Lacroix',t:'2 ชม.ที่แล้ว',x:'พลังงานเหลือ ▮▮▯ คืนนี้กลายร่างเป็นเด็กน้อยนอนหลับตั้งแต่ทุ่ม',l:4,c:0},{n:'Louisa B. Flozentine',t:'5 ชม.ที่แล้ว',x:'มันอาจจะอยู่คนเดียว แต่เรามีช็อกโกแลตกับผองเพื่อนทั้งสวน',l:1,c:2}];
+function renderCrystals(newFirst){$('#crystalRail').innerHTML=crystalData.map((s,i)=>'<div class="crys'+(newFirst&&i===0?' new':'')+'" data-ci="'+i+'"><div class="crys-ring"><div class="crys-gem">'+(s.img?'<img src="'+s.img+'" alt="">':'[รูป]')+'</div></div><b>'+s.n+'</b><span>'+s.t+'</span></div>').join('')}
+renderCrystals();
+function openCrystal(i){const s=crystalData[i];
+ openInfo('Crystal — '+s.n,'<div style="font-size:12.5px;line-height:1.8"><div class="rune" style="margin-bottom:8px"><span>✦</span></div><p style="color:var(--muted)">'+s.n+' · '+s.t+'</p>'+(s.img?'<div class="ph" style="height:150px;margin:10px 0;padding:0;overflow:hidden"><img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1)" alt="รูปในคริสตัล"></div>':'')+'<p style="font-style:italic;color:var(--ink2)">“'+s.x+'”</p><div class="sb-react" style="margin-top:10px"><span class="sb-like" data-l="'+s.l+'">♡ <i>'+s.l+'</i></span><span>ความคิดเห็น ('+s.c+')</span></div></div>')}
+$('#crystalRail').addEventListener('click',e=>{const c=e.target.closest('.crys');if(c)openCrystal(+c.dataset.ci)});
+document.addEventListener('click',e=>{const lk=e.target.closest('#infoBody .sb-like');if(!lk)return;
+ const base=+lk.dataset.l;const on=lk.classList.toggle('liked');lk.querySelector('i').textContent=base+(on?1:0)});
+/* ปุ่มเปิด + หน้าต่างปลุกคริสตัล (ข้อความ/รูป) */
+let crysImgData=null;
+$('#crysOpenBtn').addEventListener('click',()=>openPanel('crys'));
+$('#crysImgBtn').addEventListener('click',()=>$('#crysFile').click());
+$('#crysFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;$('#crysFileName').textContent=f.name;
+ const r=new FileReader();r.onload=ev=>{crysImgData=ev.target.result;$('#crysImgPrev').src=crysImgData;$('#crysPreview').hidden=false};r.readAsDataURL(f)});
+$('#crysSend').addEventListener('click',()=>{const v=$('#crysText').value.trim();if(!v&&!crysImgData)return;
+ crystalData.unshift({n:'เอเลียน วอส',t:'เมื่อสักครู่',x:v?v.replace(/</g,'&lt;'):'(แบ่งปันรูปภาพ)',img:crysImgData,l:0,c:0});
+ renderCrystals(true);
+ $('#crysText').value='';crysImgData=null;$('#crysPreview').hidden=true;$('#crysFileName').textContent='ยังไม่ได้เลือกรูป';$('#crysFile').value='';
+ closeAll();openCrystal(0)});
+document.addEventListener('click',e=>{const v=e.target.closest('.vf3');if(!v)return;
+ $$('.vf3').forEach(c=>{if(c!==v)c.classList.remove('on')});v.classList.toggle('on')});
+
+/* ไอคอนนำทางวงกลมเรียงรอบขอบโค้ง — เลื่อนซ้าย-ขวาได้ ไม่ย้อนไปทับโปรไฟล์ */
+const scIcons=$$('#scSet .sc');
+let rimOff=0;const RIM_STEP=24,RIM_SPAN=48;
+function layoutRim(){if(body.classList.contains('mini'))return;const hud=$('#hud');const W=hud.offsetWidth,H=hud.offsetHeight;
+ const cx=W/2,cy=H-2,rx=W/2-4,ry=H-6;
+ const pt=th=>{const r=th*Math.PI/180;return[cx+rx*Math.cos(r),cy-ry*Math.sin(r)]};
+ let[x,y]=pt(143);$('#pav3').style.left=x+'px';$('#pav3').style.top=y+'px';
+ const stk=$('#idolStack');stk.style.left='0px';stk.style.top='0px';
+ $$('#idolStack .hicon').forEach((h,i)=>{const a=(150+i*30)*Math.PI/180;
+  h.style.left=(x+Math.cos(a)*84)+'px';h.style.top=(y+Math.sin(a)*84)+'px'});
+ const np=$('#namePlate');[x,y]=pt(143);np.style.left=x+'px';np.style.top=(y+66)+'px';
+ scIcons.forEach((ic,i)=>{const a=122-i*RIM_STEP+rimOff;const[px,py]=pt(a);
+  ic.style.left=px+'px';ic.style.top=py+'px';
+  const hide=(a>134||a<10);ic.style.opacity=hide?0:1;ic.style.pointerEvents=hide?'none':'auto'});
+ $('#rimPrev').style.opacity=rimOff<=0?.3:1;$('#rimNext').style.opacity=rimOff>=RIM_SPAN?.3:1}
+function rimScroll(d){rimOff=Math.max(0,Math.min(RIM_SPAN,rimOff+d));layoutRim()}
+$('#rimWrap').addEventListener('wheel',e=>{if(body.classList.contains('mini'))return;e.preventDefault();rimScroll(e.deltaY>0?10:-10)},{passive:false});
+let rimDrag=null;
+$('#rimWrap').addEventListener('pointerdown',e=>{rimDrag=e.clientX});
+window.addEventListener('pointermove',e=>{if(rimDrag===null)return;const dx=e.clientX-rimDrag;if(Math.abs(dx)>26){rimScroll(dx<0?RIM_STEP:-RIM_STEP);rimDrag=e.clientX}});
+window.addEventListener('pointerup',()=>rimDrag=null);
+$('#rimPrev').addEventListener('click',()=>rimScroll(-RIM_STEP));
+$('#rimNext').addEventListener('click',()=>rimScroll(RIM_STEP));
+function placeIcons(){if(body.classList.contains('mini')){scIcons.forEach(i=>$('#miniRow').appendChild(i))}
+ else{scIcons.forEach(i=>$('#rimWrap').appendChild(i));requestAnimationFrame(layoutRim)}}
+placeIcons();
+window.addEventListener('resize',layoutRim);
+
+/* ---------- HUD: ย่อเหลือแถวบาง / ขยายกลับ ---------- */
+$('#hudToggle').addEventListener('click',()=>{body.classList.toggle('mini');const mini=body.classList.contains('mini');
+ $('#hudToggle').setAttribute('data-tip',mini?'ขยาย HUD':'ย่อ HUD');
+ $('#hudToggle').setAttribute('aria-label',mini?'ขยาย HUD':'ย่อ HUD ทั้งแทบ');
+ $('#hudToggle').firstElementChild.outerHTML=mini
+  ?'<svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>'
+  :'<svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+ placeIcons()});
+</script>
+</body>
+</html>
