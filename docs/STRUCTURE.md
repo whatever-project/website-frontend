@@ -31,7 +31,10 @@ Most tutorials online target Next 13–15. The changes below affect this repo. D
 
 ```
 website-frontend/
-├── docs/                 This documentation
+├── docs/                 This documentation (+ docs/ai: AI rules, templates; docs/handoffs: backend hand-offs, created on first promotion)
+├── scripts/              check-draft-only.mjs (`npm run check:draft`: guard for the design stage)
+├── .agents/              Kimi design agent + design-* skills (design stage)
+├── .claude/skills/       draft-to-live, api-handoff (dev stage)
 ├── public/
 │   ├── assets/           Images served at /assets/*. Used: village, letter-scene, avatar-1/2.
 │   │                     Unused (kept for upcoming designs): envelope, feather, inkpot, postmark, script-lines, seal-red
@@ -43,7 +46,7 @@ website-frontend/
 ├── postcss.config.mjs    Tailwind v4 PostCSS plugin
 ├── tsconfig.json         TS config + "@/*" alias
 ├── AGENTS.md / CLAUDE.md Notes for AI coding agents
-└── package.json          Scripts: dev, build, start, lint
+└── package.json          Scripts: dev, build, start, lint, typecheck, check:draft, design
 ```
 
 ---
@@ -76,6 +79,8 @@ src/
 │   └── draft/                        Designer drafts + dev utilities (NOT localized; reached via the Drafts button)
 │       ├── layout.tsx               Hard-codes the Thai messages so next-intl components still work
 │       ├── account/                 Draft of /account (+ dashboard settings): mock data, Thai copy
+│       ├── character-create/        Draft of a new 6-step character-creation wizard (not live yet)
+│       ├── skeleton-mockup/         Grayscale wireframe of a forum main page (home / forums / forum detail + HUD), scoped CSS in `_styles/`
 │       └── dev-tools/               Draft hub: list of drafts, quick links
 │
 ├── views/                           Page code, one folder per live page (see §5)
@@ -147,7 +152,9 @@ src/
 | `/dashboard`           | `/en/dashboard`           | `app/[locale]/(user)/dashboard/page.tsx`             | user          |
 | `/account`             | `/en/account`             | `app/[locale]/(user)/account/page.tsx`               | user          |
 | `/admin/logs`          | `/en/admin/logs`          | `app/[locale]/(admin)/admin/logs/page.tsx`           | admin         |
-| `/draft/account`       | —                         | `app/draft/account/page.tsx`                         | draft (draft) |
+| `/draft/account`       | —                         | `app/draft/account/page.tsx`                         | draft         |
+| `/draft/character-create` | —                      | `app/draft/character-create/page.tsx`                | draft         |
+| `/draft/skeleton-mockup` | —                       | `app/draft/skeleton-mockup/page.tsx`                 | draft         |
 | `/draft/dev-tools`     | —                         | `app/draft/dev-tools/page.tsx`                       | draft         |
 
 ### Why `[locale]`?
@@ -205,10 +212,10 @@ All in-app link targets come from `routes` in `src/config/routes.ts` (`href={rou
 
 Convention: a draft of `/<route>` lives at `app/draft/<route>/page.tsx` (e.g. `/account` → `app/draft/account/`).
 
-1. **Start a draft (design):** copy the view folder `views/<group>/<route>/` to `app/draft/<route>/_view/`, and add `app/draft/<route>/page.tsx` that renders it (the `_` keeps it out of routing). Or start from scratch. Add a line to `DRAFTS` in `app/draft/dev-tools/page.tsx` so it shows up on the hub.
+1. **Start a draft (design):** normally via `/design-request`, which first looks for an existing draft folder of the page and only otherwise starts a new one from the interview (Kimi never copies live code). A dev starting a draft by hand may copy the view folder `views/<group>/<route>/` to `app/draft/<route>/_view/` and add `app/draft/<route>/page.tsx` that renders it (the `_` keeps it out of routing), or start from scratch. Add a line to `DRAFTS` in `app/draft/dev-tools/page.tsx` so it shows up on the hub.
 2. **Iterate (design):** mock data and hard-coded text are fine. Put draft-only components **inside the draft folder** (e.g. `app/draft/account/_components/`), not in `src/components/`, because editing a shared component changes the live pages too.
 3. **Review:** click **Go to Drafts** on any page and pick the draft, or open `/draft/<route>` directly. **Exit Drafts** returns to the live version for comparison.
-4. **Ship (dev):** once design approves, port the draft into the live `[locale]` page: move text into `messages/th|en`, swap mock data for `api/services`, and move components that are reused into `src/components/`. Then **delete the draft folder and its `DRAFTS` line**.
+4. **Ship (dev):** once design approves, port the draft into the live `[locale]` page: move text into `messages/th|en`, swap mock data for `api/services`, and move components that are reused into `src/components/`. **Keep the draft folder and its `DRAFTS` line** as the design team's reference; delete them only when the dev team explicitly decides to (`draft-to-live` step 7). Because the draft is kept, a later change to a live page is made in its existing draft folder (design team: `/design-request` finds it first), and shipping that change applies only what its CONTEXT.md §2b lists (see `docs/ai/DESIGN-RULES.md` §1).
 
 Rule: live code never imports from `app/draft/`.
 
