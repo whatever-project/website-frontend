@@ -3,9 +3,11 @@
 import Link from "next/link"
 import { routes } from "@/config/routes"
 
-/** Active design drafts. Add a line when a draft is created; remove it once dev ships the page. */
+/** Active design drafts. Add a line when a draft is created; keep it after dev ships the page (designers still use the draft); remove it only when the dev team explicitly deletes the draft. */
 const DRAFTS = [
   { label: "Account (profile picker + account settings)", draft: "/draft/account", live: routes.account },
+  { label: "สร้างตัวละคร (Character Create)", draft: "/draft/character-create", live: "/character-create" },
+  { label: "หน้าหลักฟอรั่ม (Skeleton Mockup)", draft: "/draft/skeleton-mockup", live: "/skeleton-mockup" },
 ]
 
 /**
