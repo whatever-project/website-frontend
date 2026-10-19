@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:draft": "node scripts/check-draft-only.mjs",
+    "design": "kimi --agent kimi-designer"
   },
   "dependencies": {
     "next": "16.3.5",

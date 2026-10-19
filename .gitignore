@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# design-stage guard baseline (scripts/check-draft-only.mjs)
+/.draft-baseline.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
