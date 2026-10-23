@@ -6,6 +6,14 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 See [docs/STRUCTURE.md](docs/STRUCTURE.md) for the folder layout, routes, i18n setup and known gaps.
 
+## Git conventions
+
+Git hooks (Husky) are installed automatically by `npm install`.
+
+**Branch names** must start with `dev/` or `design/`, followed by a name and optionally the page, e.g. `dev/sho/landing-page` or `design/landing-page`. `main` is exempt. This is checked on commit and push; fix a wrong name with `git branch -m dev/<name>/<page>`.
+
+**Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org): `type: lower-case subject`, up to 100 characters. Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`. Rules live in `commitlint.config.js`.
+
 ## Getting Started
 
 First, run the development server:
