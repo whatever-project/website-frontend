@@ -1,0 +1,25 @@
+/** Thai copy for the forgot-password draft (mirrors the live page's copy). */
+export const COPY = {
+  pageTitle: "ลืมรหัสผ่าน",
+  pageSub: "— รีเซ็ตตราประทับของคุณ —",
+  heading: "รีเซ็ตรหัสผ่าน",
+  body: "กรอกอีเมลของคุณและเราจะส่งลิงก์รีเซ็ตหากมีบัญชีอยู่",
+  emailLabel: "อีเมล",
+  emailPlaceholder: "you@example.com",
+  submit: "ส่งลิงก์รีเซ็ต",
+  submitting: "กำลังส่ง…",
+  successHeading: "ตรวจสอบกล่องจดหมาย",
+  successBody: "หากมีบัญชีที่ใช้อีเมลนั้น ลิงก์รีเซ็ตรหัสผ่านได้ถูกส่งแล้ว ลิงก์หมดอายุภายใน 30 นาที",
+  backToSignIn: "↩ กลับไปเข้าสู่ระบบ",
+  /** Sample server error, shown in the "error" preview state. */
+  sampleError: "Something went wrong",
+}
+
+export type ForgotState = "idle" | "loading" | "error" | "success"
+
+export const STATE_OPTIONS: { value: ForgotState; label: string }[] = [
+  { value: "idle", label: "ปกติ (กรอกอีเมล)" },
+  { value: "loading", label: "กำลังส่ง" },
+  { value: "error", label: "เกิดข้อผิดพลาด" },
+  { value: "success", label: "ส่งสำเร็จ" },
+]

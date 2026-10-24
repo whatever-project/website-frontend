@@ -8,6 +8,12 @@ const DRAFTS = [
   { label: "Account (profile picker + account settings)", draft: "/draft/account", live: routes.account },
   { label: "สร้างตัวละคร (Character Create)", draft: "/draft/character-create", live: "/character-create" },
   { label: "หน้าหลักฟอรั่ม (Skeleton Mockup)", draft: "/draft/skeleton-mockup", live: "/skeleton-mockup" },
+  { label: "หน้าแรก (Landing)", draft: "/draft/landing", live: routes.home },
+  { label: "เข้าสู่ระบบ (Login)", draft: "/draft/login", live: routes.login },
+  { label: "สมัครสมาชิก (Signup)", draft: "/draft/signup", live: routes.signup },
+  { label: "ลืมรหัสผ่าน (Forgot Password)", draft: "/draft/forgot-password", live: routes.forgotPassword },
+  { label: "รีเซ็ตรหัสผ่าน (Reset Password)", draft: "/draft/reset-password", live: routes.resetPassword },
+  { label: "ยืนยันอีเมล / เปลี่ยนอีเมล (Verify Email + Verify Email Change)", draft: "/draft/verify-email", live: routes.verifyEmail },
 ]
 
 /**
