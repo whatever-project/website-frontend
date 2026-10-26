@@ -132,7 +132,7 @@ function InkModal({ onClose, children, wide = false, corners = true }: { onClose
         className={`parch-sheet relative w-full ${wide ? 'max-w-2xl' : 'max-w-md'} p-8 sm:p-10`}
         onClick={(e) => e.stopPropagation()}
       >
-        {corners && <SheetCorners />}
+
         <div className="absolute -top-6 left-1/2 -translate-x-1/2">
           <WaxSeal letter="✦" size={48} />
         </div>
@@ -191,7 +191,6 @@ export default function AccountDraftPage() {
       <ParchShell title="สร้างตัวละครใหม่" sub="— The Birth of a Soul · Wireframe —" onBack={() => setView('select')}>
         <div className="mx-auto max-w-4xl px-6 py-10 sm:px-12">
           <div className="parch-sheet relative p-8 sm:p-12">
-            <SheetCorners />
             <p className="font-ui text-[13px] text-[#8a7350]">
               แบบร่าง (Wireframe) หน้าสร้างตัวละคร — แสดงเพียงโครงและตำแหน่งองค์ประกอบ
             </p>
@@ -273,7 +272,6 @@ export default function AccountDraftPage() {
               { n: 5, price: '฿320', note: 'สำหรับนักสร้างตัวละคร' },
             ].map((p) => (
               <div key={p.n} className="parch-sheet relative p-7 text-center">
-                <SheetCorners />
                 <p className="parch-label">{p.n} สล็อต</p>
                 <p className="font-display mt-2 text-4xl text-[#3a2c1a]">{p.price}</p>
                 <p className="mt-2 font-ui text-[12px] text-[#8a7350]">{p.note}</p>
@@ -575,7 +573,7 @@ export default function AccountDraftPage() {
             กรุณาซื้อสล็อตตัวละครเพิ่มเติม
           </p>
           <div className="mt-6 flex justify-center gap-3">
-            <button type="button" onClick={() => setModal(null)} className="parch-btn-outline px-6 py-2.5 text-sm">
+            <button type="button" onClick={() => setModal(null)} className="parch-btn-outline px-6 py-2.5 text-md">
               ยกเลิก
             </button>
             <button
@@ -584,9 +582,9 @@ export default function AccountDraftPage() {
                 setModal(null);
                 setView('buy-slot');
               }}
-              className="parch-btn w-auto px-8"
+              className="parch-btn w-auto px-16"
             >
-              ซื้อสล็อตตัวละครเพิ่ม
+              ซื้อสล็อตเพิ่ม
             </button>
           </div>
         </InkModal>

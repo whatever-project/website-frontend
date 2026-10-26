@@ -336,6 +336,53 @@ input[type='range'].sun-slider::-moz-range-thumb {
 
 /* ============ Requested typefaces ============ */
 
+/* ilove google font */
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  src: url(https://fonts.gstatic.com/s/googlesans/v70/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iq2qgCIlsw.woff2) format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+.font-googlesans { font-family: 'Google Sans', serif; }
+
+/* Fontwz4 */
+@font-face {
+  font-family: 'Fontwiz4';
+  src: url('/fonts/Fontwiz4.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-fontwiz4 { font-family: 'Fontwiz4', 'Prompt', sans-serif; }
+
+/* Charm-Regular */
+@font-face {
+  font-family: 'Charm';
+  src: url('/fonts/Charm-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-charm { font-family: 'Charm', 'Prompt', sans-serif; }
+
+/* bangna-new */
+@font-face {
+  font-family: 'bangna-new';
+  src: url('/fonts/bangna-new.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-bangna-new { font-family: 'bangna-new', 'Prompt', sans-serif; }
+
+/* Arkhipi */
+@font-face {
+  font-family: 'Arkhipi';
+  src: url('/fonts/Arkhipi.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-arkhipi { font-family: 'Arkhipi', 'Charmonman', 'Prompt', serif; }
+
 /* Parfumerie Script — paid (Typesenses). Uses licensed file if dropped at /fonts/ParfumerieScript.woff2, else falls back to calligraphic Great Vibes. */
 @font-face {
   font-family: 'Parfumerie Script';
@@ -353,12 +400,12 @@ input[type='range'].sun-slider::-moz-range-thumb {
 
 /* TAN Grandeur — paid (TanType). Uses licensed file if dropped at /fonts/TANGrandeur.woff2, else falls back to Cormorant Garamond. */
 @font-face {
-  font-family: 'TAN Grandeur';
-  src: url('/fonts/TANGrandeur.woff2') format('woff2');
+  font-family: 'TAN-GRANDEUR-Regular';
+  src: url('/fonts/TAN-GRANDEUR-Regular.woff2') format('woff2');
   font-weight: 400;
   font-display: swap;
 }
-.font-tan-grandeur { font-family: 'TAN Grandeur', 'Cormorant Garamond', serif; }
+.font-tan-grandeur { font-family: 'TAN-GRANDEUR-Regular', 'Cormorant Garamond', serif; }
 
 /* Josefin Sans — self-hosted (SIL OFL) */
 @font-face {

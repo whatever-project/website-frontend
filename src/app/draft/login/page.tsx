@@ -34,10 +34,6 @@ export default function LoginDraft() {
             onSubmit={handleSubmit}
             className="parch-sheet relative mx-auto w-full max-w-md p-8 sm:p-10 lg:mx-0 lg:ml-16"
           >
-            <SheetCorners />
-            <div className="absolute -top-7 left-1/2 -translate-x-1/2">
-              <WaxSeal letter="✦" size={56} />
-            </div>
 
             <h2 className="font-jimthompson mt-4 text-center text-3xl text-[#3a2c1a]">{COPY.formHeading}</h2>
             <InkDivider>

@@ -1,10 +1,10 @@
 /** Thai copy for the login draft (mirrors the live page's copy). */
 export const COPY = {
   pageTitle: "เข้าสู่ระบบ",
-  pageSub: "— ประตูสู่หุบเขา —",
-  formHeading: "จดหมายเชิญกลับหมู่บ้าน",
+  pageSub: "— the greate portal —",
+  formHeading: "ยินดีต้อนรับกลับ",
   identifier: "ชื่อผู้ใช้หรืออีเมล",
-  identifierPlaceholder: "ผู้เดินทาง หรือ you@example.com",
+  identifierPlaceholder: "username หรือ you@example.com",
   password: "รหัสผ่าน",
   passwordPlaceholder: "••••••••••",
   rememberMe: "จดจำฉัน",

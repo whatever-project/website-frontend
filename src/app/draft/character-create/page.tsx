@@ -166,7 +166,6 @@ export default function CharacterCreateDraftPage() {
 
           <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
             <div className="parch-sheet relative p-6 sm:p-10">
-              <SheetCorners />
 
               <div className="mb-8">
                 <StepHeading label={`STEP ${ROMAN[index]} — ${STEP_EN[index]}`} title={SHEET_TITLE[index]} />
