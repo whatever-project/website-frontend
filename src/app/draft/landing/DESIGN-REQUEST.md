@@ -7,10 +7,10 @@ Keep answers in the designer's words. Don't add anything the designer didn't say
 page: landing
 route_group: public
 route_path: /
-status: designing
+status: ready-for-dev
 created: 2026-10-24
-updated: 2026-10-24
-round: 1
+updated: 2026-10-26
+round: 4
 ---
 
 # Design request: หน้าแรก (Landing)
@@ -22,10 +22,12 @@ round: 1
 - **Related existing page:** /login, /signup
 
 ## 2. Attached files
-none. HTML source: none. (The village background `/assets/village.jpg` already exists in the repo and is referenced, not copied.)
+Round 4: HTML source `landing-fixed.html` (saved in `_assets/source/`), used only as a layout reference for the login/signup buttons. (The village background `/assets/village.jpg` already exists in the repo and is referenced, not copied.)
 
 ## 2b. Changes requested
-n/a (round 1: baseline copy of the live page).
+- **Round 2 (2026-10-26):** All Thai text on the page uses the Jim Thompson Roman font (`JimThompsonRoman.woff2`): "ยินดีต้อนรับ", "นักเดินทาง", "ดินแดนแห่งเวทมนตร์รอคอยการมาถึงของคุณ", buttons "เข้าสู่ระบบ" / "สมัครสมาชิก", and "เวลาจริง". English text and digits ("ARCANE VALE", "00:00", "24:00") keep their current fonts.
+- **Round 3 (2026-10-26):** Fix the font on the "เข้าสู่ระบบ" / "สมัครสมาชิก" buttons, which had not changed in round 2 (the gallery button's own style overrode it). Buttons must visibly use Jim Thompson Roman too.
+- **Round 4 (2026-10-26):** Refer to the layout of the "เข้าสู่ระบบ" / "สมัครสมาชิก" buttons in the attached `landing-fixed.html` and update the landing draft. Only the layout of these two buttons changes (width fits the text, no line wrap, padding, letter-spacing); nothing else on the page.
 
 ## 3. Content, top to bottom
 | # | Section | What it shows | What the user can do | Text source |
@@ -64,3 +66,6 @@ n/a (round 1: baseline copy of the live page).
 | Round | Date | Designer said | Sections changed |
 |---|---|---|---|
 | 1 | 2026-10-24 | Create an editable draft of the live page for the design team | all (baseline copy) |
+| 2 | 2026-10-26 | All Thai text in Jim Thompson Roman font | centre title block, buttons, time toggle |
+| 3 | 2026-10-26 | Fix the login/signup button font (still showed the old font) | buttons |
+| 4 | 2026-10-26 | Use the button layout from the attached landing-fixed.html (login/signup buttons only). Revised after dev pickup (live page not updated) | buttons |

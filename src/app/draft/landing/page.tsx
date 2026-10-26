@@ -98,26 +98,34 @@ export default function LandingDraft() {
       {/* centre title */}
       <main className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
         <p
-          className="rise-in font-oranienbaum text-2xl tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:text-3xl"
+          className="rise-in font-jimthompson text-2xl tracking-[0.55em] text-[#f1e8d8]/85 sm:text-3xl"
           style={{ textShadow: "0 2px 20px rgba(0,0,0,.5)" }}
         >
           {COPY.welcome}
         </p>
         <h1
-          className="rise-in-1 font-oranienbaum mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[7.5vw]"
+          className="rise-in-1 font-jimthompson mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] sm:text-[9vw] lg:text-[7.5vw]"
           style={{ textShadow: "0 2px 34px rgba(0,0,0,.6), 0 0 60px rgba(233,196,106,.18)" }}
         >
           {COPY.title}
         </h1>
-        <p className="rise-in-2 font-josefin mt-6 text-xs font-extralight tracking-[0.32em] text-amber-50/80 uppercase">
+        <p className="rise-in-2 font-jimthompson mt-6 text-xs font-extralight tracking-[0.32em] text-amber-50/80">
           {COPY.subtitle}
         </p>
 
         <div className="rise-in-3 mt-12 flex flex-col items-center gap-5 sm:flex-row sm:gap-8">
-          <Link href={routes.login} className="gallery-btn w-40 px-6 py-3.5 text-center text-sm tracking-[0.35em] uppercase">
+          <Link
+            href={routes.login}
+            className="gallery-btn min-w-44 px-8 py-3.5 text-center text-sm tracking-[0.2em] whitespace-nowrap sm:tracking-[0.3em]"
+            style={{ fontFamily: "'Jim Thompson Roman', 'Charmonman', 'Prompt', serif" }}
+          >
             {COPY.logIn}
           </Link>
-          <Link href={routes.signup} className="gallery-btn w-40 px-6 py-3.5 text-center text-sm tracking-[0.35em] uppercase">
+          <Link
+            href={routes.signup}
+            className="gallery-btn min-w-44 px-8 py-3.5 text-center text-sm tracking-[0.2em] whitespace-nowrap sm:tracking-[0.3em]"
+            style={{ fontFamily: "'Jim Thompson Roman', 'Charmonman', 'Prompt', serif" }}
+          >
             {COPY.signUp}
           </Link>
         </div>
@@ -131,7 +139,7 @@ export default function LandingDraft() {
             <button
               type="button"
               onClick={() => setLive((v) => !v)}
-              className={`rounded-full px-3 py-1 transition ${
+              className={`font-jimthompson rounded-full px-3 py-1 transition ${
                 live ? "bg-white/10 text-amber-100/90" : "text-amber-100/45 hover:text-amber-100/80"
               }`}
             >
