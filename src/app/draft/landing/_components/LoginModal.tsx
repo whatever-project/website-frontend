@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { Flourish, InkDivider, PasswordInput } from "@/components/Parchment"
 import { routes } from "@/config/routes"
-import parchmentRoll from "../_assets/parchment-roll.svg"
 import { LOGIN_COPY, LOGIN_STATE_OPTIONS, type LoginState } from "../_mock/login"
 import styles from "./LoginModal.module.css"
 
@@ -18,7 +17,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     const previouslyFocused = document.activeElement as HTMLElement | null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    const focusDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1800
+    const focusDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 220
     const focusTimer = window.setTimeout(() => identifierRef.current?.focus(), focusDelay)
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -48,7 +47,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className={`${styles.backdrop} fixed inset-0 z-50 overflow-y-auto bg-[#2a1f10]/60 backdrop-blur-[2px]`}
+      className={`${styles.backdrop} fixed inset-0 z-50 overflow-y-auto bg-[#10131f]/65 backdrop-blur-[2px]`}
       onClick={onClose}
     >
       <div className="flex min-h-full items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
@@ -148,12 +147,6 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
                 </Link>
               </p>
             </form>
-            <div className={styles.rollTop} aria-hidden="true">
-              <img src={parchmentRoll.src} alt="" draggable={false} />
-            </div>
-            <div className={styles.rollBottom} aria-hidden="true">
-              <img src={parchmentRoll.src} alt="" draggable={false} />
-            </div>
           </div>
 
           <div className={`${styles.preview} mt-5 border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow`}>
