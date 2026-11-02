@@ -1,12 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { getTimeState } from "@/utils/timeOfDay"
 import { routes } from "@/config/routes"
-import LanguageSwitcher from "@/components/LanguageSwitcher"
+import { FaGlobe } from "react-icons/fa"
 import Stars from "./_components/Stars"
-import { COPY } from "./_mock/copy"
+import LoginModal from "./_components/LoginModal"
+import { COPY_BY_LANG, type DraftLang } from "./_mock/copy"
+
+// Both auth buttons share one size; nowrap keeps the label on a single line.
+// Inline fontFamily so it wins over `.gallery-btn`'s own font-family.
+const AUTH_BTN =
+  "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 text-center text-base tracking-[0.15em]"
+const AUTH_BTN_STYLE = {
+  fontFamily: "'Jim Thompson Roman', 'Charmonman', 'Prompt', serif",
+  background: "rgba(12, 14, 22, 0.55)", // darker than .gallery-btn so labels stay legible on a bright backdrop
+  textShadow: "0 1px 10px rgba(0,0,0,.8)",
+}
 
 export default function LandingDraft() {
   const nowHour = () => {
@@ -16,6 +27,14 @@ export default function LandingDraft() {
 
   const [hour, setHour] = useState(nowHour())
   const [live, setLive] = useState(true)
+  const [lang, setLang] = useState<DraftLang>("th")
+  const COPY = COPY_BY_LANG[lang]
+  const [loginOpen, setLoginOpen] = useState(false)
+  const loginButtonRef = useRef<HTMLButtonElement>(null)
+  const closeLogin = useCallback(() => {
+    setLoginOpen(false)
+    window.requestAnimationFrame(() => loginButtonRef.current?.focus())
+  }, [])
 
   // `?t=<hour>` forces a time of day (handy for designers: /draft/landing?t=21)
   useEffect(() => {
@@ -92,32 +111,58 @@ export default function LandingDraft() {
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
         <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">{COPY.arcaneVale}</div>
-        <LanguageSwitcher tone="night" />
+        {/* Draft-local toggle: the shared LanguageSwitcher renders nothing on /draft/*, so it swaps mock copy instead */}
+        <button
+          type="button"
+          onClick={() => setLang((l) => (l === "th" ? "en" : "th"))}
+          aria-label={lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
+          className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-100/30 px-3 py-1 font-ui text-[11px] tracking-[0.2em] whitespace-nowrap text-amber-100/80 uppercase transition hover:border-amber-100/60 hover:text-amber-50"
+        >
+          <span aria-hidden className="text-sm leading-none tracking-normal">
+            <FaGlobe />
+          </span>
+          {lang}
+        </button>
       </header>
+
+      {/* soft dark scrim behind the title block so text stays readable on the bright daytime backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[5]"
+        style={{ background: "radial-gradient(55% 45% at 50% 52%, rgba(10,12,22,.62) 0%, rgba(10,12,22,.35) 55%, transparent 100%)" }}
+      />
 
       {/* centre title */}
       <main className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
         <p
-          className="rise-in font-oranienbaum text-2xl tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:text-3xl"
-          style={{ textShadow: "0 2px 20px rgba(0,0,0,.5)" }}
+          className="rise-in font-jimthompson text-2xl tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:text-3xl"
+          style={{ textShadow: "0 2px 6px rgba(0,0,0,.7), 0 2px 24px rgba(0,0,0,.7)" }}
         >
           {COPY.welcome}
         </p>
         <h1
-          className="rise-in-1 font-oranienbaum mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[7.5vw]"
-          style={{ textShadow: "0 2px 34px rgba(0,0,0,.6), 0 0 60px rgba(233,196,106,.18)" }}
+          className="rise-in-1 font-jimthompson mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[7.5vw]"
+          style={{ textShadow: "0 2px 8px rgba(0,0,0,.75), 0 2px 34px rgba(0,0,0,.7), 0 0 60px rgba(233,196,106,.18)" }}
         >
           {COPY.title}
         </h1>
-        <p className="rise-in-2 font-josefin mt-6 text-xs font-extralight tracking-[0.32em] text-amber-50/80 uppercase">
+        <p
+          className="rise-in-2 font-josefin mt-6 text-xs font-normal tracking-[0.32em] text-amber-50 uppercase"
+          style={{ textShadow: "0 1px 6px rgba(0,0,0,.85), 0 1px 14px rgba(0,0,0,.7)" }}
+        >
           {COPY.subtitle}
         </p>
 
         <div className="rise-in-3 mt-12 flex flex-col items-center gap-5 sm:flex-row sm:gap-8">
-          <Link href={routes.login} className="gallery-btn w-40 px-6 py-3.5 text-center text-sm tracking-[0.35em] uppercase">
+          <button
+            ref={loginButtonRef}
+            type="button"
+            onClick={() => setLoginOpen(true)}
+            className={AUTH_BTN}
+            style={AUTH_BTN_STYLE}
+          >
             {COPY.logIn}
-          </Link>
-          <Link href={routes.signup} className="gallery-btn w-40 px-6 py-3.5 text-center text-sm tracking-[0.35em] uppercase">
+          </button>
+          <Link href={routes.signup} className={AUTH_BTN} style={AUTH_BTN_STYLE}>
             {COPY.signUp}
           </Link>
         </div>
@@ -126,8 +171,7 @@ export default function LandingDraft() {
       {/* time scrubber */}
       <footer className="absolute inset-x-0 bottom-0 z-20 px-6 pb-7 sm:px-10">
         <div className="mx-auto flex max-w-xl flex-col gap-2">
-          <div className="flex items-center justify-between font-josefin text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
-            <span>00:00</span>
+          <div className="flex items-center justify-center font-josefin text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
             <button
               type="button"
               onClick={() => setLive((v) => !v)}
@@ -137,7 +181,6 @@ export default function LandingDraft() {
             >
               {live ? COPY.realTime : COPY.realTimeOff}
             </button>
-            <span>24:00</span>
           </div>
           <input
             type="range"
@@ -154,6 +197,8 @@ export default function LandingDraft() {
           />
         </div>
       </footer>
+
+      {loginOpen && <LoginModal onClose={closeLogin} />}
     </div>
   )
 }

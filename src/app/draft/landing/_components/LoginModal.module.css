@@ -1,0 +1,111 @@
+.backdrop {
+  animation: backdrop-in 300ms ease-out both;
+}
+
+.sheet {
+  transform-origin: center;
+  animation: sheet-unroll 1800ms cubic-bezier(0.22, 0.75, 0.25, 1) both;
+}
+
+.rollTop,
+.rollBottom {
+  position: absolute;
+  z-index: 20;
+  top: calc(50% - 26px);
+  right: -14px;
+  left: -14px;
+  height: 52px;
+  pointer-events: none;
+  filter: drop-shadow(0 9px 7px rgba(42, 26, 10, 0.55));
+}
+
+.rollTop img,
+.rollBottom img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  user-select: none;
+}
+
+.rollTop {
+  animation: roll-top 1800ms cubic-bezier(0.22, 0.75, 0.25, 1) forwards;
+}
+
+.rollBottom {
+  animation: roll-bottom 1800ms cubic-bezier(0.22, 0.75, 0.25, 1) forwards;
+}
+
+.preview {
+  animation: preview-in 1800ms ease-out both;
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheet-unroll {
+  0%, 24% {
+    clip-path: inset(calc(50% - 22px) -4px calc(50% - 22px) -4px round 4px);
+    filter: brightness(0.82) saturate(1.15);
+    transform: perspective(900px) rotateX(-5deg) scaleX(0.985);
+  }
+  58% {
+    filter: brightness(0.98) saturate(1.05);
+    transform: perspective(900px) rotateX(1.2deg) scaleX(1);
+  }
+  100% {
+    clip-path: inset(0);
+    filter: brightness(1) saturate(1);
+    transform: perspective(900px) rotateX(0) scaleX(1);
+  }
+}
+
+@keyframes roll-top {
+  0%, 24% {
+    top: calc(50% - 26px);
+    opacity: 1;
+    transform: perspective(500px) rotateX(-8deg) scaleY(1.08);
+  }
+  82% { opacity: 1; }
+  100% {
+    top: -26px;
+    opacity: 0;
+    transform: perspective(500px) rotateX(0) scaleY(0.8);
+  }
+}
+
+@keyframes roll-bottom {
+  0%, 24% {
+    top: calc(50% - 26px);
+    opacity: 1;
+    transform: perspective(500px) rotateX(8deg) scaleY(1.08);
+  }
+  82% { opacity: 1; }
+  100% {
+    top: calc(100% - 26px);
+    opacity: 0;
+    transform: perspective(500px) rotateX(0) scaleY(0.8);
+  }
+}
+
+@keyframes preview-in {
+  0%, 78% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet,
+  .rollTop,
+  .rollBottom,
+  .preview {
+    animation: none;
+  }
+
+  .rollTop,
+  .rollBottom {
+    display: none;
+  }
+}
