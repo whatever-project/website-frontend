@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Flourish, InkDivider, SheetCorners, WaxSeal } from "@/components/Parchment"
-import { routes } from "@/config/routes"
+import { DRAFT_HUB } from "@/config/routes"
 import DraftFrame from "./DraftFrame"
 
 interface SubmittedScreenProps {
@@ -28,7 +28,7 @@ export default function SubmittedScreen({ displayName }: SubmittedScreenProps) {
           <p className="mt-2 font-ui text-[11.5px] leading-relaxed text-[#a68d5f]">
             ทีมผู้ดูแลจะตรวจสอบความถูกต้องตามกฎแห่งหุบเขาก่อนประทับตรารับรอง
           </p>
-          <Link href={routes.home} className="parch-btn mt-6 block">
+          <Link href={DRAFT_HUB}className="parch-btn mt-6 block">
             กลับสู่หมู่บ้าน
           </Link>
         </div>
