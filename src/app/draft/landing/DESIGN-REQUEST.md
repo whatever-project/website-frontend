@@ -10,7 +10,7 @@ route_path: /
 status: designing
 created: 2026-10-24
 updated: 2026-11-04
-round: 4
+round: 12
 ---
 
 # Design request: หน้าแรก (Landing)
@@ -27,6 +27,30 @@ Round 2: screenshot of the desired login card, showing a single parchment sheet 
 Round 3: the Kimi demo project "Fantasy Parchment Scroll Demo" (a 3D parchment scroll that rolls open and closed; Three.js + one GLB model). HTML source: the demo's `scroll_login_animation_v01.html`, copied to `_assets/source/` for reference only. The demo's GLB model is copied to `_assets/scroll/`.
 
 ## 2b. Changes requested
+**Round 12**
+- The real-time button shows a pointer (hand) cursor on hover.
+
+**Round 11**
+- Bigger click/tap area for the time slider (about 26 px tall instead of 2 px). Nothing moves or changes size visually.
+
+**Round 10**
+- Make the moon icon blend into the night background: duller colour, partly transparent, much softer glow (the designer set its size to 13 px).
+
+**Round 9**
+- Make the moon icon on the slider smaller (16 px to 12 px); the sun icon stays the same size.
+
+**Round 8**
+- The circle on the time slider becomes an icon that follows the slider: sun (`MdSunny`) from 06:00 to 18:00, moon with stars (`BsMoonStarsFill`) from 18:01 to 05:59. (The toggle label above the slider is currently text only; the designer removed its icons.)
+
+**Round 7**
+- Make the circle (thumb) on the bottom time slider smaller (14 px to 8 px).
+
+**Round 6**
+- The label on the bottom real-time toggle shows the actual current time from the device clock (HH:MM, 24 h, updating) instead of the fixed "05:33 น."
+
+**Round 5**
+- Real-time toggle at the bottom: show a sun icon instead of the ✦/✧/○ text symbols. Filled sun (`FaSun`) when real time is on, outline sun (`FaRegSun`) when it is off.
+
 **Round 4**
 - Remove the cross (X) close button from the login scroll.
 - Closing now works by tapping anywhere outside the form (the dim area or the paper around the form) or pressing Esc; each rolls the sheet up first. Confirmed by the designer.
@@ -86,3 +110,11 @@ Round 3: the Kimi demo project "Fantasy Parchment Scroll Demo" (a 3D parchment s
 | 2 | 2026-11-02 | Open login on landing as a parchment-unroll popup matching the supplied screenshot | centre login action, new login popup |
 | 3 | 2026-11-04 | Replace the popup with the Kimi demo's 3D parchment scroll (all its animation), full existing form on the sheet | login popup |
 | 4 | 2026-11-04 | Remove the cross button; close by tapping outside the form or Esc | login popup close control |
+| 5 | 2026-11-04 | Use sun icons (filled on / outline off) on the real-time toggle instead of text symbols | bottom time slider |
+| 6 | 2026-11-04 | Show the real current time in the toggle label instead of the hard-coded "05:33 น." | bottom time slider |
+| 7 | 2026-11-04 | Smaller circle on the time slider | bottom time slider |
+| 8 | 2026-11-04 | Slider circle becomes a sun icon (06:00-18:00) or a moon-and-stars icon (18:01-05:59) | bottom time slider |
+| 9 | 2026-11-04 | Smaller moon icon on the slider | bottom time slider |
+| 10 | 2026-11-04 | Moon icon less prominent, blends into the background | bottom time slider |
+| 11 | 2026-11-04 | Larger clickable area for the slider, layout unchanged | bottom time slider |
+| 12 | 2026-11-04 | Pointer cursor on the real-time button | bottom time slider |

@@ -1,0 +1,62 @@
+/* The native thumb of the shared `.sun-slider` (14px circle, globals.css) is made invisible here and a
+   sun / moon icon is drawn over it by the page. The thumb keeps a fixed size so the icon can be placed
+   exactly on it. The doubled class selector wins over globals.css without touching that file. */
+.wrap {
+  position: relative;
+  --thumb: 18px;
+  --hit: 26px;
+}
+
+/* Block so the wrapper is exactly as tall as the input and the icon centres on the track.
+   Bigger click area: the input is --hit tall (the shared slider is 2px), the same 2px track is painted
+   in its middle, and negative vertical margins cancel the extra height so nothing around it moves. */
+.wrap input[type="range"].timeSlider {
+  display: block;
+  height: var(--hit);
+  margin: calc((2px - var(--hit)) / 2) 0;
+  background-size: 100% 2px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+input[type="range"].timeSlider.timeSlider::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+input[type="range"].timeSlider.timeSlider::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Centre of the native thumb: half a thumb plus the value's share of the remaining track. */
+.icon {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--thumb) / 2 + var(--pos) * (100% - var(--thumb)));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.sun {
+  color: #f6d98a;
+  opacity: 0.70;
+  filter: drop-shadow(0 0 5px rgba(233, 196, 106, 0.7));
+}
+
+/* Smaller than the sun (16px): the moon-and-stars glyph fills more of its box. */
+.moon {
+  color: #b4bbdc;
+  opacity: 0.70;
+  font-size: 13px;
+  filter: drop-shadow(0 0 3px rgba(150, 160, 215, 0.25));
+}
