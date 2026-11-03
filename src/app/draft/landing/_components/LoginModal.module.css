@@ -2,10 +2,38 @@
   animation: backdrop-in 200ms ease-out both;
 }
 
-/* Plain pop-up: the sheet just fades and scales in slightly. */
+/* Flat fallback card (only when WebGL / the 3D scroll can't start): fades and scales in slightly. */
 .sheet,
 .preview {
   animation: pop-in 220ms ease-out both;
+}
+
+.stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Login form fades onto the sheet once the parchment has fully unrolled and settled. */
+.formReveal {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 220ms ease-out, transform 240ms ease-out;
+}
+
+.formHidden {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+.loadingRoll {
+  width: 96px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(0deg, #d8c9a3, #f1e8d0);
+  box-shadow: inset 0 -3px 5px rgba(90, 70, 40, 0.3);
+  animation: loading-turn 1.1s ease-in-out infinite alternate;
 }
 
 @keyframes backdrop-in {
@@ -18,10 +46,19 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes loading-turn {
+  to { transform: rotate(-8deg) translateY(-4px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .backdrop,
   .sheet,
-  .preview {
+  .preview,
+  .loadingRoll {
     animation: none;
+  }
+
+  .formReveal {
+    transition: none;
   }
 }
