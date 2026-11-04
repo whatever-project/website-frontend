@@ -159,12 +159,10 @@ export default function CharacterCreateDraftPage() {
       <DraftFrame sub={sub} title={STEP_TITLE[index]}>
         {/* content shifts left while the info panel is open (left/relative, not transform: a transform would
             re-anchor the fixed photo-picker modal to this wrapper instead of the viewport) */}
-        <div className={`relative transition-[left] duration-300 ${info.open ? "left-[-88%] sm:-left-105" : "left-0"}`}>
-          <div className="px-6 pt-8 sm:px-12">
-            <StepIndicator current={step} total={TOTAL_STEPS} />
-          </div>
-
-          <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
+        <div className={`relative transition-[left] duration-300 ${info.open ? "info-open-shift" : "left-0"}`}>
+          <div className="wizard-stage">
+            <StepIndicator current={step} total={TOTAL_STEPS} labels={STEP_TITLE} onStep={goToStep} />
+            <div className="wizard-sheet-column">
             <div className="parch-sheet relative p-6 sm:p-10">
 
               <div className="mb-8">
@@ -184,9 +182,10 @@ export default function CharacterCreateDraftPage() {
                 onNext={() => (step === TOTAL_STEPS ? submit() : goToStep(step + 1))}
                 prevDisabled={step === 1}
                 nextDisabled={!check.valid}
-                nextLabel={step === TOTAL_STEPS ? "ยืนยันการสร้างตัวละคร →" : "ถัดไป →"}
+                nextLabel={step === TOTAL_STEPS ? "ยืนยันการสร้างตัวละคร" : "ถัดไป"}
                 error={check.hint}
               />
+            </div>
             </div>
           </div>
         </div>

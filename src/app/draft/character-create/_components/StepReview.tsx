@@ -1,5 +1,6 @@
+import { useId, useMemo, useState } from "react"
 import PhotoCircle from "./PhotoCircle"
-import { getBirthInfo, getDisplayName, type CharacterForm } from "./form"
+import { cleanRichText, getBirthInfo, getDisplayName, type CharacterForm } from "./form"
 import { BEAST_RACES, BLOODLINE_TYPES, DOMINANT_BLOODLINES, NYMPH_SPIRITS, optionLabel } from "../_mock/options"
 
 interface StepReviewProps {
@@ -15,14 +16,51 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function ReviewBlock({ label, value }: { label: string; value: string }) {
+function BookIcon() {
   return (
-    <div>
-      <p className="parch-label mb-1.5">{label}</p>
-      <div className="max-h-44 overflow-y-auto border border-dashed border-[#c9ad77] bg-[#efe3c6]/40 px-4 py-3">
-        <p className="whitespace-pre-wrap font-ui text-[13px] leading-relaxed text-[#5d4626]">{value.trim() || "—"}</p>
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+    </svg>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg className="review-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+/** Expandable reading sheet: collapsed by default, unfolds to show the formatted text. */
+function ReviewBlock({ label, value }: { label: string; value: string }) {
+  const [open, setOpen] = useState(false)
+  const id = useId()
+  // Sanitise once per value, not on every toggle (DOMParser on each render caused the lag).
+  const html = useMemo(() => cleanRichText(value) || "—", [value])
+
+  return (
+    <section className={`review-block ${open ? "is-open" : ""}`}>
+      <button
+        type="button"
+        className="review-trigger"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="review-book" aria-hidden="true"><BookIcon /></span>
+        <span className="review-label"><small>✦ บันทึกตัวละคร</small>{label}</span>
+        <span className="review-action">{open ? "ย่อเก็บ" : "กดเพื่ออ่าน"}</span>
+        <ChevronIcon />
+      </button>
+      <div id={id} className="review-panel" aria-hidden={!open} inert={!open}>
+        <div className="review-panel-inner">
+          <div className="review-content font-ui">
+            <div className="rich-rendered" dangerouslySetInnerHTML={{ __html: html }} />
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -76,10 +114,10 @@ export default function StepReview({ form }: StepReviewProps) {
         ))}
       </div>
 
-      <div className="space-y-5">
-        <ReviewBlock label="ประวัติตัวละคร" value={form.backstory} />
+      <div className="review-blocks">
         <ReviewBlock label="ลักษณะภายนอก" value={form.appearanceNotes} />
         <ReviewBlock label="อุปนิสัย" value={form.personality} />
+        <ReviewBlock label="ประวัติตัวละคร" value={form.backstory} />
         <ReviewBlock label="ข้อมูลเพิ่มเติม (TMI)" value={form.tmi} />
       </div>
     </div>

@@ -236,11 +236,33 @@ export function validateAppearance(form: CharacterForm): StepCheck {
     return { valid: false, hint: "กรุณากรอกสีผม สีตา และสีผิว" }
   if (form.height.trim() === "" || form.weight.trim() === "")
     return { valid: false, hint: "กรุณากรอกส่วนสูงและน้ำหนัก (ตัวเลขเท่านั้น)" }
+  const notes = form.appearanceNotes.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim()
+  if (notes === "") return { valid: false, hint: "กรุณากรอกลักษณะภายนอก" }
   return { valid: true, hint: null }
 }
 
 export function validateBackstory(form: CharacterForm): StepCheck {
-  return form.backstory.trim() === ""
-    ? { valid: false, hint: "กรุณากรอกประวัติตัวละคร" }
-    : { valid: true, hint: null }
+  const text = form.backstory.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim()
+  return text === "" ? { valid: false, hint: "กรุณากรอกประวัติตัวละคร" } : { valid: true, hint: null }
+}
+
+/** Keep only the formatting offered by the editor; pasted markup is never rendered directly. */
+export function cleanRichText(html: string): string {
+  if (typeof DOMParser === "undefined") return html
+  const doc = new DOMParser().parseFromString(html, "text/html")
+  const allowed = new Set(["B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "UL", "OL", "LI", "BR", "DIV", "P"])
+  const walk = (node: Element): void => {
+    Array.from(node.children).forEach((child) => {
+      walk(child)
+      if (!allowed.has(child.tagName)) {
+        child.replaceWith(...Array.from(child.childNodes))
+        return
+      }
+      const align = child instanceof HTMLElement ? child.style.textAlign : ""
+      child.getAttributeNames().forEach((name) => child.removeAttribute(name))
+      if (["left", "center", "right"].includes(align)) child.setAttribute("style", `text-align:${align}`)
+    })
+  }
+  walk(doc.body)
+  return doc.body.innerHTML
 }

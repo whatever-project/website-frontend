@@ -17,7 +17,7 @@ interface DraftFrameProps {
  */
 export default function DraftFrame({ sub, title, children }: DraftFrameProps) {
   return (
-    <div className="parch-bg relative min-h-screen w-full overflow-x-hidden">
+    <div className="cc-scope parch-bg relative min-h-screen w-full overflow-x-hidden">
       <div className="parch-vignette pointer-events-none absolute inset-0 z-10" />
 
       <header className="relative z-20 flex items-center justify-between px-6 pt-7 sm:px-12">

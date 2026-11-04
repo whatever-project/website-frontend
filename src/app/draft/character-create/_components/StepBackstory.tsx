@@ -1,4 +1,5 @@
 import SectionHeading from "./SectionHeading"
+import RichTextEditor from "./RichTextEditor"
 import type { CharacterForm, FormPatch } from "./form"
 import type { InfoTopicKey } from "../_mock/guideContent"
 
@@ -22,14 +23,12 @@ export default function StepBackstory({ form, onChange, onOpenInfo }: StepBackst
     <div className="space-y-8">
       <section className="space-y-4">
         <SectionHeading title="เรื่องราวของตัวละคร" onDetail={() => onOpenInfo("backstory")} />
-        <textarea
+        <RichTextEditor
           id="cc-backstory"
-          rows={7}
-          aria-label="เรื่องราวของตัวละคร"
-          className="parch-input w-full resize-none font-serithai"
+          label="เรื่องราวของตัวละคร"
           placeholder="เล่าเรื่องราวของตัวละคร..."
           value={form.backstory}
-          onChange={(e) => onChange({ backstory: e.target.value })}
+          onChange={(backstory) => onChange({ backstory })}
         />
 
         <div className="border border-dashed border-[#c9ad77] bg-[#efe3c6]/40 p-4">
@@ -44,14 +43,13 @@ export default function StepBackstory({ form, onChange, onOpenInfo }: StepBackst
 
       <section className="space-y-4">
         <SectionHeading title="ข้อมูลเพิ่มเติม (ไม่บังคับ · TMI ต่าง ๆ ของตัวละคร)" />
-        <textarea
+        <RichTextEditor
           id="cc-tmi"
-          rows={3}
-          aria-label="ข้อมูลเพิ่มเติม (TMI)"
-          className="parch-input w-full resize-none font-serithai"
+          label="ข้อมูลเพิ่มเติม (TMI)"
           placeholder="เรื่องเล็ก ๆ น้อย ๆ ที่อยากบอกต่อ เช่น ของชิ้นหัวใจโปรด นิสัยแปลก ๆ ความชอบส่วนตัว..."
+          minHeight={120}
           value={form.tmi}
-          onChange={(e) => onChange({ tmi: e.target.value })}
+          onChange={(tmi) => onChange({ tmi })}
         />
       </section>
     </div>

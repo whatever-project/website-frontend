@@ -1,30 +1,40 @@
 interface StepIndicatorProps {
   current: number
   total: number
+  labels: readonly string[]
+  onStep: (step: number) => void
 }
 
-/** Numbered step circles — filled for done/current, outline for upcoming. */
-export default function StepIndicator({ current, total }: StepIndicatorProps) {
+/** Vertical parchment step rail; completed steps lead back to that part of the form. */
+export default function StepIndicator({ current, total, labels, onStep }: StepIndicatorProps) {
   return (
-    <ol className="flex items-center justify-center" aria-label={`ขั้นที่ ${current} จาก ${total}`}>
-      {Array.from({ length: total }, (_, i) => i + 1).map((n) => {
-        const done = n <= current
-        return (
-          <li key={n} className="flex items-center">
-            {n > 1 && <span className={`h-px w-5 sm:w-10 ${n <= current ? "bg-[#43331c]" : "bg-[#b89a63]"}`} />}
-            <span
-              aria-current={n === current ? "step" : undefined}
-              className={`flex h-8 w-8 items-center justify-center rounded-full border font-ui text-[13px] ${
-                done
-                  ? "border-[#43331c] bg-[#43331c] text-[#e9d9ae] shadow-[0_3px_10px_rgba(50,36,14,0.35)]"
-                  : "border-[#b89a63] text-[#a68d5f]"
-              }`}
-            >
-              {n}
-            </span>
-          </li>
-        )
-      })}
-    </ol>
+    <nav className="step-rail" aria-label={`ลำดับการกรอก ขั้นที่ ${current} จาก ${total}`}>
+      <p className="parch-label">ลำดับการจารึก</p>
+      <ol>
+        {Array.from({ length: total }, (_, index) => index + 1).map((number) => {
+          const completed = number < current
+          const active = number === current
+          return (
+            <li key={number} className={`${completed ? "is-complete" : ""} ${active ? "is-current" : ""}`}>
+              <button
+                type="button"
+                disabled={!completed}
+                onClick={() => completed && onStep(number)}
+                aria-current={active ? "step" : undefined}
+                aria-label={`${labels[number - 1]}${completed ? " — กดเพื่อกลับไป" : ""}`}
+                title={completed ? "กดเพื่อกลับไปขั้นตอนนี้" : labels[number - 1]}
+              >
+                <span className="step-number">{number}</span>
+                <span className="step-copy">
+                  <strong>{labels[number - 1]}</strong>
+                  <small>{active ? "กำลังกรอก" : completed ? "กดเพื่อกลับไป" : "รอดำเนินการ"}</small>
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+      <p className="step-rail-note">✦ สามารถกดย้อนกลับมายังขั้นตอนที่ผ่านแล้ว</p>
+    </nav>
   )
 }

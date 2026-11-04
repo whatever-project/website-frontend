@@ -1,4 +1,5 @@
 import Field from "./Field"
+import RichTextEditor from "./RichTextEditor"
 import { MAX_CUSTOM_TOPICS } from "../_mock/options"
 import type { CharacterForm, CustomTopic, FormPatch } from "./form"
 
@@ -25,7 +26,7 @@ export default function StepAppearance({ form, onChange }: StepAppearanceProps) 
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="color-fields">
         <Field id="cc-hair" label="สีผมตามกำเนิด">
           <input
             id="cc-hair"
@@ -53,6 +54,9 @@ export default function StepAppearance({ form, onChange }: StepAppearanceProps) 
             onChange={(e) => onChange({ skinColor: e.target.value })}
           />
         </Field>
+      </div>
+
+      <div className="measure-row">
         <Field id="cc-scent" label="กลิ่นประจำตัว (ไม่บังคับ)">
           <input
             id="cc-scent"
@@ -62,25 +66,31 @@ export default function StepAppearance({ form, onChange }: StepAppearanceProps) 
             onChange={(e) => onChange({ scent: e.target.value })}
           />
         </Field>
-        <Field id="cc-height" label="ส่วนสูง" hint="ใส่เป็นตัวเลข — หน่วย: เซนติเมตร (cm.)">
-          <input
-            id="cc-height"
-            inputMode="numeric"
-            className="parch-input w-full font-serithai"
-            placeholder="เช่น 168"
-            value={form.height}
-            onChange={(e) => onChange({ height: e.target.value.replace(/\D/g, "") })}
-          />
+        <Field id="cc-height" label="ส่วนสูง">
+          <div className="unit-input">
+            <input
+              id="cc-height"
+              inputMode="numeric"
+              className="font-serithai"
+              placeholder="168"
+              value={form.height}
+              onChange={(e) => onChange({ height: e.target.value.replace(/\D/g, "") })}
+            />
+            <span>cm.</span>
+          </div>
         </Field>
-        <Field id="cc-weight" label="น้ำหนัก" hint="ใส่เป็นตัวเลข — หน่วย: กิโลกรัม (kg.)">
-          <input
-            id="cc-weight"
-            inputMode="numeric"
-            className="parch-input w-full font-serithai"
-            placeholder="เช่น 52"
-            value={form.weight}
-            onChange={(e) => onChange({ weight: e.target.value.replace(/\D/g, "") })}
-          />
+        <Field id="cc-weight" label="น้ำหนัก">
+          <div className="unit-input">
+            <input
+              id="cc-weight"
+              inputMode="numeric"
+              className="font-serithai"
+              placeholder="52"
+              value={form.weight}
+              onChange={(e) => onChange({ weight: e.target.value.replace(/\D/g, "") })}
+            />
+            <span>kg.</span>
+          </div>
         </Field>
       </div>
 
@@ -126,25 +136,25 @@ export default function StepAppearance({ form, onChange }: StepAppearanceProps) 
 
       <div className="border-t border-dashed border-[#c9ad77]" />
 
-      <Field id="cc-appearance" label="ลักษณะภายนอก (ไม่บังคับ)">
-        <textarea
+      <Field id="cc-appearance" label="ลักษณะภายนอก">
+        <RichTextEditor
           id="cc-appearance"
-          rows={5}
-          className="parch-input w-full resize-none font-serithai"
+          label="ลักษณะภายนอก"
           placeholder="บรรยายลักษณะภายนอกโดยละเอียด เช่น รูปร่าง ทรงผม รอยแผลเป็นที่เห็นได้..."
+          minHeight={160}
           value={form.appearanceNotes}
-          onChange={(e) => onChange({ appearanceNotes: e.target.value })}
+          onChange={(appearanceNotes) => onChange({ appearanceNotes })}
         />
       </Field>
 
       <Field id="cc-personality" label="อุปนิสัย (ไม่บังคับ)">
-        <textarea
+        <RichTextEditor
           id="cc-personality"
-          rows={5}
-          className="parch-input w-full resize-none font-serithai"
+          label="อุปนิสัย"
           placeholder="บรรยายอุปนิสัย นิสัยใจคอ พฤติกรรมที่โดดเด่น..."
+          minHeight={160}
           value={form.personality}
-          onChange={(e) => onChange({ personality: e.target.value })}
+          onChange={(personality) => onChange({ personality })}
         />
       </Field>
     </div>

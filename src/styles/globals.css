@@ -543,3 +543,305 @@ input[type='range'].sun-slider::-moz-range-thumb {
     0 0 26px rgba(233, 196, 106, 0.28);
 }
 .liquid-glass:active { transform: translateY(0); }
+
+/* ---------------------------------------------------------------------------
+   Character-create layout: step rail, compact measure rows, rich editor and
+   expandable review sheets. Palette, textures and fonts reuse the parchment set.
+   --------------------------------------------------------------------------- */
+.wizard-stage {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 768px);
+  gap: 32px;
+  align-items: start;
+  justify-content: center;
+  padding: 40px 24px 0;
+}
+.wizard-sheet-column { width: 100%; min-width: 0; }
+.step-rail { position: sticky; top: 24px; padding: 10px 0 0; }
+.step-rail > .parch-label { margin: 0 0 14px 48px; }
+.step-rail ol { margin: 0; padding: 0; list-style: none; }
+.step-rail li { position: relative; }
+.step-rail li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: calc(50% + 16px);
+  bottom: calc(-50% + 16px);
+  left: 15.5px;
+  width: 1px;
+  background: #c9ad77;
+}
+.step-rail li.is-complete:not(:last-child)::after { background: #43331c; }
+.step-rail button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  min-height: 68px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 8px 8px 8px 0;
+  border: 0;
+  background: transparent;
+  color: #a68d5f;
+  text-align: left;
+}
+.step-number {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid #b89a63;
+  border-radius: 50%;
+  background: #e9dfc8;
+  font-size: 13px;
+  transition: transform 180ms, box-shadow 180ms, background-color 180ms;
+}
+.step-copy { display: grid; min-width: 0; gap: 1px; }
+.step-copy strong { font-family: 'Jost', 'Prompt', sans-serif; font-size: 12.5px; font-weight: 500; letter-spacing: .02em; line-height: 1.5; }
+.step-copy small { font-size: 9px; letter-spacing: .15px; opacity: .75; }
+.step-rail li.is-complete button, .step-rail li.is-current button { color: #3a2c1a; }
+.step-rail li.is-complete .step-number, .step-rail li.is-current .step-number {
+  border-color: #43331c;
+  background: #43331c;
+  color: #e9d9ae;
+  box-shadow: 0 3px 10px rgba(50, 36, 14, .25);
+}
+.step-rail li.is-complete button:hover .step-number { transform: translateX(-2px); box-shadow: 0 4px 14px rgba(50, 36, 14, .35); }
+.step-rail li.is-complete button:hover .step-copy strong { color: #8a6a35; }
+.step-rail li.is-current .step-number { transform: scale(1.08); }
+.step-rail li:not(.is-current):not(.is-complete) button { opacity: .72; }
+.step-rail-note { margin: 17px 0 0 47px; color: #a68d5f; font-size: 9px; line-height: 1.7; }
+
+.color-fields { display: flex; gap: 20px; align-items: flex-start; }
+.color-fields > div { flex: 1 1 0; min-width: 0; }
+
+.measure-row { display: grid; grid-template-columns: minmax(0, 1fr) 125px 125px; gap: 20px; }
+.unit-input {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  border: 1px solid #b89a63;
+  background: rgba(255, 252, 237, .35);
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.unit-input:focus-within { border-color: #8a6a35; box-shadow: 0 0 0 1px rgba(138, 106, 53, .15); }
+.unit-input input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 8px 4px 8px 11px;
+  border: 0;
+  background: transparent;
+  color: #3a2c1a;
+  font-size: 16px;
+}
+.unit-input input:focus { outline: none; }
+.unit-input span { padding-right: 9px; color: #8a7350; font-size: 11px; }
+
+.rich-editor { border: 1px solid #b89a63; background: rgba(255, 252, 237, .35); }
+.rich-toolbar {
+  flex-wrap: wrap;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px;
+  border-bottom: 1px dashed #c9ad77;
+}
+.rich-toolbar button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #5d4626;
+  transition: background-color 160ms, color 160ms;
+}
+.rich-toolbar button:hover { background: #efe3c6; color: #3a2c1a; }
+.rich-toolbar .align-tools { margin-left: 5px; padding-left: 7px; border-left: 1px solid #c9ad77; }
+.rich-content {
+  min-height: 270px;
+  padding: 15px 17px;
+  overflow: auto;
+  resize: vertical;
+  color: #3a2c1a;
+  font-size: 16px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rich-content:focus { background: rgba(255, 252, 237, .4); outline: none; }
+.rich-content.empty::before, .rich-content:empty::before {
+  content: attr(data-placeholder);
+  color: #a68d5f;
+  pointer-events: none;
+}
+.rich-content div, .rich-content p, .rich-rendered div, .rich-rendered p { margin: 0 0 8px; }
+.rich-content b, .rich-content strong, .rich-rendered b, .rich-rendered strong { font-weight: 700; }
+.rich-content i, .rich-content em, .rich-rendered i, .rich-rendered em { font-style: italic; }
+
+.review-blocks { display: grid; gap: 12px; }
+.review-block {
+  position: relative;
+  overflow: hidden;
+  border: 1px dashed #c9ad77;
+  background: rgba(239, 227, 198, .28);
+  transition: border-color 220ms, background-color 220ms, box-shadow 220ms;
+}
+.review-block:hover { border-color: #a3854e; background: rgba(239, 227, 198, .45); }
+.review-block.is-open {
+  border-style: solid;
+  border-color: #b89a63;
+  background: rgba(255, 252, 237, .24);
+  box-shadow: 0 5px 16px rgba(80, 58, 22, .07);
+}
+.review-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 68px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 15px;
+  border: 0;
+  background: transparent;
+  color: #3a2c1a;
+  text-align: left;
+}
+.review-book {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #c9ad77;
+  border-radius: 50%;
+  color: #8a6a35;
+  transition: color 220ms, background-color 220ms, transform 220ms;
+}
+.review-label { display: grid; flex: 1; gap: 1px; font-family: 'Jost', 'Prompt', sans-serif; font-size: 15px; font-weight: 500; letter-spacing: .02em; }
+.review-label small { color: #a68d5f; font-family: 'Jost', 'Prompt', sans-serif; font-size: 9px; font-weight: 400; letter-spacing: .08em; }
+.review-action { color: #8a6a35; font-size: 10px; white-space: nowrap; }
+.review-chevron { flex: none; color: #8a6a35; transition: transform 260ms ease; }
+.review-trigger:hover .review-book { background: #efe3c6; transform: rotate(-7deg); }
+.review-trigger:active .review-book { transform: rotate(-7deg) scale(.94); }
+.review-block.is-open .review-book { border-color: #43331c; background: #43331c; color: #e9d9ae; }
+.review-block.is-open .review-chevron { transform: rotate(180deg); }
+.review-panel { display: grid; grid-template-rows: 0fr; visibility: hidden; }
+.review-block.is-open .review-panel { grid-template-rows: 1fr; visibility: visible; }
+.review-panel-inner { min-height: 0; overflow: hidden; }
+.review-content {
+  position: relative;
+  max-height: 300px;
+  margin: 0 15px 15px;
+  padding: 18px 20px;
+  overflow-y: auto;
+  border-top: 1px dashed #c9ad77;
+  color: #5d4626;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  transform: translateY(-7px);
+  transition: opacity 240ms 70ms, transform 300ms 70ms;
+}
+.review-block.is-open .review-content { opacity: 1; transform: translateY(0); }
+.review-content p { margin: 0; }
+.review-ornament { display: block; margin-bottom: 8px; color: #b89a63; font-size: 10px; }
+
+@media (min-width: 1100px) {
+  .info-open-shift { left: -410px; }
+}
+
+@media (max-width: 1000px) {
+  .wizard-stage { grid-template-columns: 190px minmax(0, 1fr); gap: 22px; }
+  .step-copy strong { font-size: 11px; }
+}
+
+@media (max-width: 767px) {
+  .wizard-stage { display: block; padding: 24px 10px 0; }
+  .wizard-sheet-column { margin-top: 20px; }
+  .step-rail { position: static; padding: 0 6px; }
+  .step-rail > .parch-label, .step-rail-note, .step-copy { display: none; }
+  .step-rail ol { display: flex; width: 100%; align-items: center; justify-content: center; }
+  .step-rail li { display: flex; align-items: center; }
+  .step-rail li:not(:last-child)::after { position: static; width: 20px; height: 1px; flex: none; }
+  .step-rail button { display: grid; width: 44px; min-height: 44px; padding: 6px; place-items: center; }
+  .step-rail li.is-complete button:hover .step-number { transform: none; }
+  .color-fields { gap: 10px; }
+  .measure-row { grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+  .measure-row > div:first-child { grid-column: 1 / -1; }
+  .review-trigger { gap: 9px; padding: 10px 12px; }
+  .review-label { font-size: 15px; }
+  .review-action { font-size: 9px; }
+  .review-content { margin: 0 11px 11px; padding: 15px 13px; }
+}
+
+@media (max-width: 390px) {
+  .step-rail li:not(:last-child)::after { width: 12px; }
+  .review-book { width: 30px; height: 30px; }
+  .review-action { display: none; }
+}
+
+/* Wide screens: sheet stays centred on the page, step rail sits at the far left. */
+@media (min-width: 1280px) {
+  .wizard-stage { grid-template-columns: minmax(200px, 1fr) minmax(0, 768px) minmax(200px, 1fr); }
+  .wizard-stage > .step-rail { grid-column: 1; grid-row: 1; justify-self: start; width: 100%; max-width: 240px; }
+  .wizard-stage > .wizard-sheet-column { grid-column: 2; grid-row: 1; }
+}
+
+/* Minimal scrollbars on the character-create page (incl. the page scrollbar). */
+html:has(.cc-scope) { scrollbar-width: thin; scrollbar-color: rgba(163, 133, 78, .48) transparent; scroll-behavior: smooth; }
+.cc-scope, .cc-scope * { scrollbar-width: thin; scrollbar-color: rgba(163, 133, 78, .48) transparent; }
+html:has(.cc-scope)::-webkit-scrollbar, .cc-scope *::-webkit-scrollbar { width: 5px; height: 5px; }
+html:has(.cc-scope)::-webkit-scrollbar-track, .cc-scope *::-webkit-scrollbar-track { background: transparent; }
+html:has(.cc-scope)::-webkit-scrollbar-thumb, .cc-scope *::-webkit-scrollbar-thumb { background: rgba(163, 133, 78, .48); border-radius: 10px; }
+html:has(.cc-scope)::-webkit-scrollbar-thumb:hover, .cc-scope *::-webkit-scrollbar-thumb:hover { background: #a3854e; }
+
+/* Wizard navigation buttons (ย้อนกลับ / ถัดไป). */
+.wizard-nav .parch-btn,
+.wizard-nav .parch-btn-outline {
+  display: inline-flex;
+  width: auto;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #43331c;
+  border-radius: 0;
+  font-family: 'Jost', 'Prompt', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.5;
+  box-shadow: none;
+  transition: color 180ms, background-color 180ms, border-color 180ms, transform 180ms;
+}
+.wizard-nav .parch-btn { padding: 9px 24px; background: #43331c; color: #e9d9ae; }
+.wizard-nav .parch-btn:hover:not(:disabled) { background: #5d4626; box-shadow: none; }
+.wizard-nav .parch-btn-outline { padding: 9px 24px; border-color: #a3854e; background: transparent; color: #5d4626; }
+.wizard-nav .parch-btn-outline:hover:not(:disabled) { border-color: #5d4626; background: rgba(239, 227, 198, .65); color: #3a2c1a; box-shadow: none; }
+.wizard-nav .parch-btn:active:not(:disabled), .wizard-nav .parch-btn-outline:active:not(:disabled) { transform: translateY(1px); }
+
+/* Review sheets: keep the unfold animation inside its own paint/layout scope. */
+.review-block { contain: layout paint; }
+.review-panel-inner { contain: layout paint; }
+.review-content { will-change: opacity, transform; }
+
+/* Thai-safe fonts on the character-create page: anything without an explicit font class
+   inherits Jost/Prompt instead of the browser's system font, and Latin-only display
+   fonts fall back to a Thai serif rather than a sans face. */
+.cc-scope { font-family: 'Jost', 'Prompt', sans-serif; }
+.cc-scope .font-display { font-family: 'Cormorant Garamond', 'Jim Thompson Roman', 'Charmonman', 'Prompt', serif; }
+.cc-scope .unit-input span { font-family: 'Jost', 'Prompt', sans-serif; }
+
+/* Rich text: underline, strike-through and lists (Tailwind resets list styles). */
+.rich-content u, .rich-rendered u { text-decoration: underline; text-underline-offset: 3px; }
+.rich-content s, .rich-content strike, .rich-content del,
+.rich-rendered s, .rich-rendered strike, .rich-rendered del { text-decoration: line-through; }
+.rich-content ul, .rich-rendered ul { margin: 0 0 8px; padding-left: 1.6em; list-style: disc; }
+.rich-content ol, .rich-rendered ol { margin: 0 0 8px; padding-left: 1.8em; list-style: decimal; }
+.rich-content li, .rich-rendered li { margin: 0 0 4px; padding-left: 2px; }
+.rich-content li::marker, .rich-rendered li::marker { color: #8a6a35; }
+.rich-toolbar .list-tools { margin-left: 5px; padding-left: 7px; border-left: 1px solid #c9ad77; }
