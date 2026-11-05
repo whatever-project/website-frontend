@@ -20,10 +20,10 @@ Revision of the already-live landing page `/`. The login button now opens a 3D p
 | `_components/Stars.tsx` | Existing editable copy of the live page-local stars |
 | `_components/LoginModal.tsx` | Dialog shell: dimmed backdrop, transparent Three.js canvas, form overlay shown once the sheet has settled, close handling (rolls up first), flat fallback card, draft-only state previews |
 | `_components/LoginForm.tsx` | Login form extracted unchanged from the round-2 modal; used on the 3D sheet and in the flat fallback. Wrapped in a `<fieldset disabled>` while the sheet is still rolling |
-| `_components/scrollLoginAnimation.ts` | Typed port of the demo's `scroll_login_animation_v03.js` (engine class `ScrollLoginAnimation`) |
+| `_components/scrollLoginAnimation.ts` | Engine class `ScrollLoginAnimation`: plays the GLB's baked morph-target clip (opening segment forwards to open, backwards to close) with real-time Three.js lighting/shadows (soft upper-left spot key, neutral fill, faint environment, neutral tone mapping) |
 | `_components/useScrollLoginAnimation.ts` | React hook: lazy-loads the engine (dynamic `import()`, so `three` is not in the landing bundle until the popup opens), unrolls on ready, exposes `ready / error / formActive / close()` |
 | `_components/LoginModal.module.css` | Scoped backdrop, flat-fallback pop-in, canvas sizing, form reveal, loading-roll animations, reduced-motion fallback |
-| `_assets/scroll/scroll_login_animation_v01.glb` | The demo's parchment model (5.8 MB), referenced via `new URL("../_assets/scroll/…glb", import.meta.url)` |
+| `_assets/scroll/new-model-scroll/Parchment_Rolling_Animation_v03.glb` | Final animated parchment (56 MB, 40 morph targets, one 6 s clip), referenced via `new URL("../_assets/scroll/new-model-scroll/…glb", import.meta.url)`. The older `_assets/scroll/scroll_login_animation_v01.glb` is no longer referenced |
 | `_assets/source/scroll_login_animation_v01.html` | Designer's HTML source: reference only, never imported |
 | `_mock/copy.ts` | Bilingual landing copy for the draft toggle plus Thai login copy, login state type, and preview options |
 
@@ -56,7 +56,7 @@ n/a — this draft has not previously been picked up by dev. Round 2 file-level 
 | `LoginForm` | `_components/LoginForm.tsx` | Form needed to be shared between the 3D sheet and the flat fallback | no; replace with the live login form on promotion |
 | 3D scroll engine | `_components/scrollLoginAnimation.ts` | No 3D / WebGL code exists in the repo | maybe; reusable for other "scroll" popups (signup, etc.) |
 | Scroll hook | `_components/useScrollLoginAnimation.ts` | Lifecycle glue between React and the engine | with the engine |
-| Scroll model | `_assets/scroll/scroll_login_animation_v01.glb` | Required by the engine | with the engine; see Needs dev |
+| Scroll model | `_assets/scroll/new-model-scroll/Parchment_Rolling_Animation_v03.glb` | Required by the engine | with the engine; see Needs dev |
 | Slider sun/moon icon | `_components/TimeSlider.module.css`, `page.tsx` | The thumb is styled in shared `globals.css` (`.sun-slider`), which drafts may not edit. The native thumb is made transparent (18 px, same size so hit area is unchanged) and a react-icon is drawn over it, positioned from the hour (`--pos`) | yes: if promoted, move this into the shared slider or a small `TimeSlider` component |
 | Dialog animations | `_components/LoginModal.module.css` | Form reveal and loading roll | no initially; landing-specific |
 | Login preview state switch | `_components/LoginModal.tsx` | Draft-only control for empty/loading/error/unverified/generic states | no; remove on promotion |
@@ -71,7 +71,7 @@ New colours / fonts / spacing / animations / CSS:
 
 ## 5. Needs dev (couldn't be done inside the draft)
 - **Dependencies:** add `three` and `@types/three` (0.187.0 installed locally for this round) to `package.json`. `three` is only imported from `_components/scrollLoginAnimation.ts` via dynamic `import()`.
-- **Model asset:** `scroll_login_animation_v01.glb` (5.8 MB) currently lives in the draft's `_assets/` and is resolved with `new URL(..., import.meta.url)`. When promoting, simplest is `public/assets/` + a plain `/assets/…glb` URL (or keep the bundler asset). Consider preloading it (e.g. on login-button hover/focus) since first open waits on the download.
+- **Model asset:** `Parchment_Rolling_Animation_v03.glb` (**56 MB**: mostly the 40 morph targets plus 13 MB of PNG textures; needs compression/CDN/preload before production) currently lives in the draft's `_assets/` and is resolved with `new URL(..., import.meta.url)`. When promoting, simplest is `public/assets/` + a plain `/assets/…glb` URL (or keep the bundler asset). Consider preloading it (e.g. on login-button hover/focus) since first open waits on the download.
 - **Intermittent request cancel:** in headless Edge + SwiftShader the model request was sometimes cancelled right after the WebGL context started ("Failed to fetch", ~50% of runs). `ScrollLoginAnimation.loadModel()` retries up to 2 more times (250/500 ms); all test runs then loaded the 3D sheet. Verify on real GPUs/browsers; the flat fallback covers a total failure.
 - **Performance:** CPU vertex deformation per frame (~42k vertices) plus `SSAOPass`; `delta` is capped at 0.2 s per frame so very slow devices animate slower than real time. Consider dropping `SSAOPass` on low-end devices (AO is also baked into vertex colours).
 - Apply the dialog and its scoped animation to the live landing page; no global CSS or shared-component change is required by the dialog.

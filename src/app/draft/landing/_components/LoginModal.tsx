@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { LOGIN_STATE_OPTIONS, type LoginState } from "../_mock/login"
 import LoginForm from "./LoginForm"
-import { useScrollLoginAnimation } from "./useScrollLoginAnimation"
+import { QUILL_SRC, useScrollLoginAnimation } from "./useScrollLoginAnimation"
 import styles from "./LoginModal.module.css"
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
@@ -12,7 +12,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
   const closingRef = useRef(false)
   const stageRef = useRef<HTMLDivElement>(null)
   const identifierRef = useRef<HTMLInputElement>(null)
-  const { ready, error: sceneError, formActive, close } = useScrollLoginAnimation(stageRef)
+  const { error: sceneError, formActive, quillVisible, close } = useScrollLoginAnimation(stageRef)
 
   // The sheet rolls back up first, then the dialog is dismissed.
   const requestClose = useCallback(async () => {
@@ -59,13 +59,6 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       {/* Three.js canvas: transparent, so the dimmed village stays visible around the sheet */}
       <div ref={stageRef} className={`${styles.stage} pointer-events-none absolute inset-0`} />
 
-      {!sceneError && !ready && (
-        <div role="status" className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span className={styles.loadingRoll} aria-hidden="true" />
-          <span className="sr-only">กำลังโหลด</span>
-        </div>
-      )}
-
       {sceneError ? (
         <div className="absolute inset-0 flex items-center justify-center overflow-y-auto px-4 py-8 sm:px-6 sm:py-12">
           <div
@@ -83,14 +76,68 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="landing-login-title"
-          className="absolute top-1/2 left-1/2 flex h-[84%] aspect-[0.88] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+          // Box tracks the parchment's on-screen size (--sheet-w / --sheet-h are set by the 3D engine).
+          style={{ width: "var(--sheet-w, 74%)", height: "var(--sheet-h, 84%)" }}
+          className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
         >
+          {/* Cast shadow of the quill ON THE PAPER, clipped to the parchment outline (flat sheet + the wider bottom roll,
+              soft-faded at the edges) so nothing is cast onto the dark backdrop. It replays the same drift/sway
+              animation classes as the feather below, with identical geometry/timing, so it stays in step with it. */}
+          <div className={styles.quillShadowClip} aria-hidden="true">
+            <div className={styles.quillShadowFade}>
+              <div className={`${styles.quill} ${quillVisible ? styles.quillShown : ""}`}>
+                <div className={styles.quillDrift}>
+                  <div className={styles.quillSway}>
+                        {/* cast shadow on the paper: sharp + soft silhouettes of the same PNG, tinted by the SVG filters below */}
+                        <div className={styles.quillShadowRig}>
+                          {/* .quillShadowProject: static projection (shear about the nib) toward the key light's direction */}
+                          <div className={styles.quillShadowProject}>
+                            {/* eslint-disable @next/next/no-img-element -- decorative copies of the static quill PNG */}
+                            <img src={QUILL_SRC} alt="" draggable={false} decoding="async" className={`${styles.quillShadowImage} ${styles.quillShadowSoft}`} />
+                            <img src={QUILL_SRC} alt="" draggable={false} decoding="async" className={`${styles.quillShadowImage} ${styles.quillShadowSharp}`} />
+                            {/* eslint-enable @next/next/no-img-element */}
+                          </div>
+                        </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div
             inert={!interactive}
-            className={`${styles.formReveal} ${interactive ? "" : styles.formHidden} max-h-[80%] w-[min(86%,24rem,calc(100vw-3.5rem))] overflow-y-auto px-1`}
+            className={`${styles.formReveal} ${styles.compactForm} ${interactive ? "" : styles.formHidden} overflow-y-auto px-1`}
             onClick={(event) => event.stopPropagation()}
           >
             {form}
+          </div>
+
+          {/* Decorative 2D quill (separate from the 3D scene): enters at ~68% of the unroll, drifts while open,
+              leaves as soon as the close starts. Purely visual: aria-hidden and pointer-events none.
+              Nested layers, each owning different transform properties so no animation overwrites another:
+              .quill (position + entrance/exit) > .quillDrift (organic path) > .quillSway (tilt about the nib)
+              > img (tiny shaft flex + faint silhouette shadow). The cast shadow on the paper is the separate, paper-clipped chain above. */}
+          {/* Warm-brown silhouette filters for the quill's cast shadow (no pure black): blur the image's alpha,
+              then fill it with brown. Static; only the elements' opacity/transform are animated. */}
+          <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
+            <filter id="quillShadowSharp" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="blur" />
+              <feFlood floodColor="#3a2210" />
+              <feComposite in2="blur" operator="in" />
+            </filter>
+            <filter id="quillShadowSoft" x="-8%" y="-8%" width="116%" height="116%" colorInterpolationFilters="sRGB">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="5.5" result="blur" />
+              <feFlood floodColor="#3f2a2c" />
+              <feComposite in2="blur" operator="in" />
+            </filter>
+          </svg>
+          <div className={`${styles.quill} ${quillVisible ? styles.quillShown : ""}`} aria-hidden="true">
+            <div className={styles.quillDrift}>
+              <div className={styles.quillSway}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- static decorative PNG; cropped/sized with CSS */}
+                <img src={QUILL_SRC} alt="" draggable={false} decoding="async" className={styles.quillImage} />
+              </div>
+            </div>
           </div>
         </div>
       )}

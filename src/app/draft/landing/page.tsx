@@ -11,6 +11,7 @@ import { MdSunny } from "react-icons/md";
 import { BsMoonStarsFill } from "react-icons/bs";
 import Stars from "./_components/Stars";
 import LoginModal from "./_components/LoginModal";
+import { preloadScrollLogin, releaseScrollLogin } from "./_components/useScrollLoginAnimation";
 import sliderStyles from "./_components/TimeSlider.module.css";
 import { COPY_BY_LANG, type DraftLang } from "./_mock/copy";
 
@@ -40,6 +41,15 @@ export default function LandingDraft() {
     setLoginOpen(false);
     window.requestAnimationFrame(() => loginButtonRef.current?.focus());
   }, []);
+
+  // Build the login parchment (download, parse, GPU upload) as soon as the page has mounted, so it is ready
+  // before the visitor clicks Login. The small delay keeps it out of the first paint.
+  useEffect(() => {
+    const id = setTimeout(preloadScrollLogin, 150);
+    return () => clearTimeout(id);
+  }, []);
+  // Free the warm WebGL context (and its GPU memory) when the landing page unmounts.
+  useEffect(() => releaseScrollLogin, []);
 
   // `?t=<hour>` forces a time of day (handy for designers: /draft/landing?t=21)
   useEffect(() => {
@@ -200,6 +210,8 @@ export default function LandingDraft() {
             ref={loginButtonRef}
             type="button"
             onClick={() => setLoginOpen(true)}
+            onPointerEnter={preloadScrollLogin}
+            onFocus={preloadScrollLogin}
             className={AUTH_BTN}
             style={AUTH_BTN_STYLE}
           >
