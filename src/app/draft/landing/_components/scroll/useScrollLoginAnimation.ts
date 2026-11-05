@@ -2,16 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import type { ScrollLoginAnimation } from "./scrollLoginAnimation"
+import { PARCHMENT_GLB_URL as GLB_URL, QUILL_SRC } from "../../_utils/assets"
 
-// Emitted by the bundler as an asset; never copied to public/.
-const GLB_URL = new URL(
-  "../_assets/scroll/new-model-scroll/Parchment_Rolling_Animation_v03.glb",
-  import.meta.url,
-).href
 
 let quillPreloaded = false
-export const QUILL_SRC = "/assets/Midnight%20Arcane%20Quill%20Feather.png"
-
 /**
  * Builds the renderer, parses the GLB and uploads it to the GPU ahead of time, so opening the popup does no
  * loading or setup work. Call it while the landing page is idle; it is safe to call more than once.

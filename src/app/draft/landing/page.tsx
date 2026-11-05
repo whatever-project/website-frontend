@@ -9,18 +9,19 @@ import { PiClockCounterClockwise } from "react-icons/pi";
 import { FaRegSun } from "react-icons/fa6";
 import { MdSunny } from "react-icons/md";
 import { BsMoonStarsFill } from "react-icons/bs";
-import Stars from "./_components/Stars";
-import LoginModal from "./_components/LoginModal";
-import { preloadScrollLogin, releaseScrollLogin } from "./_components/useScrollLoginAnimation";
-import sliderStyles from "./_components/TimeSlider.module.css";
+import Stars from "./_components/shared/Stars";
+import LoginModal from "./_components/login-ui/LoginModal";
+import { preloadScrollLogin, releaseScrollLogin } from "./_components/scroll/useScrollLoginAnimation";
+import sliderStyles from "./_components/shared/TimeSlider.module.css";
 import { COPY_BY_LANG, type DraftLang } from "./_mock/copy";
+import { BACKDROP_SRC } from "./_utils/assets";
 
 // Both auth buttons share one size; nowrap keeps the label on a single line.
 // Inline fontFamily so it wins over `.gallery-btn`'s own font-family.
 const AUTH_BTN =
   "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 text-center text-base tracking-[0.15em]";
 const AUTH_BTN_STYLE = {
-  fontFamily: "'Jim Thompson Roman', 'Charmonman', 'Prompt', serif",
+  fontFamily: "'Jim Thompson Roman', 'Prompt', serif",
   background: "rgba(12, 14, 22, 0.55)", // darker than .gallery-btn so labels stay legible on a bright backdrop
   textShadow: "0 1px 10px rgba(0,0,0,.8)",
 };
@@ -88,7 +89,7 @@ export default function LandingDraft() {
     <div className="relative h-screen w-full overflow-hidden bg-[#10131f] select-none">
       {/* village backdrop */}
       <img
-        src="/assets/village.jpg"
+        src={BACKDROP_SRC}
         alt="Arcane Vale Village"
         className="absolute inset-0 h-full w-full object-cover"
         draggable={false}
@@ -276,7 +277,7 @@ export default function LandingDraft() {
         </div>
       </footer>
 
-      {loginOpen && <LoginModal onClose={closeLogin} />}
+      {loginOpen && <LoginModal onClose={closeLogin} lang={lang} />}
     </div>
   );
 }

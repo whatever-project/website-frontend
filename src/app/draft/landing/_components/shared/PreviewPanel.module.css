@@ -1,0 +1,15 @@
+/* Draft-only preview controls: fade/scale in slightly, like the flat fallback card. */
+.panel {
+  animation: pop-in 220ms ease-out both;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

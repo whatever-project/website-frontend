@@ -1,0 +1,134 @@
+/* ฟอนต์ของ 3 กลุ่มในหน้า login  (ใช้ร่วมกันทั้ง UI เดิม และ UI ใหม่)
+ *
+ *   1) ป้ายชื่อช่อง   "ชื่อผู้ใช้หรืออีเมล" / "รหัสผ่าน"      (--label-*)
+ *   2) ช่องกรอก       ข้อความที่พิมพ์ + placeholder            (--input-*)
+ *   3) แจ้งเตือน      เช่น "อีเมลของคุณยังไม่ได้รับการยืนยัน"   (--notice-*)
+ *   4) ข้อความรอง     "จดจำฉัน" "ลืมรหัสผ่าน?" "ยังไม่มีบัญชี?" "สร้างบัญชีใหม่"  ใช้ฟอนต์เดียวกันทั้ง 4 (--text-*)
+ *   5) ปุ่ม           ปุ่ม "เข้าสู่ระบบ"                         (--button-*)
+ *
+ * แต่ละกลุ่มแยกกันเด็ดขาด และแยก "อังกฤษ" (-en) กับ "ไทย" (-th) ด้วย
+ *
+ * วิธีแก้: เปลี่ยนค่าในบล็อก .classic (UI เดิม) หรือ .parchment (UI ใหม่) ด้านล่าง ใส่ชื่อฟอนต์ตัวเดียวต่อบรรทัด
+ * (ชื่อที่ประกาศไว้ใน @font-face ของ src/styles/globals.css เช่น "Jost", "Prompt", "Serithai", "Anupark", "Charm",
+ * "EB Garamond", "Oranienbaum", "Josefin Sans") ไม่ต้องใส่ fallback เพราะใส่ให้ต่อท้ายแล้ว
+ *
+ * หลักการทำงาน: font-family = <ฟอนต์อังกฤษ>, <ฟอนต์ไทย>  ตัวอักษรละตินจะถูกวาดด้วยฟอนต์อังกฤษ ส่วนตัวอักษรไทยที่ฟอนต์อังกฤษ
+ * ไม่มีจะตกไปใช้ฟอนต์ไทย  ถ้าอยากใช้ฟอนต์ที่มี "ทั้งไทยและอังกฤษ" เป็นฟอนต์อังกฤษ ให้ใช้ชื่อแฝง "… EN" ด้านล่างแทน
+ * (วาดเฉพาะอักษรละติน ไม่งั้นฟอนต์นั้นจะแย่งวาดอักษรไทยด้วยและช่อง -th จะไม่มีผล):
+ *   "Anupark EN", "Serithai EN", "Charm EN"        (ฟอนต์ไทยล้วน/ไทย+ละตินที่ตั้งชื่อแฝงไว้แล้ว)
+ *   ฟอนต์ละตินล้วนใช้ชื่อปกติได้เลย เช่น "Jost", "EB Garamond", "Oranienbaum", "Josefin Sans"
+ *   ถ้าอยากใช้ฟอนต์อื่นที่มีไทยด้วยเป็นฟอนต์อังกฤษ ให้เพิ่ม @font-face แบบเดียวกันด้านล่าง
+ *   ฟอนต์ไทย (-th) ใช้ชื่อปกติ เช่น "Prompt", "Anupark", "Serithai", "Charm"
+ *
+ * ไม่ใช่ที่นี่: หัวข้อ "ยินดีต้อนรับกลับ" (Jim Thompson ในไฟล์ layout ของแต่ละ UI)
+ */
+
+/* ชื่อแฝง "… EN": ไฟล์ฟอนต์เดียวกับใน globals.css แต่จำกัดให้วาดเฉพาะอักษรละติน/เครื่องหมายทั่วไป (ไม่โหลดซ้ำ เบราว์เซอร์ใช้ไฟล์เดียวกัน) */
+@font-face {
+  font-family: "Anupark EN";
+  src: url("/fonts/Anupark-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: "Serithai EN";
+  src: url("/fonts/Serithai-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: "Charm EN";
+  src: url("/fonts/Charm-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}
+
+/* ── UI เดิม: ค่าเท่ากับที่ใช้อยู่เดิมทุกประการ ───────────────────────────────────────────────────────── */
+.classic {
+  --label-en: "Jost";
+  --label-th: "IBM Plex Sans Thai";
+  --input-en: "IBM Plex Sans Thai";
+  --input-th: "IBM Plex Sans Thai";
+  --notice-en: "Jost";
+  --notice-th: "Google Sans";
+  --text-en: "Jost";
+  --text-th: "IBM Plex Sans Thai";
+  --button-en: "Montserrat";
+  --button-th: "Jim Thompson Roman";
+}
+
+/* ── UI ใหม่: ตอนนี้เป็น Anupark ทุกกลุ่ม ─────────────────────────────────────────────────────────────── */
+.parchment {
+  --label-en: "Jost";
+  --label-th: "IBM Plex Sans Thai";
+  --input-en: "IBM Plex Sans Thai";
+  --input-th: "IBM Plex Sans Thai";
+  --notice-en: "Jost";
+  --notice-th: "Google Sans";
+  --text-en: "Jost";
+  --text-th: "IBM Plex Sans Thai";
+  --button-en: "Montserrat";
+  --button-th: "Jim Thompson Roman";
+}
+
+/* ── การนำไปใช้ (ไม่ต้องแก้) ─────────────────────────────────────────────────────────────────────────────
+   ตัวเลือกยาวพอที่จะชนะทั้งคลาสเดิม (.parch-label, .font-serithai, .font-ui) และกฎ .anupark ของ UI ใหม่ */
+.fonts :global(.parch-label) {
+    font-family: var(--label-en), var(--label-th), "Google Sans", sans-serif;
+  font-weight: 500;      /* หนา */
+}
+
+.fonts :global(#landing-login-identifier),
+.fonts :global(#landing-login-password) {
+  font-family: var(--input-en), var(--input-th), "Google Sans", sans-serif;
+}
+
+/* ตัวแจ้งเตือนอยู่นอกฟอร์ม (ใต้ม้วนกระดาษ) และถือคลาส .fonts เอง จึงต้องมีรูปแบบ .fonts[role] ด้วย */
+.fonts[role="alert"],
+.fonts[role="alert"] *,
+.fonts [role="alert"],
+.fonts [role="alert"] * {
+  font-family: var(--notice-en), var(--notice-th), "Google Sans", sans-serif;
+}
+
+/* ข้อความรอง: จดจำฉัน / ลืมรหัสผ่าน? / ยังไม่มีบัญชี? / สร้างบัญชีใหม่ (ตัวที่มี data-login-text; ลิงก์ในประโยคสมัครสมาชิกรวมอยู่แล้ว) */
+.fonts [data-login-text],
+.fonts [data-login-text] * {
+  font-family: var(--text-en), var(--text-th), "Google Sans", sans-serif;
+}
+
+/* ปุ่มเข้าสู่ระบบ */
+.fonts :global(.parch-btn) {
+  font-family: var(--button-en), var(--button-th), "Google Sans", sans-serif;
+}
+
+/* ปุ่มเข้าสู่ระบบ "เฉพาะภาษาอังกฤษ" (data-lang="en" ที่ LoginModal): Montserrat ทั้ง UI เดิมและ UI ใหม่
+   ย่อ 0.8 เท่าที่ตัวหนังสือ (span) ไม่ใช่ตัวปุ่ม ขนาดปุ่มจึงไม่เปลี่ยน ภาษาไทยไม่ได้รับผล */
+/* ข้อความในปุ่มต้องรับฟอนต์/น้ำหนักจากปุ่ม (ไม่งั้นกฎ ".anupark :not(h2)" ของ UI ใหม่ไปตั้ง Anupark ที่ span โดยตรง) */
+.fonts :global(.parch-btn) > span {
+  font-family: inherit;
+  font-weight: inherit;
+}
+.fonts[data-lang="en"] :global(.parch-btn) {
+  font-family: "Montserrat", var(--button-th), "Google Sans", sans-serif;
+  font-weight: 500;
+  letter-spacing: 4px;
+}
+.fonts[data-lang="en"] :global(.parch-btn) > span {
+  display: inline-block;
+  transform: scale(0.8, 0.8);
+}
+
+/* เงาปุ่มเข้าสู่ระบบของ UI เดิม: เบาและนุ่มลงราว 35% (เท่ากับ UI ใหม่ ดู ParchmentLogin.module.css) สี/ขนาด/การโต้ตอบไม่เปลี่ยน
+   ก่อนหน้า: 0 4px 14px / .35 (hover: 0 6px 20px / .45 + glow 18px)  .parch-btn ใน globals.css ไม่ถูกแก้ หน้าอื่นไม่กระทบ */
+.classic :global(.parch-btn) {
+  box-shadow: 0 3px 8px rgba(50, 36, 14, 0.22), inset 0 1px 0 rgba(233, 217, 174, 0.2);
+}
+.classic :global(.parch-btn):hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
+}

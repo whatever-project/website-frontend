@@ -1,100 +1,4 @@
-.backdrop {
-  animation: backdrop-in 200ms ease-out both;
-}
-
-/* Flat fallback card (only when WebGL / the 3D scroll can't start): fades and scales in slightly. */
-.sheet,
-.preview {
-  animation: pop-in 220ms ease-out both;
-}
-
-.stage canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* Login form fades onto the sheet once the parchment has fully unrolled and settled. */
-.formReveal {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 220ms ease-out, transform 240ms ease-out;
-}
-
-.formHidden {
-  opacity: 0;
-  transform: scale(0.96);
-  pointer-events: none;
-}
-
-@keyframes backdrop-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pop-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .backdrop,
-  .sheet,
-  .preview {
-    animation: none;
-  }
-
-  .formReveal {
-    transition: none;
-  }
-}
-
-/* Compact spacing/sizing for the form when it sits on the (smaller) 3D parchment. Same design language, same
-   fields; only margins, paddings and font sizes shrink so nothing overflows the paper. */
-.compactForm {
-  width: min(80%, 23rem);
-  max-height: 88%;
-}
-.compactForm h2 {
-  margin-top: 0;
-  font-size: 1.65rem;
-  line-height: 1.2;
-}
-.compactForm :global(.ink-divider) {
-  margin-top: 0.55rem;
-  margin-bottom: 0.3rem;
-}
-.compactForm :global(.parch-label) {
-  margin-top: 1rem;
-  margin-bottom: 0.3rem;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-}
-.compactForm :global(.parch-input) {
-  font-size: 15px;
-  padding: 9px 12px;
-}
-.compactForm :global(.parch-btn) {
-  font-size: 16px;
-  padding: 10px 0 12px;
-}
-.compactForm :global(.parch-check) {
-  width: 15px;
-  height: 15px;
-}
-.compactForm :global(.mb-7) {
-  margin-top: 0.8rem;
-  margin-bottom: 1.2rem;
-}
-.compactForm :global(.mt-6) {
-  margin-top: 0.95rem;
-}
-.compactForm :global(.mb-4) {
-  margin-bottom: 0.4rem;
-}
-.compactForm :global(.text-\[13px\]) {
-  font-size: 12.5px;
-}
+/* The decorative 2D quill and its cast shadow on the paper. Components: QuillFeather.tsx and QuillShadow.tsx. */
 
 /* Decorative quill. The PNG is 1536x1024 but its artwork is only the 1008x981 box at (353,14), so the image is
    shifted/oversized inside a box of exactly the artwork size: scale 314/1008 = 0.3115 (1.4x the previous 224/1008).
@@ -166,7 +70,7 @@
   mask-image: linear-gradient(to bottom, #000 96.5%, transparent 99.3%);
 }
 
-/* Cast shadow on the paper: two silhouette copies of the quill (warm brown via the SVG filters in LoginModal),
+/* Cast shadow on the paper: two silhouette copies of the quill (warm brown via the SVG filters in QuillShadow.tsx),
    a sharp one and a soft one, inside the sway layer so they tilt and drift with the quill. The rig is offset
    down-right (light from the upper left) and masked to the nib/lower-shaft corner, so only the part of the quill
    that is over the paper casts a visible shadow. Only transform and opacity animate (cheap, compositor-only);

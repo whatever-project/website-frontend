@@ -10,6 +10,37 @@ updated: 2026-11-04
 
 # Landing: dev context
 
+
+## Current file structure
+
+(Supersedes the older file tables below, which describe the earlier flat layout.)
+
+```text
+landing/
+  page.tsx                        the landing page (background, time slider, language toggle, opens the login dialog)
+  _components/
+    login-ui/                     the login dialog
+      LoginModal.tsx(+.module.css)  dialog shell: backdrop, 3D canvas, form column, quill, preview panel; owns the UI-variant state
+      LoginForm.tsx                 the ONE login implementation: form state, preview-state messages, submit; picks a layout
+      loginLayoutTypes.ts           props shared by both layouts
+      classic/ClassicLoginLayout.tsx  the ORIGINAL UI ("UI เดิม"): boxed inputs, dark rectangular button. Never changed by the redesign
+      new-ui/                       the NEW UI ("UI ใหม่"): ParchmentLoginLayout.tsx, ParchmentRegistrationLine.tsx, ParchmentLogin.module.css
+    scroll/                       the 3D parchment: scrollLoginAnimation.ts (Three.js engine, plays the GLB morph clip),
+                                  useScrollLoginAnimation.ts (React hook + preload/release)
+    quill/                        QuillFeather.tsx, QuillShadow.tsx, Quill.module.css (animation + paper-clipped cast shadow)
+    shared/                       PreviewPanel (draft-only state/UI switch), Stars, TimeSlider.module.css
+  _utils/assets.ts                every asset URL in one place
+  _mock/                          copy.ts (landing copy, TH/EN), login.ts (login copy, preview states, UI-variant options)
+  _assets/scroll/                 bundled model: Parchment_Rolling_Animation_v03.glb (runtime) + source/, legacy-models/, previews/ (not referenced by code)
+  _assets/reference/              scroll_login_animation_v01.html (designer reference, never imported)
+public/assets/landing/            login-ui/wax-seal.png (+ the untouched wax-seal-with-rope.png), quill/midnight-arcane-quill.png (+ an unused alternate)
+public/assets/village.jpg         the backdrop, shared with the live landing page
+```
+
+Why the GLB is not under public/: src/proxy.ts (shared) sends any URL whose extension is not in its static list through i18n, and
+`.glb` is not in the list, so `/assets/...glb` is rewritten to `/en/assets/...glb` and 404s. It therefore stays a bundler asset
+resolved with `new URL(..., import.meta.url)` in _utils/assets.ts. Adding `glb` to that matcher would allow moving it.
+
 ## 1. What this page is
 Revision of the already-live landing page `/`. The login button now opens a 3D parchment scroll (Three.js, from the Kimi "Fantasy Parchment Scroll Demo") over the village scene: it unrolls from a roll, settles with a damped wobble, then the login form fades in on the sheet; closing (X / backdrop / Esc) rolls it back up before dismissing. If WebGL or the model fails, a flat parchment card with the same form is shown. The form matches the round-2 screenshot and contains draft-only login state previews. The current working copy also has a draft-local TH/EN landing-copy toggle outside this round's requested popup scope. See `DESIGN-REQUEST.md`.
 
