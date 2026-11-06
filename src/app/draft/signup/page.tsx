@@ -84,8 +84,8 @@ export default function SignupDraft() {
                   <div
                     className={`flex h-9 w-9 items-center justify-center rounded-full border font-display text-base transition-all ${
                       step === s
-                        ? "wax-seal border-[#5c1d17] text-[#f3ddc0]"
-                        : "border-[#b89a63] bg-[#efe3c6] text-[#a68d5f]"
+                        ? "border-[#3b2a18] bg-[#4a3520] text-[#f3e6c8] shadow-[0_3px_10px_rgba(50,32,14,0.45),inset_0_1px_2px_rgba(255,235,200,0.2)]"
+                        : "border-[#b89a63] bg-transparent text-[#a68d5f]"
                     }`}
                   >
                     {s}
@@ -113,7 +113,13 @@ export default function SignupDraft() {
                 <Flourish className="h-4 w-4" />
               </InkDivider>
 
-              <ol className="my-5 max-h-72 space-y-3.5 overflow-y-auto border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-5">
+              <ol
+                className="my-5 max-h-[min(34rem,65vh)] min-h-[20rem] space-y-3.5 overflow-y-auto border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-5"
+                style={{
+                  scrollbarColor: "#b89a63 transparent",
+                  scrollbarWidth: "thin",
+                }}
+              >
                 {TERMS.map((term, i) => (
                   <li
                     key={i}

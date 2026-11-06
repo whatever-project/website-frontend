@@ -1,8 +1,6 @@
 /** Thai copy for the signup draft (mirrors the live page's copy). */
 export const COPY = {
   pageTitle: "สมัครสมาชิก",
-  pageSubStep1: "— การลงทะเบียน ✦ ขั้นตอนที่ 1 จาก 2 —",
-  pageSubStep2: "— การลงทะเบียน ✦ ขั้นตอนที่ 2 จาก 2 —",
   pageSubStep3: "— ยืนยันอีเมล —",
   stepTerms: "ข้อกำหนด",
   stepAccountInfo: "ข้อมูลบัญชี",
