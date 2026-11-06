@@ -1,0 +1,39 @@
+/* ชื่อฟอนต์แฝง "… EN" สำหรับหน้า login (ใช้ร่วมกันทั้ง Classic และ New)
+ *
+ * ไฟล์นี้มีเฉพาะ @font-face  ไม่มีกฎ typography ใด ๆ  (ฟอนต์/ขนาด/น้ำหนักของแต่ละ UI อยู่ใน
+ *   classic/ClassicLoginTypography.module.css  และ  new/NewLoginTypography.module.css)
+ *
+ * ชื่อแฝงเหล่านี้ยังไม่มีบทบาทไหนใช้ แต่เตรียมไว้ให้ใส่ในช่อง --<บทบาท>-font-en ของไฟล์ typography เมื่อต้องการใช้ฟอนต์ที่มี
+ * "ทั้งไทยและอังกฤษ" เป็นฟอนต์ละติน: ชื่อแฝงจะวาดเฉพาะอักษรละติน (unicode-range) อักษรไทยจึงตกไปใช้ช่อง -font-th
+ * ไม่งั้นฟอนต์นั้นจะแย่งวาดอักษรไทยด้วยและช่อง -font-th จะไม่มีผล:
+ *   "Anupark EN", "Serithai EN", "Charm EN"
+ * ฟอนต์ละตินล้วนใช้ชื่อปกติได้เลย เช่น "Jost", "EB Garamond", "Oranienbaum", "Josefin Sans"
+ * ถ้าอยากใช้ฟอนต์อื่นที่มีไทยด้วยเป็นฟอนต์ละติน ให้เพิ่ม @font-face แบบเดียวกันด้านล่าง
+ * ฟอนต์ไทย (-font-th) ใช้ชื่อปกติ เช่น "Prompt", "Anupark", "Serithai", "Charm"
+ *
+ * ไฟล์ฟอนต์เดียวกับใน globals.css (ไม่โหลดซ้ำ เบราว์เซอร์ใช้ไฟล์เดียว) เพียงจำกัดให้วาดเฉพาะอักษรละติน/เครื่องหมายทั่วไป
+ */
+
+@font-face {
+  font-family: "Anupark EN";
+  src: url("/fonts/Anupark-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: "Serithai EN";
+  src: url("/fonts/Serithai-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: "Charm EN";
+  src: url("/fonts/Charm-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF;
+}

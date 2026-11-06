@@ -1,0 +1,52 @@
+.backdrop {
+  animation: backdrop-in 200ms ease-out both;
+}
+
+/* Flat fallback card (only when WebGL / the 3D scroll can't start): fades and scales in slightly. */
+.sheet {
+  animation: pop-in 220ms ease-out both;
+}
+
+.stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Login form fades onto the sheet once the parchment has fully unrolled and settled. */
+.formReveal {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 220ms ease-out, transform 240ms ease-out;
+}
+
+.formHidden {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet {
+    animation: none;
+  }
+
+  .formReveal {
+    transition: none;
+  }
+}
+
+/* Form box sizing, spacing and gaps are NOT here any more: they live in one layout file per UI
+   (classic/ClassicLoginLayout.module.css, new/NewLoginLayout.module.css). This file keeps the shared modal behaviour only:
+   backdrop, canvas, form reveal and the flat card pop-in. */

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import { Flourish, InkDivider } from "@/components/Parchment"
-import { routes } from "@/config/routes"
+import { DRAFT_HUB } from "@/config/routes"
 
 interface DraftFrameProps {
   /** small caps line above the title, e.g. "— IDENTITY · STEP III OF VI —" */
@@ -22,7 +22,7 @@ export default function DraftFrame({ sub, title, children }: DraftFrameProps) {
 
       <header className="relative z-20 flex items-center justify-between px-6 pt-7 sm:px-12">
         <Link
-          href={routes.home}
+          href={DRAFT_HUB}
           className="parch-label group flex items-center gap-2 whitespace-nowrap transition hover:text-[#3a2c1a]"
         >
           <span className="inline-block transition-transform group-hover:-translate-x-1">←</span>

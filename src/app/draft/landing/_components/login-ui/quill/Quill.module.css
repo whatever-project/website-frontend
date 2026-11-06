@@ -1,0 +1,513 @@
+/* The decorative 2D quill and its cast shadow on the paper. Components: QuillFeather.tsx and QuillShadow.tsx. */
+
+/* Decorative quill. The PNG is 1536x1024 but its artwork is only the 1008x981 box at (353,14), so the image is
+   shifted/oversized inside a box of exactly the artwork size: scale 314/1008 = 0.3115 (1.4x the previous 224/1008).
+   The nib is the box's bottom-left corner.
+
+   Layers (each animates different transform properties, so nothing overwrites anything else):
+     .quill       position + entrance/exit      transition: transform, opacity
+     .quillDrift  organic path                  animation: translate (x) and transform (y), different periods
+     .quillSway   tilt about the nib            animation: rotate
+     .quillImage  shaft flex + feather shadow   animation: transform (tiny rotation about the shaft)
+     .quillShadowRig  cast shadow on the paper  animation: transform (offset) / opacity, see below
+   Periods 8.3 s / 6.7 s / 5.7 s / 4.3 s do not share a common cycle for a long time, so the combined motion
+   never visibly repeats, yet every individual loop starts and ends at the same neutral value (no snap). */
+.quill {
+  position: absolute;
+  left: calc(100% - 46px); /* nib 46 px inside the paper's right edge (was 26) */
+  bottom: 50px; /* was 16px: the nib now floats ~6px above the roll's top edge instead of sitting on the roll */
+  width: 314px;
+  height: 307px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(60px, 48px, 0);
+  transform-origin: 0 100%;
+  /* leaving: quick and soft, in step with the (faster) sheet roll-up */
+  transition: opacity 240ms ease-in, transform 300ms ease-in;
+}
+
+.quillShown {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  /* entering: finishes as the sheet reaches fully open */
+  transition: opacity 320ms ease-out, transform 360ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+/* Clip for the cast shadow: a static box with the parchment's size (the dialog box) clipped to the parchment's REAL
+   silhouette. The polygon is the paper's right-hand outline (flat sheet edge, the roll stepping out at ~91% of the
+   height, the roll's rounded lower end) measured from the rendered, fully open sheet at the midpoint between paper
+   and backdrop luminance, then simplified (0.35 px tolerance). The mesh is fixed and this box is sized from the
+   same model units (--sheet-w / --sheet-h), so the outline is a constant fraction of the box at every viewport.
+   The shadow therefore reaches the paper edge and stops there; it used to be cut by a straight-edged gradient mask
+   (fade 96.2% -> 97.7%) that began ~3 px inside the wavy real edge (96.7%-97.6%) and left a bright strip. */
+.quillShadowClip,
+.quillShadowFade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.quillShadowClip {
+  clip-path: polygon(
+    0 0, 89.98% 0.00%, 96.74% 0.11%, 97.21% 0.77%,
+    97.48% 1.92%, 97.47% 2.97%, 97.02% 5.66%, 97.00% 12.65%,
+    96.75% 14.18%, 96.74% 16.22%, 96.82% 17.48%, 97.28% 19.96%,
+    97.30% 27.16%, 97.56% 30.51%, 97.55% 31.61%, 96.80% 36.89%,
+    97.01% 41.23%, 96.81% 46.07%, 97.54% 51.13%, 97.54% 53.11%,
+    97.29% 55.36%, 97.27% 62.79%, 96.73% 65.86%, 96.74% 68.06%,
+    96.99% 70.10%, 97.01% 77.03%, 97.54% 80.21%, 97.54% 83.68%,
+    97.28% 85.16%, 97.19% 87.42%, 97.28% 90.72%, 97.34% 90.83%,
+    99.68% 90.88%, 99.82% 90.99%, 99.99% 91.81%, 99.96% 94.73%,
+    99.65% 96.27%, 99.37% 96.82%, 99.34% 97.37%, 99.11% 97.59%,
+    99.03% 98.25%, 98.49% 98.30%, 98.29% 98.47%, 95.23% 98.69%,
+    18.15% 98.74%, 9.66% 98.91%, 0 100%
+  );
+}
+
+/* A second box fades the shadow out at the roll's lower edge. */
+.quillShadowFade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 96.5%, transparent 99.3%);
+  mask-image: linear-gradient(to bottom, #000 96.5%, transparent 99.3%);
+}
+
+/* Cast shadow on the paper: two silhouette copies of the quill (warm brown via the SVG filters in QuillShadow.tsx),
+   a sharp one and a soft one, inside the sway layer so they tilt and drift with the quill. The rig is offset
+   down-right (light from the upper left) and masked to the nib/lower-shaft corner, so only the part of the quill
+   that is over the paper casts a visible shadow. Only transform and opacity animate (cheap, compositor-only);
+   the blurs are static. When the quill is low: sharp layer strong, soft layer weaker. When it rises: the
+   offset grows, the sharp layer fades and the soft layer takes over. */
+.quillShadowRig {
+  position: absolute;
+  /* 40 px larger than the art box on the left and bottom: the mask clips to this box, and the nib's shadow
+     must not be cut off at the nib's own x/y. */
+  inset: 0 0 -40px -40px;
+  transform-origin: 0 100%;
+  -webkit-mask-image: linear-gradient(to top right, #000 0%, #000 44%, transparent 72%);
+  mask-image: linear-gradient(to top right, #000 0%, #000 44%, transparent 72%);
+  animation: quill-shadow-move 8.3s linear 360ms infinite backwards paused;
+  will-change: transform;
+}
+
+/* Light direction and shadow projection (measured from the scene, not guessed):
+   the key light is a SpotLight at (-5.2, 5.6, 6.4) aimed at (0.4, -0.4, 0), so a point h above the paper casts its
+   shadow about h*(1.13, 1.25) world units right and down: y/x = 1.11, i.e. 48 deg below horizontal on screen. The
+   3D sheet's own shadow on the backdrop falls the same way (right and below; nothing to the left or above), and the
+   texture has no baked lighting or AO. Hence:
+     - the animated offset (quill-shadow-move) runs along (0.67, 0.74): 14 px at rest -> 19 px at the highest point of
+       the drift. It grows only a little with height (the depth cue is mainly the sharp -> soft opacity cross-fade),
+       otherwise the shadow slides off the paper edge when the quill drifts right;
+     - this static projection makes the offset grow with distance from the nib. A point's height above the paper is
+       taken as proportional to its distance along the quill's rise direction a = (0.717, -0.697) (screen px,
+       y down): offset = 0.14 * distance * (0.67, 0.74). It is zero at the nib (the soft contact point: the shadow
+       touches the nib) and about 30 px a third of the way up the feather.
+   matrix(1 + s*dx*ax, s*dy*ax, s*dx*ay, 1 + s*dy*ay) with s = 0.14, d = (0.67, 0.74), a as above. The origin is the
+   nib, i.e. the art box's bottom-left corner: (40px, 307px) inside the rig box, which starts 40px further left. */
+.quillShadowProject {
+  position: absolute;
+  inset: 0;
+  transform-origin: 40px 307px;
+  transform: matrix(1.0673, 0.0743, -0.0654, 0.9278, 0, 0);
+}
+
+.quillShadowImage {
+  position: absolute;
+  left: -70px; /* -110 + 40, because the rig box starts 40 px further left */
+  top: -4.4px;
+  width: 478.5px;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  transform-origin: 131px 265px;
+  animation: quill-flex 4.3s linear 360ms infinite backwards paused;
+  will-change: transform, opacity;
+}
+
+.quillShadowSharp {
+  filter: url(#quillShadowSharp);
+  opacity: 0.66;
+  animation: quill-flex 4.3s linear 360ms infinite backwards paused, quill-shadow-sharp 8.3s linear 360ms infinite backwards paused;
+}
+
+.quillShadowSoft {
+  filter: url(#quillShadowSoft);
+  opacity: 0.62;
+  animation: quill-flex 4.3s linear 360ms infinite backwards paused, quill-shadow-soft 8.3s linear 360ms infinite backwards paused;
+}
+
+.quillDrift,
+.quillSway {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 100%;
+  will-change: transform;
+  /* Declared permanently, running only while shown: on close they are paused in place (no snap) and then
+     removed with the modal. The delay lets the entrance settle first. */
+  animation-play-state: paused;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-delay: 360ms;
+  animation-fill-mode: backwards;
+}
+
+.quillDrift {
+  animation-name: quill-drift-y, quill-drift-x;
+  animation-duration: 8.3s, 6.7s;
+}
+
+.quillSway {
+  animation-name: quill-sway;
+  animation-duration: 5.7s;
+}
+
+.quillImage {
+  position: absolute;
+  left: -110px;
+  top: -4.4px;
+  width: 478.5px;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  /* No filter/shadow on the feather itself: its depth comes from the single cast shadow on the paper, so nothing
+     is drawn on the dark backdrop around the feather. */
+  /* Pivot on the shaft, about a quarter of the way up from the nib: the feather flexes slightly relative to it. */
+  transform-origin: 131px 265px;
+  animation: quill-flex 4.3s linear 360ms infinite backwards paused;
+  will-change: transform;
+}
+
+.quillShown .quillDrift,
+.quillShown .quillSway,
+.quillShown .quillImage,
+.quillShown .quillShadowRig,
+.quillShown .quillShadowImage {
+  animation-play-state: running;
+}
+
+/* Motion curves. Generated from sums of 2-3 sine harmonics sampled at 40 keyframes and played with LINEAR
+   timing: the speed varies continuously (no stop-and-go at keyframes, which per-segment ease-in-out causes),
+   the unequal harmonics make the rise/fall uneven with slow stretches, and because each curve is periodic it
+   starts and ends at the same value with the same speed, so every loop closes without a snap. Ranges: y 0..-11.5 px
+   (8.3 s), x 0..6 px (6.7 s), tilt -3..+4 deg about the nib (5.7 s), shaft flex -0.8..+0.9 deg (4.3 s). The
+   shadow keyframes use the SAME vertical curve and period, so the shadow and the quill stay in step. */
+@keyframes quill-drift-y {
+  0% { transform: translate3d(0, 0px, 0); }
+  2.5% { transform: translate3d(0, -0.277px, 0); }
+  5% { transform: translate3d(0, -1.064px, 0); }
+  7.5% { transform: translate3d(0, -2.253px, 0); }
+  10% { transform: translate3d(0, -3.694px, 0); }
+  12.5% { transform: translate3d(0, -5.222px, 0); }
+  15% { transform: translate3d(0, -6.681px, 0); }
+  17.5% { transform: translate3d(0, -7.952px, 0); }
+  20% { transform: translate3d(0, -8.963px, 0); }
+  22.5% { transform: translate3d(0, -9.697px, 0); }
+  25% { transform: translate3d(0, -10.185px, 0); }
+  27.5% { transform: translate3d(0, -10.488px, 0); }
+  30% { transform: translate3d(0, -10.682px, 0); }
+  32.5% { transform: translate3d(0, -10.834px, 0); }
+  35% { transform: translate3d(0, -10.988px, 0); }
+  37.5% { transform: translate3d(0, -11.157px, 0); }
+  40% { transform: translate3d(0, -11.324px, 0); }
+  42.5% { transform: translate3d(0, -11.453px, 0); }
+  45% { transform: translate3d(0, -11.5px, 0); }
+  47.5% { transform: translate3d(0, -11.43px, 0); }
+  50% { transform: translate3d(0, -11.233px, 0); }
+  52.5% { transform: translate3d(0, -10.927px, 0); }
+  55% { transform: translate3d(0, -10.561px, 0); }
+  57.5% { transform: translate3d(0, -10.2px, 0); }
+  60% { transform: translate3d(0, -9.912px, 0); }
+  62.5% { transform: translate3d(0, -9.751px, 0); }
+  65% { transform: translate3d(0, -9.738px, 0); }
+  67.5% { transform: translate3d(0, -9.852px, 0); }
+  70% { transform: translate3d(0, -10.028px, 0); }
+  72.5% { transform: translate3d(0, -10.167px, 0); }
+  75% { transform: translate3d(0, -10.153px, 0); }
+  77.5% { transform: translate3d(0, -9.878px, 0); }
+  80% { transform: translate3d(0, -9.264px, 0); }
+  82.5% { transform: translate3d(0, -8.285px, 0); }
+  85% { transform: translate3d(0, -6.977px, 0); }
+  87.5% { transform: translate3d(0, -5.441px, 0); }
+  90% { transform: translate3d(0, -3.827px, 0); }
+  92.5% { transform: translate3d(0, -2.313px, 0); }
+  95% { transform: translate3d(0, -1.08px, 0); }
+  97.5% { transform: translate3d(0, -0.277px, 0); }
+  100% { transform: translate3d(0, 0px, 0); }
+}
+@keyframes quill-drift-x {
+  0% { translate: 0px 0; }
+  2.5% { translate: 0.106px 0; }
+  5% { translate: 0.42px 0; }
+  7.5% { translate: 0.912px 0; }
+  10% { translate: 1.526px 0; }
+  12.5% { translate: 2.19px 0; }
+  15% { translate: 2.828px 0; }
+  17.5% { translate: 3.37px 0; }
+  20% { translate: 3.766px 0; }
+  22.5% { translate: 3.991px 0; }
+  25% { translate: 4.056px 0; }
+  27.5% { translate: 3.994px 0; }
+  30% { translate: 3.863px 0; }
+  32.5% { translate: 3.727px 0; }
+  35% { translate: 3.649px 0; }
+  37.5% { translate: 3.674px 0; }
+  40% { translate: 3.826px 0; }
+  42.5% { translate: 4.1px 0; }
+  45% { translate: 4.469px 0; }
+  47.5% { translate: 4.886px 0; }
+  50% { translate: 5.293px 0; }
+  52.5% { translate: 5.639px 0; }
+  55% { translate: 5.88px 0; }
+  57.5% { translate: 5.992px 0; }
+  60% { translate: 5.972px 0; }
+  62.5% { translate: 5.834px 0; }
+  65% { translate: 5.602px 0; }
+  67.5% { translate: 5.307px 0; }
+  70% { translate: 4.975px 0; }
+  72.5% { translate: 4.623px 0; }
+  75% { translate: 4.254px 0; }
+  77.5% { translate: 3.864px 0; }
+  80% { translate: 3.441px 0; }
+  82.5% { translate: 2.972px 0; }
+  85% { translate: 2.456px 0; }
+  87.5% { translate: 1.905px 0; }
+  90% { translate: 1.347px 0; }
+  92.5% { translate: 0.825px 0; }
+  95% { translate: 0.393px 0; }
+  97.5% { translate: 0.104px 0; }
+  100% { translate: 0px 0; }
+}
+@keyframes quill-sway {
+  0% { rotate: 0.001deg; }
+  2.5% { rotate: 0.627deg; }
+  5% { rotate: 1.188deg; }
+  7.5% { rotate: 1.684deg; }
+  10% { rotate: 2.129deg; }
+  12.5% { rotate: 2.538deg; }
+  15% { rotate: 2.921deg; }
+  17.5% { rotate: 3.276deg; }
+  20% { rotate: 3.588deg; }
+  22.5% { rotate: 3.83deg; }
+  25% { rotate: 3.973deg; }
+  27.5% { rotate: 3.99deg; }
+  30% { rotate: 3.867deg; }
+  32.5% { rotate: 3.61deg; }
+  35% { rotate: 3.247deg; }
+  37.5% { rotate: 2.823deg; }
+  40% { rotate: 2.399deg; }
+  42.5% { rotate: 2.036deg; }
+  45% { rotate: 1.784deg; }
+  47.5% { rotate: 1.67deg; }
+  50% { rotate: 1.695deg; }
+  52.5% { rotate: 1.828deg; }
+  55% { rotate: 2.011deg; }
+  57.5% { rotate: 2.171deg; }
+  60% { rotate: 2.23deg; }
+  62.5% { rotate: 2.124deg; }
+  65% { rotate: 1.813deg; }
+  67.5% { rotate: 1.292deg; }
+  70% { rotate: 0.592deg; }
+  72.5% { rotate: -0.222deg; }
+  75% { rotate: -1.064deg; }
+  77.5% { rotate: -1.84deg; }
+  80% { rotate: -2.461deg; }
+  82.5% { rotate: -2.86deg; }
+  85% { rotate: -3deg; }
+  87.5% { rotate: -2.879deg; }
+  90% { rotate: -2.527deg; }
+  92.5% { rotate: -1.998deg; }
+  95% { rotate: -1.358deg; }
+  97.5% { rotate: -0.673deg; }
+  100% { rotate: 0.001deg; }
+}
+@keyframes quill-flex {
+  0% { transform: rotate(0deg); }
+  2.5% { transform: rotate(0.187deg); }
+  5% { transform: rotate(0.357deg); }
+  7.5% { transform: rotate(0.503deg); }
+  10% { transform: rotate(0.616deg); }
+  12.5% { transform: rotate(0.695deg); }
+  15% { transform: rotate(0.741deg); }
+  17.5% { transform: rotate(0.756deg); }
+  20% { transform: rotate(0.747deg); }
+  22.5% { transform: rotate(0.723deg); }
+  25% { transform: rotate(0.692deg); }
+  27.5% { transform: rotate(0.663deg); }
+  30% { transform: rotate(0.644deg); }
+  32.5% { transform: rotate(0.639deg); }
+  35% { transform: rotate(0.652deg); }
+  37.5% { transform: rotate(0.682deg); }
+  40% { transform: rotate(0.726deg); }
+  42.5% { transform: rotate(0.778deg); }
+  45% { transform: rotate(0.83deg); }
+  47.5% { transform: rotate(0.873deg); }
+  50% { transform: rotate(0.897deg); }
+  52.5% { transform: rotate(0.895deg); }
+  55% { transform: rotate(0.858deg); }
+  57.5% { transform: rotate(0.784deg); }
+  60% { transform: rotate(0.672deg); }
+  62.5% { transform: rotate(0.523deg); }
+  65% { transform: rotate(0.345deg); }
+  67.5% { transform: rotate(0.147deg); }
+  70% { transform: rotate(-0.06deg); }
+  72.5% { transform: rotate(-0.263deg); }
+  75% { transform: rotate(-0.448deg); }
+  77.5% { transform: rotate(-0.604deg); }
+  80% { transform: rotate(-0.718deg); }
+  82.5% { transform: rotate(-0.785deg); }
+  85% { transform: rotate(-0.798deg); }
+  87.5% { transform: rotate(-0.759deg); }
+  90% { transform: rotate(-0.671deg); }
+  92.5% { transform: rotate(-0.54deg); }
+  95% { transform: rotate(-0.376deg); }
+  97.5% { transform: rotate(-0.192deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes quill-shadow-move {
+  0% { transform: translate3d(9.4px, 10.4px, 0); }
+  2.5% { transform: translate3d(9.484px, 10.494px, 0); }
+  5% { transform: translate3d(9.724px, 10.761px, 0); }
+  7.5% { transform: translate3d(10.086px, 11.164px, 0); }
+  10% { transform: translate3d(10.524px, 11.653px, 0); }
+  12.5% { transform: translate3d(10.989px, 12.171px, 0); }
+  15% { transform: translate3d(11.433px, 12.666px, 0); }
+  17.5% { transform: translate3d(11.82px, 13.097px, 0); }
+  20% { transform: translate3d(12.128px, 13.44px, 0); }
+  22.5% { transform: translate3d(12.351px, 13.689px, 0); }
+  25% { transform: translate3d(12.5px, 13.854px, 0); }
+  27.5% { transform: translate3d(12.592px, 13.957px, 0); }
+  30% { transform: translate3d(12.651px, 14.023px, 0); }
+  32.5% { transform: translate3d(12.697px, 14.074px, 0); }
+  35% { transform: translate3d(12.744px, 14.126px, 0); }
+  37.5% { transform: translate3d(12.796px, 14.184px, 0); }
+  40% { transform: translate3d(12.847px, 14.24px, 0); }
+  42.5% { transform: translate3d(12.886px, 14.284px, 0); }
+  45% { transform: translate3d(12.9px, 14.3px, 0); }
+  47.5% { transform: translate3d(12.879px, 14.276px, 0); }
+  50% { transform: translate3d(12.819px, 14.209px, 0); }
+  52.5% { transform: translate3d(12.726px, 14.106px, 0); }
+  55% { transform: translate3d(12.614px, 13.982px, 0); }
+  57.5% { transform: translate3d(12.504px, 13.859px, 0); }
+  60% { transform: translate3d(12.417px, 13.761px, 0); }
+  62.5% { transform: translate3d(12.368px, 13.707px, 0); }
+  65% { transform: translate3d(12.364px, 13.702px, 0); }
+  67.5% { transform: translate3d(12.398px, 13.741px, 0); }
+  70% { transform: translate3d(12.452px, 13.801px, 0); }
+  72.5% { transform: translate3d(12.494px, 13.848px, 0); }
+  75% { transform: translate3d(12.49px, 13.843px, 0); }
+  77.5% { transform: translate3d(12.406px, 13.75px, 0); }
+  80% { transform: translate3d(12.219px, 13.542px, 0); }
+  82.5% { transform: translate3d(11.921px, 13.21px, 0); }
+  85% { transform: translate3d(11.523px, 12.766px, 0); }
+  87.5% { transform: translate3d(11.056px, 12.245px, 0); }
+  90% { transform: translate3d(10.565px, 11.698px, 0); }
+  92.5% { transform: translate3d(10.104px, 11.185px, 0); }
+  95% { transform: translate3d(9.729px, 10.766px, 0); }
+  97.5% { transform: translate3d(9.484px, 10.494px, 0); }
+  100% { transform: translate3d(9.4px, 10.4px, 0); }
+}
+@keyframes quill-shadow-sharp {
+  0% { opacity: 0.66; }
+  2.5% { opacity: 0.652; }
+  5% { opacity: 0.629; }
+  7.5% { opacity: 0.595; }
+  10% { opacity: 0.554; }
+  12.5% { opacity: 0.51; }
+  15% { opacity: 0.468; }
+  17.5% { opacity: 0.432; }
+  20% { opacity: 0.403; }
+  22.5% { opacity: 0.382; }
+  25% { opacity: 0.368; }
+  27.5% { opacity: 0.359; }
+  30% { opacity: 0.353; }
+  32.5% { opacity: 0.349; }
+  35% { opacity: 0.345; }
+  37.5% { opacity: 0.34; }
+  40% { opacity: 0.335; }
+  42.5% { opacity: 0.331; }
+  45% { opacity: 0.33; }
+  47.5% { opacity: 0.332; }
+  50% { opacity: 0.338; }
+  52.5% { opacity: 0.346; }
+  55% { opacity: 0.357; }
+  57.5% { opacity: 0.367; }
+  60% { opacity: 0.376; }
+  62.5% { opacity: 0.38; }
+  65% { opacity: 0.381; }
+  67.5% { opacity: 0.377; }
+  70% { opacity: 0.372; }
+  72.5% { opacity: 0.368; }
+  75% { opacity: 0.369; }
+  77.5% { opacity: 0.377; }
+  80% { opacity: 0.394; }
+  82.5% { opacity: 0.422; }
+  85% { opacity: 0.46; }
+  87.5% { opacity: 0.504; }
+  90% { opacity: 0.55; }
+  92.5% { opacity: 0.594; }
+  95% { opacity: 0.629; }
+  97.5% { opacity: 0.652; }
+  100% { opacity: 0.66; }
+}
+@keyframes quill-shadow-soft {
+  0% { opacity: 0.341; }
+  2.5% { opacity: 0.348; }
+  5% { opacity: 0.367; }
+  7.5% { opacity: 0.396; }
+  10% { opacity: 0.431; }
+  12.5% { opacity: 0.468; }
+  15% { opacity: 0.503; }
+  17.5% { opacity: 0.534; }
+  20% { opacity: 0.558; }
+  22.5% { opacity: 0.576; }
+  25% { opacity: 0.588; }
+  27.5% { opacity: 0.595; }
+  30% { opacity: 0.6; }
+  32.5% { opacity: 0.604; }
+  35% { opacity: 0.608; }
+  37.5% { opacity: 0.612; }
+  40% { opacity: 0.616; }
+  42.5% { opacity: 0.619; }
+  45% { opacity: 0.62; }
+  47.5% { opacity: 0.618; }
+  50% { opacity: 0.614; }
+  52.5% { opacity: 0.606; }
+  55% { opacity: 0.597; }
+  57.5% { opacity: 0.588; }
+  60% { opacity: 0.581; }
+  62.5% { opacity: 0.578; }
+  65% { opacity: 0.577; }
+  67.5% { opacity: 0.58; }
+  70% { opacity: 0.584; }
+  72.5% { opacity: 0.588; }
+  75% { opacity: 0.587; }
+  77.5% { opacity: 0.581; }
+  80% { opacity: 0.566; }
+  82.5% { opacity: 0.542; }
+  85% { opacity: 0.51; }
+  87.5% { opacity: 0.473; }
+  90% { opacity: 0.434; }
+  92.5% { opacity: 0.397; }
+  95% { opacity: 0.367; }
+  97.5% { opacity: 0.348; }
+  100% { opacity: 0.341; }
+}
+
+/* Decorative only: dropped where the larger feather would run off the screen or cover the form. */
+@media (max-width: 979px) {
+  .quill { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quill,
+  .quillShown {
+    transition: none;
+    transform: none;
+  }
+
+  .quillDrift,
+  .quillSway,
+  .quillImage,
+  .quillShadowRig,
+  .quillShadowImage {
+    animation: none;
+  }
+}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ParchShell, Flourish, InkDivider, WaxSeal, SheetCorners, PasswordInput } from '@/components/Parchment';
 import { useRouter } from 'next/navigation';
-import { routes } from '@/config/routes';
+import { routes, DRAFT_PREFIX } from '@/config/routes';
 
 const asset = (name: string) => `/assets/${name}`;
 
@@ -170,7 +170,7 @@ type Modal =
 
 export default function AccountDraftPage() {
   const router = useRouter();
-  const onBack = () => router.push(routes.login);
+  const onBack = () => router.push(`${DRAFT_PREFIX}${routes.login}`);
   const standalone = false;
   const [view, setView] = useState<View>('select');
   const [modal, setModal] = useState<Modal | null>(null);

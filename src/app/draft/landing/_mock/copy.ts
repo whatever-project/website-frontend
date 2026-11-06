@@ -6,8 +6,8 @@ export const COPY = {
   subtitle: "ดินแดนแห่งเวทมนตร์รอคอยการมาถึงของคุณ",
   logIn: "เข้าสู่ระบบ",
   signUp: "สมัครสมาชิก",
-  realTime: "● เวลาจริง",
-  realTimeOff: "○ เวลาจริง",
+  // `time` is the device clock as HH:MM (24 h), filled in by the page.
+  realTime: (time: string) => `แสดงภาพตามเวลาปัจจุบัน ${time} น.`,
   timeLabel: "ปรับเวลาในวัน",
 }
 
@@ -19,8 +19,7 @@ export const COPY_EN: typeof COPY = {
   subtitle: "A land of magic awaits your arrival",
   logIn: "Log in",
   signUp: "Sign up",
-  realTime: "● Real time",
-  realTimeOff: "○ Real time",
+  realTime: (time: string) => `Real time ${time}`,
   timeLabel: "Adjust time of day",
 }
 

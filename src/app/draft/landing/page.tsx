@@ -1,65 +1,149 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useCallback, useEffect, useRef, useState } from "react"
-import { getTimeState } from "@/utils/timeOfDay"
-import { routes } from "@/config/routes"
-import { FaGlobe } from "react-icons/fa"
-import Stars from "./_components/Stars"
-import LoginModal from "./_components/LoginModal"
-import { COPY_BY_LANG, type DraftLang } from "./_mock/copy"
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { getTimeState } from "@/utils/timeOfDay";
+import { routes } from "@/config/routes";
+import { FaGlobe } from "react-icons/fa";
+import { MdSunny } from "react-icons/md";
+import { BsMoonStarsFill } from "react-icons/bs";
+import Stars from "./_components/landing/Stars";
+import LoginModal from "./_components/login-ui/LoginModal";
+import { preloadScrollLogin, releaseScrollLogin } from "./_components/login-ui/scroll/useScrollLoginAnimation";
+import sliderStyles from "./_components/landing/TimeSlider.module.css";
+import { COPY_BY_LANG, type DraftLang } from "./_mock/copy";
+import { BACKDROP_SRC } from "./_utils/assets";
+import DevicePreviewHost from "./_components/draft-tools/DevicePreviewHost";
+import DevicePreviewLauncher from "./_components/draft-tools/DevicePreviewLauncher";
+import { DEV_PREVIEW_ENABLED } from "./_components/draft-tools/devPreviewFlag";
+import { listenPreviewCommands, mergeCurrentSnapshot, reportPreviewStatus, setCurrentSnapshot, setEmbedded } from "./_components/draft-tools/previewBridge";
+import { DEFAULT_SNAPSHOT, clearSnapshotParams, parsePreviewRoute, replacePreviewSearch, usePreviewRoute } from "./_components/draft-tools/previewRoute";
 
 // Both auth buttons share one size; nowrap keeps the label on a single line.
 // Inline fontFamily so it wins over `.gallery-btn`'s own font-family.
 const AUTH_BTN =
-  "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 text-center text-base tracking-[0.15em]"
+  "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 text-center text-base tracking-[0.15em]";
 const AUTH_BTN_STYLE = {
-  fontFamily: "'Jim Thompson Roman', 'Charmonman', 'Prompt', serif",
+  fontFamily: "'Jim Thompson Roman', 'Prompt', serif",
   background: "rgba(12, 14, 22, 0.55)", // darker than .gallery-btn so labels stay legible on a bright backdrop
   textShadow: "0 1px 10px rgba(0,0,0,.8)",
+};
+
+/**
+ * The landing route. Normally it is just the landing page. In a development build only, the URL can switch it into the developer DEVICE
+ * PREVIEW (see draft-tools/previewRoute.ts):
+ *   ?device=...  the host: a toolbar plus an iframe of THIS SAME route at an exact device size (the landing page itself is not mounted
+ *                in the host, so there is only ever one 3D engine: the one inside the iframe);
+ *   ?embed=1     this is the real page inside that iframe: no preview chrome, driven by the host.
+ */
+export default function LandingDraftRoute() {
+  const route = usePreviewRoute();
+  if (route.device && !route.embed) return <DevicePreviewHost device={route.device} snapshot={route.snapshot} />;
+  return <LandingDraft embed={route.embed} />;
 }
 
-export default function LandingDraft() {
+function LandingDraft({ embed }: { embed: boolean }) {
   const nowHour = () => {
-    const d = new Date()
-    return d.getHours() + d.getMinutes() / 60
-  }
+    const d = new Date();
+    return d.getHours() + d.getMinutes() / 60;
+  };
 
-  const [hour, setHour] = useState(nowHour())
-  const [live, setLive] = useState(true)
-  const [lang, setLang] = useState<DraftLang>("th")
-  const COPY = COPY_BY_LANG[lang]
-  const [loginOpen, setLoginOpen] = useState(false)
-  const loginButtonRef = useRef<HTMLButtonElement>(null)
+  const [hour, setHour] = useState(nowHour());
+  const [live, setLive] = useState(true);
+  const [lang, setLang] = useState<DraftLang>("th");
+  const COPY = COPY_BY_LANG[lang];
+  const [loginOpen, setLoginOpen] = useState(false);
+  const loginButtonRef = useRef<HTMLButtonElement>(null);
   const closeLogin = useCallback(() => {
-    setLoginOpen(false)
-    window.requestAnimationFrame(() => loginButtonRef.current?.focus())
-  }, [])
+    setLoginOpen(false);
+    // On the normal page the preview selections carried over from a device preview apply to that one opening only.
+    if (!parsePreviewRoute(window.location.search).embed) setCurrentSnapshot(null);
+    window.requestAnimationFrame(() => loginButtonRef.current?.focus());
+  }, []);
+
+  // Developer device preview only (a no-op in a production build and on a plain /draft/landing URL).
+  //  - embedded (?embed=1): this page is the real page inside the host's iframe: apply the host's selections, report back, obey commands.
+  //  - normal page opened with selections in the URL (coming back from a device): apply them once, then clean the URL.
+  // The route is read from the URL here (not from props) because the first hydration pass always sees the neutral route.
+  useEffect(() => {
+    if (!DEV_PREVIEW_ENABLED) return;
+    const route = parsePreviewRoute(window.location.search);
+    if (route.device && !route.embed) return; // the host is about to replace this page
+    if (route.embed) {
+      setEmbedded(true);
+      setCurrentSnapshot(route.snapshot);
+      const open = route.snapshot.loginOpen ? window.setTimeout(() => setLoginOpen(true), 0) : undefined;
+      reportPreviewStatus({ ready: true });
+      const stop = listenPreviewCommands((command) => {
+        mergeCurrentSnapshot(command);
+        if (command.loginOpen === true) setLoginOpen(true);
+      });
+      return () => {
+        window.clearTimeout(open);
+        stop();
+        setEmbedded(false);
+        setCurrentSnapshot(null);
+      };
+    }
+    if (route.hasSnapshot) {
+      setCurrentSnapshot(route.snapshot);
+      // Applied from a timer, and the URL is cleaned in that same timer: React StrictMode runs this effect twice in development (run,
+      // cleanup, run), so the second run must still find the URL untouched and schedule the same thing again.
+      const apply = window.setTimeout(() => {
+        if (route.snapshot.loginOpen) setLoginOpen(true);
+        replacePreviewSearch(clearSnapshotParams);
+      }, 0);
+      return () => window.clearTimeout(apply);
+    }
+  }, []);
+
+  // Build the login parchment (download, parse, GPU upload) as soon as the page has mounted, so it is ready
+  // before the visitor clicks Login. The small delay keeps it out of the first paint.
+  useEffect(() => {
+    const id = setTimeout(preloadScrollLogin, 150);
+    return () => clearTimeout(id);
+  }, []);
+  // Free the warm WebGL context (and its GPU memory) when the landing page unmounts.
+  useEffect(() => releaseScrollLogin, []);
 
   // `?t=<hour>` forces a time of day (handy for designers: /draft/landing?t=21)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const forced = parseFloat(params.get("t") ?? "")
+    const params = new URLSearchParams(window.location.search);
+    const forced = parseFloat(params.get("t") ?? "");
     if (Number.isFinite(forced)) {
-      setHour(((forced % 24) + 24) % 24)
-      setLive(false)
+      setHour(((forced % 24) + 24) % 24);
+      setLive(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (!live) return
-    const id = setInterval(() => setHour(nowHour()), 30_000)
-    setHour(nowHour())
-    return () => clearInterval(id)
-  }, [live])
+    if (!live) return;
+    const id = setInterval(() => setHour(nowHour()), 30_000);
+    setHour(nowHour());
+    return () => clearInterval(id);
+  }, [live]);
 
-  const ts = getTimeState(hour)
+  // Device clock for the toggle label. Starts empty so server and first client render match.
+  const [clock, setClock] = useState("");
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setClock(
+        `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+      );
+    };
+    tick();
+    const id = setInterval(tick, 5_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const ts = getTimeState(hour);
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[#10131f] select-none">
       {/* village backdrop */}
       <img
-        src="/assets/village.jpg"
+        src={BACKDROP_SRC}
         alt="Arcane Vale Village"
         className="absolute inset-0 h-full w-full object-cover"
         draggable={false}
@@ -76,14 +160,23 @@ export default function LandingDraft() {
       />
 
       {/* time-of-day colour grade */}
-      <div className="pointer-events-none absolute inset-0 transition-all duration-1000" style={{ background: ts.grade }} />
-      <div className="pointer-events-none absolute inset-0 transition-all duration-1000" style={{ background: ts.wash }} />
+      <div
+        className="pointer-events-none absolute inset-0 transition-all duration-1000"
+        style={{ background: ts.grade }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 transition-all duration-1000"
+        style={{ background: ts.wash }}
+      />
 
       {/* stars */}
       <Stars opacity={ts.stars} />
 
       {/* warm window glows at night */}
-      <div className="pointer-events-none absolute inset-0 transition-opacity duration-1000" style={{ opacity: ts.windowGlow }}>
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-1000"
+        style={{ opacity: ts.windowGlow }}
+      >
         {[
           { l: "56%", t: "62%", s: 90 },
           { l: "79%", t: "66%", s: 120 },
@@ -98,7 +191,8 @@ export default function LandingDraft() {
               top: w.t,
               width: w.s,
               height: w.s,
-              background: "radial-gradient(circle, rgba(255,178,80,.55) 0%, rgba(255,150,50,.22) 45%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(255,178,80,.55) 0%, rgba(255,150,50,.22) 45%, transparent 70%)",
               animation: `candle-flicker ${3 + i * 1.3}s ease-in-out ${i * 0.7}s infinite`,
             }}
           />
@@ -108,14 +202,23 @@ export default function LandingDraft() {
       {/* bottom vignette */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" />
 
+      {/* Developer device preview (dev builds only, normal page only, hidden while the login is open: its Preview panel has the same buttons).
+          In the embedded page the host's own "Back to Dev Tools" badge is hidden so the simulated viewport shows the page, not dev chrome. */}
+      {!embed && !loginOpen && <DevicePreviewLauncher snapshot={{ ...DEFAULT_SNAPSHOT, uiLang: lang }} />}
+      {embed && <style>{`a[href="/draft/dev-tools"] { display: none !important; }`}</style>}
+
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
-        <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">{COPY.arcaneVale}</div>
+        <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">
+          {COPY.arcaneVale}
+        </div>
         {/* Draft-local toggle: the shared LanguageSwitcher renders nothing on /draft/*, so it swaps mock copy instead */}
         <button
           type="button"
           onClick={() => setLang((l) => (l === "th" ? "en" : "th"))}
-          aria-label={lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
+          aria-label={
+            lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"
+          }
           className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-100/30 px-3 py-1 font-ui text-[11px] tracking-[0.2em] whitespace-nowrap text-amber-100/80 uppercase transition hover:border-amber-100/60 hover:text-amber-50"
         >
           <span aria-hidden className="text-sm leading-none tracking-normal">
@@ -128,26 +231,36 @@ export default function LandingDraft() {
       {/* soft dark scrim behind the title block so text stays readable on the bright daytime backdrop */}
       <div
         className="pointer-events-none absolute inset-0 z-[5]"
-        style={{ background: "radial-gradient(55% 45% at 50% 52%, rgba(10,12,22,.62) 0%, rgba(10,12,22,.35) 55%, transparent 100%)" }}
+        style={{
+          background:
+            "radial-gradient(55% 45% at 50% 52%, rgba(10,12,22,.62) 0%, rgba(10,12,22,.35) 55%, transparent 100%)",
+        }}
       />
 
       {/* centre title */}
       <main className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
         <p
           className="rise-in font-jimthompson text-2xl tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:text-3xl"
-          style={{ textShadow: "0 2px 6px rgba(0,0,0,.7), 0 2px 24px rgba(0,0,0,.7)" }}
+          style={{
+            textShadow: "0 2px 6px rgba(0,0,0,.7), 0 2px 24px rgba(0,0,0,.7)",
+          }}
         >
           {COPY.welcome}
         </p>
         <h1
           className="rise-in-1 font-jimthompson mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[7.5vw]"
-          style={{ textShadow: "0 2px 8px rgba(0,0,0,.75), 0 2px 34px rgba(0,0,0,.7), 0 0 60px rgba(233,196,106,.18)" }}
+          style={{
+            textShadow:
+              "0 2px 8px rgba(0,0,0,.75), 0 2px 34px rgba(0,0,0,.7), 0 0 60px rgba(233,196,106,.18)",
+          }}
         >
           {COPY.title}
         </h1>
         <p
           className="rise-in-2 font-josefin mt-6 text-xs font-normal tracking-[0.32em] text-amber-50 uppercase"
-          style={{ textShadow: "0 1px 6px rgba(0,0,0,.85), 0 1px 14px rgba(0,0,0,.7)" }}
+          style={{
+            textShadow: "0 1px 6px rgba(0,0,0,.85), 0 1px 14px rgba(0,0,0,.7)",
+          }}
         >
           {COPY.subtitle}
         </p>
@@ -157,12 +270,18 @@ export default function LandingDraft() {
             ref={loginButtonRef}
             type="button"
             onClick={() => setLoginOpen(true)}
+            onPointerEnter={preloadScrollLogin}
+            onFocus={preloadScrollLogin}
             className={AUTH_BTN}
             style={AUTH_BTN_STYLE}
           >
             {COPY.logIn}
           </button>
-          <Link href={routes.signup} className={AUTH_BTN} style={AUTH_BTN_STYLE}>
+          <Link
+            href={routes.signup}
+            className={AUTH_BTN}
+            style={AUTH_BTN_STYLE}
+          >
             {COPY.signUp}
           </Link>
         </div>
@@ -171,34 +290,53 @@ export default function LandingDraft() {
       {/* time scrubber */}
       <footer className="absolute inset-x-0 bottom-0 z-20 px-6 pb-7 sm:px-10">
         <div className="mx-auto flex max-w-xl flex-col gap-2">
-          <div className="flex items-center justify-center font-josefin text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
+          {/* relative z-10: stays above the slider's enlarged click area, which reaches a few px up */}
+          <div className="relative z-10 flex items-center justify-center font-josefin text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
             <button
               type="button"
               onClick={() => setLive((v) => !v)}
-              className={`rounded-full px-3 py-1 transition ${
-                live ? "bg-white/10 text-amber-100/90" : "text-amber-100/45 hover:text-amber-100/80"
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1 transition ${
+                live
+                  ? "text-amber-100/90"
+                  : "text-amber-100/45 hover:text-amber-100/80"
               }`}
             >
-              {live ? COPY.realTime : COPY.realTimeOff}
+              {COPY.realTime(clock)}
             </button>
           </div>
-          <input
-            type="range"
-            min={0}
-            max={24}
-            step={0.05}
-            value={hour}
-            onChange={(e) => {
-              setLive(false)
-              setHour(parseFloat(e.target.value))
-            }}
-            className="sun-slider"
-            aria-label={COPY.timeLabel}
-          />
+          <div className={sliderStyles.wrap}>
+            <input
+              type="range"
+              min={0}
+              max={24}
+              step={0.05}
+              value={hour}
+              onChange={(e) => {
+                setLive(false);
+                setHour(parseFloat(e.target.value));
+              }}
+              className={`sun-slider ${sliderStyles.timeSlider}`}
+              aria-label={COPY.timeLabel}
+            />
+            {/* Icon follows the thumb: sun 06:00-18:00, moon 18:01-05:59 */}
+            {hour >= 6 && hour <= 18 ? (
+              <MdSunny
+                aria-hidden
+                className={`${sliderStyles.icon} ${sliderStyles.sun}`}
+                style={{ "--pos": hour / 24 } as CSSProperties}
+              />
+            ) : (
+              <BsMoonStarsFill
+                aria-hidden
+                className={`${sliderStyles.icon} ${sliderStyles.moon}`}
+                style={{ "--pos": hour / 24 } as CSSProperties}
+              />
+            )}
+          </div>
         </div>
       </footer>
 
-      {loginOpen && <LoginModal onClose={closeLogin} />}
+      {loginOpen && <LoginModal onClose={closeLogin} lang={lang} />}
     </div>
-  )
+  );
 }

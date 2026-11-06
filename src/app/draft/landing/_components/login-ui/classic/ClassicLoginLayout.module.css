@@ -1,0 +1,225 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   เลย์เอาต์ของ "UI เดิม" (Classic Login UI)  ←  ไฟล์นี้คือที่เดียวที่ต้องแก้ขนาด/ระยะห่าง/ตำแหน่งของ Classic
+   (UI ใหม่ใช้ไฟล์ new/NewLoginLayout.module.css แยกอิสระ แก้ไฟล์หนึ่งไม่กระทบอีกไฟล์)
+   ตัวอักษร (font/size/weight/letter-spacing/line-height) อยู่ใน ClassicLoginTypography.module.css ไม่ใช่ไฟล์นี้
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+   ชิ้นส่วนที่ควบคุมได้ (ตรงกับ data-layout ใน ClassicLoginLayout.tsx / LoginNotice.tsx):
+
+     form-box   กล่องฟอร์มบนม้วนกระดาษ 3D          width · max-height · padding ซ้าย-ขวา · ยกขึ้น (margin-bottom) (--form-*)
+     heading    หัวข้อ                              margin-top                                 (--heading-*)
+     divider    เส้นแบ่งลายประดับใต้หัวข้อ            margin บน/ล่าง                             (--divider-*)
+     label      ป้ายชื่อช่อง                         margin บน/ล่าง                             (--label-*)
+     input      ช่องกรอก (ชื่อผู้ใช้ + รหัสผ่าน)       width · height · padding                    (--input-*)
+     options    แถว "จดจำฉัน" + "ลืมรหัสผ่าน?"        margin บน/ล่าง · ช่องว่างระหว่างสองฝั่ง      (--options-*)
+     remember   ป้าย "จดจำฉัน"                       ช่องว่างระหว่าง checkbox กับข้อความ          (--remember-gap)
+     checkbox   ช่อง checkbox                        ขนาด                                       (--checkbox-size)
+     button     ปุ่มเข้าสู่ระบบ                       width · height · padding                    (--button-*)
+     prompt     ประโยค "ยังไม่มีบัญชี?" + ลิงก์        margin-top                                 (--prompt-*)
+     notice     แบนเนอร์แจ้งเตือน                    padding · ระยะใต้ม้วนกระดาษ · ความกว้างสูงสุด · margin ในการ์ด (--notice-*)
+
+   วิธีแก้: เปลี่ยนค่าตัวแปรในหัวข้อ 1 (ม้วนกระดาษ 3D) หรือหัวข้อ 2 (การ์ดสำรอง) ไม่ต้องแตะหัวข้อ 4 (การนำไปใช้)
+   ภาษา:   หัวข้อ 3 ไว้ปรับเฉพาะภาษาไทย (data-lang="th") หรืออังกฤษ (data-lang="en") ถ้าต้องการ (ตอนนี้ไม่มีค่าที่ต่างกัน)
+   มือถือ: ตอนนี้ยังไม่มีกฎมือถือสำหรับฟอร์มบนม้วนกระดาษ (กล่องฟอร์มวัดเป็น % ของขนาดม้วนกระดาษที่ engine คำนวณจากหน้าจอ);
+          มีเฉพาะ breakpoint เดียวของการ์ดสำรอง (หัวข้อ 2, ที่ 40rem = 640px) ซึ่งเป็นกฎเดิม — Phase 6 จะเพิ่มค่าสำหรับมือถือที่นี่
+
+   ไม่ได้อยู่ในไฟล์นี้: ตัวอักษร (ClassicLoginTypography), สี/เงา/เส้นขอบ (ClassicLogin.module.css, .parch-* ใน globals.css),
+   อนิเมชันเปิด/ปิดฟอร์ม และขนาดกล่องของ dialog ที่ engine 3D กำหนด (LoginModal.module.css)
+
+   ตัวเลือกด้านล่างใช้ ".layout [data-layout=…]" (specificity 0,2,0) จึงชนะ .parch-* ใน globals.css และ Tailwind utility
+   (Tailwind อยู่ใน @layer จึงแพ้กฎที่อยู่นอก layer เสมอ) ไม่มีกฎใดอ้างถึงชื่อ class ของ Tailwind
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 1. แผงควบคุม: ค่าบนม้วนกระดาษ 3D (กรณีปกติ) ─────────────────────────────────────────────────────────── */
+.layout {
+  /* form-box — กล่องฟอร์มบนม้วนกระดาษ (ใช้กับกล่องบนม้วนกระดาษเท่านั้น ไม่ใช้กับการ์ดสำรอง) */
+  --form-width: min(80%, 23rem);
+  --form-max-height: 88%;
+  --form-padding-x: 0.25rem;
+  /* ยกฟอร์มขึ้นจากกึ่งกลางกล่อง: margin-bottom ของกล่องฟอร์ม ฟอร์มถูกจัดกึ่งกลางด้วย flex ดังนั้นฟอร์มเลื่อนขึ้นครึ่งหนึ่งของค่านี้
+     (ดูบล็อก "ระยะเหนือม้วนล่าง บนมือถือ" ใต้ส่วนที่ 2) ค่าตั้งต้น 0 = ไม่เลื่อน (desktop และจอกว้างตั้งแต่ 40rem ขึ้นไปไม่เปลี่ยน) */
+  --form-margin-bottom: 0;
+
+  /* heading — ระยะเหนือหัวข้อ */
+  --heading-margin-top: 0;
+
+  /* divider — เส้นแบ่งลายประดับ (ระยะบน/ล่างของเส้น) */
+  --divider-margin-top: 0.55rem;
+  --divider-margin-bottom: 0.3rem;
+
+  /* label — ป้ายชื่อช่อง (ระยะเหนือป้าย = ระยะจากช่องก่อนหน้า, ระยะใต้ป้าย = ระยะป้ายถึงช่องกรอก) */
+  --label-margin-top: 1rem;
+  --label-margin-bottom: 0.3rem;
+
+  /* input — ช่องกรอกทั้งสองช่อง */
+  --input-width: 100%;
+  --input-height: auto;
+  --input-padding: 9px 12px;
+
+  /* options — แถว "จดจำฉัน" / "ลืมรหัสผ่าน?" */
+  --options-margin-top: 0.8rem;
+  --options-margin-bottom: 1.2rem;
+  --options-gap: 0.5rem;
+  --remember-gap: 0.625rem;
+  --checkbox-size: 15px;
+
+  /* button — ปุ่มเข้าสู่ระบบ */
+  --button-width: 100%;
+  --button-height: auto;
+  --button-padding: 10px 0 12px;
+
+  /* prompt — "ยังไม่มีบัญชี?" */
+  --prompt-margin-top: 0.95rem;
+
+  /* notice — แบนเนอร์แจ้งเตือน
+     offset/max-width: ตอนอยู่ใต้ม้วนกระดาษ 3D (ระยะจากขอบล่างของกล่อง dialog และความกว้างสูงสุด)
+     margin-top: ตอนอยู่ในการ์ดสำรอง (ระยะเหนือแบนเนอร์) · padding: ใช้ทั้งสองกรณี */
+  --notice-offset: 14px;
+  --notice-max-width: min(92vw, 26rem);
+  --notice-margin-top: 1rem;
+  --notice-padding: 0.5rem 0.75rem;
+}
+
+
+/* ── 2. การ์ดสำรอง (WebGL ใช้ไม่ได้ → การ์ดแบนแทนม้วนกระดาษ; แสดงเฉพาะ Classic) ────────────────────────────────
+   ค่าด้านล่าง = ค่าเดิมของการ์ดสำรอง (จาก Tailwind ใน markup และ .parch-* ใน globals.css) ทุกประการ
+   .flatCard (คลาสของการ์ด) ติดเฉพาะบนการ์ดสำรอง · .flatPage ติดที่กล่องหุ้มการ์ด (พื้นที่เลื่อนของ dialog) */
+.layout.flatCard {
+  --heading-margin-top: 0.5rem;
+  --divider-margin-top: 1rem;
+  --divider-margin-bottom: 1rem;
+  --label-margin-top: 1.25rem;
+  --label-margin-bottom: 0.375rem;
+  --input-padding: 11px 14px;
+  --options-margin-top: 1rem;
+  --options-margin-bottom: 1.75rem;
+  --checkbox-size: 17px;
+  --button-padding: 12px 0 14px;
+  --prompt-margin-top: 1.5rem;
+}
+
+/* ตัวการ์ด: ความกว้าง/ระยะขอบใน (หน้าจอกว้างตั้งแต่ 40rem ใช้ระยะขอบในมากขึ้น) */
+.flatCard {
+  --flat-card-max-width: 28rem;
+  --flat-card-padding: 1.75rem;
+  position: relative;
+  margin: auto;
+  width: 100%;
+  max-width: var(--flat-card-max-width);
+  padding: var(--flat-card-padding);
+}
+
+/* กล่องหุ้มการ์ด: จัดการ์ดกึ่งกลางหน้าจอ และเว้นขอบจอ */
+.flatPage {
+  --flat-page-padding-x: 1rem;
+  --flat-page-padding-y: 2rem;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding-left: var(--flat-page-padding-x);
+  padding-right: var(--flat-page-padding-x);
+  padding-top: var(--flat-page-padding-y);
+  padding-bottom: var(--flat-page-padding-y);
+}
+
+/* breakpoint เดิมของการ์ดสำรอง (Tailwind "sm" = 40rem) */
+@media (width >= 40rem) {
+  .flatCard {
+    --flat-card-padding: 2.5rem;
+  }
+  .flatPage {
+    --flat-page-padding-x: 1.5rem;
+    --flat-page-padding-y: 3rem;
+  }
+}
+
+
+/* ── ระยะเหนือม้วนล่าง บนมือถือ (จอกว้างน้อยกว่า 40rem = 640px; ขอบเขตเดียวกับ breakpoint ของการ์ดสำรองข้างบน) ───────────────
+   ที่มา: กล่องที่ฟอร์มวางอยู่คือกล่องทั้งใบของกระดาษ 3D ซึ่งรวมม้วนล่างหนา ~9.09% ของความสูง ฟอร์มที่จัดกึ่งกลางกล่องจึงเอียงลงชิดม้วนล่าง
+   (ประโยคสมัครเหลือ ~5px) แก้ด้วยการลดระยะเหนือป้ายชื่อ (--label-margin-top) บนมือถือลง 8px (1rem → 0.5rem) ตัวแปรนี้ใช้กับป้ายทั้งสองป้าย
+   ฟอร์มจึงเตี้ยลง ~16px และขอบล่างของฟอร์มขยับขึ้น ~8px ผลที่วัดได้ที่ 375 และ 390: เว้นบน ~53px / ล่าง ~13px จึงไม่ต้องใช้ --form-margin-bottom (คงเป็น 0)
+   ถ้าต้องการยกฟอร์มเพิ่ม ให้ตั้ง --form-margin-bottom (ฟอร์มเลื่อนขึ้นครึ่งหนึ่งของค่านี้) ไม่แตะ engine, ขนาดกระดาษ หรือการ์ดสำรอง */
+@media (width < 40rem) {
+  .layout {
+    --form-margin-bottom: 0;
+    --label-margin-top: 0.5rem;
+  }
+}
+
+
+/* ── 3. ค่าเฉพาะภาษา (ทับค่าข้างบนเมื่อหน้า login เป็นภาษานั้น) ────────────────────────────────────────── */
+/* ยังไม่มีค่าที่ต่างกันระหว่างไทยและอังกฤษ  ตัวอย่าง:  .layout[data-lang="en"] { --button-padding: 11px 0 13px; } */
+
+
+/* ── 4. การนำไปใช้ — ไม่ต้องแก้ ──────────────────────────────────────────────────────────────────────────────── */
+
+/* กล่องฟอร์มบนม้วนกระดาษ (คลาส sheetBox ติดเฉพาะกล่องนี้) */
+.sheetBox {
+  width: var(--form-width);
+  max-height: var(--form-max-height);
+  padding-left: var(--form-padding-x);
+  padding-right: var(--form-padding-x);
+  margin-bottom: var(--form-margin-bottom);
+}
+
+.layout [data-layout="heading"] {
+  margin-top: var(--heading-margin-top);
+}
+
+/* เส้นแบ่งมาจากคอมโพเนนต์ InkDivider ที่ใช้ร่วมกัน (แก้ไม่ได้) จึงอ้างด้วยคลาส .ink-divider ของคอมโพเนนต์เอง ไม่ใช่ Tailwind */
+.layout :global(.ink-divider) {
+  margin-top: var(--divider-margin-top);
+  margin-bottom: var(--divider-margin-bottom);
+}
+
+.layout [data-layout="label"] {
+  margin-top: var(--label-margin-top);
+  margin-bottom: var(--label-margin-bottom);
+}
+
+.layout :is([data-layout="input"], [data-layout="password-input"]) {
+  width: var(--input-width);
+  height: var(--input-height);
+  padding: var(--input-padding);
+}
+
+.layout [data-layout="options"] {
+  margin-top: var(--options-margin-top);
+  margin-bottom: var(--options-margin-bottom);
+  gap: var(--options-gap);
+}
+
+.layout [data-layout="remember"] {
+  gap: var(--remember-gap);
+}
+
+.layout [data-layout="checkbox"] {
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+}
+
+.layout [data-layout="button"] {
+  width: var(--button-width);
+  height: var(--button-height);
+  padding: var(--button-padding);
+}
+
+.layout [data-layout="prompt"] {
+  margin-top: var(--prompt-margin-top);
+}
+
+/* notice: ตัวแบนเนอร์ถือคลาส .layout เอง (อยู่นอกฟอร์ม/ใน LoginNotice) จึงเป็นตัวเลือกแบบ compound */
+.layout[data-layout="notice"] {
+  padding: var(--notice-padding);
+}
+.layout[data-layout="notice"][data-placement="below-sheet"] {
+  top: calc(100% + var(--notice-offset));
+  max-width: var(--notice-max-width);
+}
+.layout[data-layout="notice"][data-placement="in-card"] {
+  margin-top: var(--notice-margin-top);
+}

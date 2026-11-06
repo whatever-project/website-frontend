@@ -1,3 +1,14 @@
+/* Google Fonts (full axes). @import url() rules must come first in the file.
+   Commas inside the URLs are written as %2C on purpose: Next/Turbopack silently drops an @import whose URL contains a raw comma.
+   - Noto Sans Thai:     wght 100-900 and wdth 62.5-100 (variable). No italic exists.
+   - IBM Plex Sans Thai: wght 100,200,300,400,500,600,700 (static weights, not variable). No italic or width axis exists.
+   - Anuphan:            wght 100-700 (variable). No italic or width axis exists.
+   - Montserrat:         wght 100-900 and italic (variable). No width axis exists.
+   Use the .font-* classes below, or font-family directly; weights/widths via font-weight / font-stretch (e.g. font-stretch: 75%). */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wdth%2Cwght@62.5..100%2C100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital%2Cwght@0%2C100..900;1%2C100..900&display=swap");
 @import "tailwindcss";
 
 @layer base {
@@ -237,7 +248,7 @@ input[type='range'].sun-slider::-moz-range-thumb {
   outline: none;
   transition: box-shadow 0.25s, border-color 0.25s;
 }
-.parch-input::placeholder { color: #a68d5f; font-style: italic; }
+.parch-input::placeholder { color: #a68d5f; }
 .parch-input:focus {
   border-color: #8a6a35;
   box-shadow: 0 0 0 3px rgba(160, 125, 60, 0.22), inset 0 1px 4px rgba(120, 90, 40, 0.15);
@@ -336,7 +347,7 @@ input[type='range'].sun-slider::-moz-range-thumb {
 
 /* ============ Requested typefaces ============ */
 
-/* ilove google font */
+/* ilove Google Sans */
 @font-face {
   font-family: 'Google Sans';
   font-style: normal;
@@ -347,14 +358,35 @@ input[type='range'].sun-slider::-moz-range-thumb {
 }
 .font-googlesans { font-family: 'Google Sans', serif; }
 
-/* Fontwz4 */
+/* Google Fonts utilities (the faces themselves are loaded by the @import lines at the top of this file) */
+.font-notosansthai { font-family: 'Noto Sans Thai', 'Google Sans', sans-serif; }
+.font-ibmplexsansthai { font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif; }
+.font-anuphan { font-family: 'Anuphan', 'Google Sans', sans-serif; }
+.font-montserrat { font-family: 'Montserrat', 'Google Sans', sans-serif; }
+
+/* Anupark-Regular — paid (Linotype). Uses licensed file if dropped at /fonts/Anupark-Regular.ttf, else falls back to Charm (same designer, SIL OFL). */
 @font-face {
-  font-family: 'Fontwiz4';
-  src: url('/fonts/Fontwiz4.woff2') format('woff2');
+  font-family: 'Anupark';
+  src: url('/fonts/Anupark-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
-.font-fontwiz4 { font-family: 'Fontwiz4', 'Prompt', sans-serif; }
+@font-face {
+    font-family: 'Anupark';
+    src: url('/fonts/Anupark-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+}
+.font-anupark { font-family: 'Anupark', 'Google Sans', sans-serif; }
+
+/* Arkhip */
+@font-face {
+    font-family: 'Arkhip';
+    src: url('/fonts/Arkhip.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}
+.font-arkhip { font-family: 'Arkhip', 'Google Sans', sans-serif; }
 
 /* Charm-Regular */
 @font-face {
@@ -363,25 +395,25 @@ input[type='range'].sun-slider::-moz-range-thumb {
   font-weight: 400;
   font-display: swap;
 }
-.font-charm { font-family: 'Charm', 'Prompt', sans-serif; }
+.font-charm { font-family: 'Charm', 'Google Sans', sans-serif; }
+
+/* GreatVibes Regular */
+@font-face {
+  font-family: 'GreatVibes';
+  src: url('/fonts/GreatVibes-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-greatvibes { font-family: 'GreatVibes', 'Google Sans', cursive; }
 
 /* bangna-new */
 @font-face {
   font-family: 'bangna-new';
-  src: url('/fonts/bangna-new.woff2') format('woff2');
+  src: url('/fonts/bangna-new.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
-.font-bangna-new { font-family: 'bangna-new', 'Prompt', sans-serif; }
-
-/* Arkhipi */
-@font-face {
-  font-family: 'Arkhipi';
-  src: url('/fonts/Arkhipi.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-.font-arkhipi { font-family: 'Arkhipi', 'Charmonman', 'Prompt', serif; }
+.font-bangna-new { font-family: 'bangna-new', 'Google Sans', sans-serif; }
 
 /* Parfumerie Script — paid (Typesenses). Uses licensed file if dropped at /fonts/ParfumerieScript.woff2, else falls back to calligraphic Great Vibes. */
 @font-face {
@@ -396,16 +428,16 @@ input[type='range'].sun-slider::-moz-range-thumb {
   font-weight: 400;
   font-display: swap;
 }
-.font-parfumerie { font-family: 'Parfumerie Script', 'Great Vibes', cursive; }
+.font-parfumerie { font-family: 'Parfumerie Script', 'Google Sans', cursive; }
 
 /* TAN Grandeur — paid (TanType). Uses licensed file if dropped at /fonts/TANGrandeur.woff2, else falls back to Cormorant Garamond. */
 @font-face {
-  font-family: 'TAN-GRANDEUR-Regular';
-  src: url('/fonts/TAN-GRANDEUR-Regular.woff2') format('woff2');
+  font-family: 'TAN-Grandeur';
+  src: url('/fonts/TAN-GRANDEUR-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
-.font-tan-grandeur { font-family: 'TAN-GRANDEUR-Regular', 'Cormorant Garamond', serif; }
+.font-tan-grandeur { font-family: 'TAN-Grandeur', 'Google Sans', serif; }
 
 /* Josefin Sans — self-hosted (SIL OFL) */
 @font-face {
@@ -426,37 +458,16 @@ input[type='range'].sun-slider::-moz-range-thumb {
   font-weight: 400;
   font-display: swap;
 }
-.font-josefin { font-family: 'Josefin Sans', 'Prompt', sans-serif; }
+.font-josefin { font-family: 'Josefin Sans', 'Google Sans', sans-serif; }
 
 /* Jim Thompson Roman — brand typeface (not publicly redistributable). Uses licensed file if dropped at /fonts/JimThompsonRoman.woff2, else falls back to Charmonman (loop-headed Thai display serif, SIL OFL). */
 @font-face {
   font-family: 'Jim Thompson Roman';
-  src: url('/fonts/JimThompsonRoman.woff2') format('woff2');
+  src: url('/fonts/JimThompsonRoman.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
-@font-face {
-  font-family: 'Jim Thompson Roman';
-  src: url('/fonts/Charmonman-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
-.font-jimthompson { font-family: 'Jim Thompson Roman', 'Charmonman', 'Prompt', serif; }
-
-/* Anuparp Thai — paid (Linotype). Uses licensed file if dropped at /fonts/AnuparpThai.woff2, else falls back to Charm (same designer, SIL OFL). */
-@font-face {
-  font-family: 'Anuparp Thai';
-  src: url('/fonts/AnuparpThai.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Anuparp Thai';
-  src: url('/fonts/Charm-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
-.font-anuparp { font-family: 'Anuparp Thai', 'Charm', 'Prompt', sans-serif; }
+.font-jimthompson { font-family: 'Jim Thompson Roman', 'Google Sans', serif; }
 
 /* Oranienbaum — OFL, self-hosted */
 @font-face {
@@ -465,7 +476,7 @@ input[type='range'].sun-slider::-moz-range-thumb {
   font-weight: 400;
   font-display: swap;
 }
-.font-oranienbaum { font-family: 'Oranienbaum', 'Cormorant Garamond', serif; }
+.font-oranienbaum { font-family: 'Oranienbaum', 'Google Sans', serif; }
 
 /* Serithai — free 100% incl. commercial (Jipatype), self-hosted */
 @font-face {
@@ -474,7 +485,147 @@ input[type='range'].sun-slider::-moz-range-thumb {
   font-weight: 400;
   font-display: swap;
 }
-.font-serithai { font-family: 'Serithai', 'Charm', 'Prompt', sans-serif; }
+.font-serithai { font-family: 'Serithai', 'Google Sans', sans-serif; }
+
+/* Cloud Soft */
+@font-face {
+  font-family: 'Cloud Soft';
+  src: url('/fonts/Cloud Soft-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cloud Soft';
+  src: url('/fonts/Cloud Soft-Light.ttf') format('truetype');
+  font-display: swap;
+}
+.font-serithai { font-family: 'Serithai', 'Google Sans', sans-serif; }
+
+/* ---- Newly added fonts (public/fonts) ---- */
+
+/* Highcrest */
+@font-face {
+  font-family: 'Highcrest';
+  src: url('/fonts/Highcrest.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-highcrest { font-family: 'Highcrest', 'Google Sans', serif; }
+
+/* Brotheric (Demo) */
+@font-face {
+  font-family: 'Brotheric';
+  src: url('/fonts/Brotheric Regular Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-brotheric { font-family: 'Brotheric', 'Google Sans', serif; }
+
+@font-face {
+  font-family: 'Brotheric Ink Bleed';
+  src: url('/fonts/Brotheric Ink Bleed Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-brotheric-inkbleed { font-family: 'Brotheric Ink Bleed', 'Google Sans', serif; }
+
+/* Blue Mirage */
+@font-face {
+  font-family: 'Blue Mirage';
+  src: url('/fonts/blue-mirage.otf') format('opentype'), url('/fonts/blue-mirage.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Blue Mirage';
+  src: url('/fonts/blue-mirage-italic.otf') format('opentype'), url('/fonts/blue-mirage-italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+.font-bluemirage { font-family: 'Blue Mirage', 'Google Sans', serif; }
+
+/* Piston Black */
+@font-face {
+  font-family: 'Piston Black';
+  src: url('/fonts/PistonBlack-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-pistonblack { font-family: 'Piston Black', 'Google Sans', sans-serif; }
+
+/* Gitaste */
+@font-face {
+  font-family: 'Gitaste';
+  src: url('/fonts/gitaste.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-gitaste { font-family: 'Gitaste', 'Google Sans', serif; }
+
+/* Roline */
+@font-face {
+  font-family: 'Roline';
+  src: url('/fonts/roline.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-roline { font-family: 'Roline', 'Google Sans', serif; }
+
+/* NCL Gasdrifo (Demo) */
+@font-face {
+  font-family: 'NCL Gasdrifo';
+  src: url('/fonts/NCLGasdrifo-Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-nclgasdrifo { font-family: 'NCL Gasdrifo', 'Google Sans', serif; }
+
+/* Creattion (Demo) */
+@font-face {
+  font-family: 'Creattion';
+  src: url('/fonts/Creattion Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-creattion { font-family: 'Creattion', 'Google Sans', serif; }
+
+/* Canterbury */
+@font-face {
+  font-family: 'Canterbury';
+  src: url('/fonts/Canterbury.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-canterbury { font-family: 'Canterbury', 'Google Sans', serif; }
+
+/* Script (SCRIPTIN / SCRIPALT) */
+@font-face {
+  font-family: 'Script Tin';
+  src: url('/fonts/SCRIPTIN.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-scriptin { font-family: 'Script Tin', 'Google Sans', cursive; }
+
+@font-face {
+  font-family: 'Script Alt';
+  src: url('/fonts/SCRIPALT.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-scriptalt { font-family: 'Script Alt', 'Google Sans', cursive; }
+
+/* Blackchancery */
+@font-face {
+  font-family: 'Black Chancery';
+  src: url('/fonts/BLKCHCRY.TTF') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-blackchancery { font-family: 'Black Chancery', 'Google Sans', cursive; }
+
 
 /* ============ Gallery outline buttons (museum style) ============ */
 

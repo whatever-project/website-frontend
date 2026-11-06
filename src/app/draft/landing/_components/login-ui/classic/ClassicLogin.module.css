@@ -1,0 +1,11 @@
+/* "UI เดิม" (Classic): สไตล์ที่ไม่ใช่ตัวอักษร  (typography อยู่ใน ClassicLoginTypography.module.css)
+   .classic ถูกติดโดย LoginModal ที่กล่องฟอร์มของ Classic (ทั้งบนม้วนกระดาษและบนการ์ดสำรอง) */
+
+/* เงาปุ่มเข้าสู่ระบบของ UI เดิม: เบาและนุ่มลงราว 35% (เท่ากับ UI ใหม่ ดู new/NewLogin.module.css) สี/ขนาด/การโต้ตอบไม่เปลี่ยน
+   ก่อนหน้า: 0 4px 14px / .35 (hover: 0 6px 20px / .45 + glow 18px)  .parch-btn ใน globals.css ไม่ถูกแก้ หน้าอื่นไม่กระทบ */
+.classic :global(.parch-btn) {
+  box-shadow: 0 3px 8px rgba(50, 36, 14, 0.22), inset 0 1px 0 rgba(233, 217, 174, 0.2);
+}
+.classic :global(.parch-btn):hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
+}
