@@ -44,7 +44,7 @@ export default function LandingView() {
       {/* village backdrop */}
       <img
         src="/assets/village.jpg"
-        alt="Arcane Vale Village"
+        alt="Whatever Village"
         className="absolute inset-0 h-full w-full object-cover"
         draggable={false}
       />
@@ -94,7 +94,7 @@ export default function LandingView() {
 
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
-        <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">{tSite('arcaneVale')}</div>
+        <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">{tSite('whatever')}</div>
         <LanguageSwitcher tone="night" />
       </header>
 

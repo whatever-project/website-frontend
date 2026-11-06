@@ -144,7 +144,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
       {/* village backdrop */}
       <img
         src={BACKDROP_SRC}
-        alt="Arcane Vale Village"
+        alt="Whatever Village"
         className="absolute inset-0 h-full w-full object-cover"
         draggable={false}
       />
@@ -210,7 +210,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
         <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">
-          {COPY.arcaneVale}
+          {COPY.whatever}
         </div>
         {/* Draft-local toggle: the shared LanguageSwitcher renders nothing on /draft/*, so it swaps mock copy instead */}
         <button

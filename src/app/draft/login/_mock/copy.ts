@@ -29,3 +29,26 @@ export const STATE_OPTIONS: { value: LoginState; label: string }[] = [
   { value: "unverified", label: "ยังไม่ยืนยันอีเมล" },
   { value: "generic", label: "ข้อผิดพลาดทั่วไป" },
 ]
+
+/** English copy for the draft's language toggle (mirrors messages/en/login.json). */
+export const COPY_EN: typeof COPY = {
+  pageTitle: "Sign In",
+  pageSub: "— The Gates of the Vale —",
+  formHeading: "An Invitation to Return to the Village",
+  identifier: "Username or Email",
+  identifierPlaceholder: "wanderer or you@example.com",
+  password: "Password",
+  passwordPlaceholder: "••••••••••",
+  rememberMe: "Remember me",
+  forgotPassword: "Forgot password?",
+  submit: "Sign In",
+  submitting: "Signing in…",
+  noAccount: "No account yet?",
+  createOne: "Create one",
+  errorUnverified: "Your email is still unverified. Please check your inbox before signing in.",
+  errorGeneric: "Something went wrong. Please try again.",
+  backToSignup: "Back to sign up →",
+  sampleApiError: "Invalid credentials",
+}
+
+export const COPY_BY_LANG = { th: COPY, en: COPY_EN } as const

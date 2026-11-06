@@ -1,10 +1,10 @@
 {
   "site": {
-    "name": "Arcane Vale",
+    "name": "Whatever",
     "tagline": "A Magical Time Awaits Your Arrival",
-    "footerText": "✦ Arcane Vale — A Magical Community Roleplay in an Enchanted Valley ✦",
+    "footerText": "✦ Whatever — A Magical Community Roleplay in an Enchanted Valley ✦",
     "backToVillage": "Back to Village",
-    "arcaneVale": "Arcane Vale"
+    "whatever": "Whatever"
   },
   "breadcrumbs": {
     "home": "Home",

@@ -1,13 +1,16 @@
 "use client"
 
+import { useDraftLang } from "@/components/DraftLang";
 import Link from "next/link"
 import { useState, FormEvent } from "react"
 import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners, PasswordInput } from "@/components/Parchment"
 import LetterStack from "@/components/LetterStack"
 import { routes } from "@/config/routes"
-import { COPY, STATE_OPTIONS, type LoginState } from "./_mock/copy"
+import { COPY_BY_LANG, STATE_OPTIONS, type LoginState } from "./_mock/copy"
 
 export default function LoginDraft() {
+  const { lang } = useDraftLang();
+  const COPY = COPY_BY_LANG[lang];
   const [form, setForm] = useState({ usernameOrEmail: "", password: "" })
   const [remember, setRemember] = useState(false)
   const [state, setState] = useState<LoginState>("idle")

@@ -132,7 +132,7 @@ export default function InfoPanel({ open, topic, onClose }: InfoPanelProps) {
       <PanelBody key={topic} tabs={getTabs(topic)} />
 
       <footer className="border-t border-dashed border-[#c9ad77] px-6 py-3 text-center">
-        <p className="parch-label">✦ Arcane Vale — บันทึกแห่งหุบเขา ✦</p>
+        <p className="parch-label">✦ Whatever — บันทึกแห่งหุบเขา ✦</p>
       </footer>
     </aside>
   )

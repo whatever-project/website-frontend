@@ -1,7 +1,8 @@
 "use client";
 
+import { useDraftLang } from "@/components/DraftLang";
 import Link from "next/link";
-import { useState, FormEvent } from "react";
+import { Fragment, useState, FormEvent } from "react";
 import {
   ParchShell,
   InkDivider,
@@ -17,10 +18,50 @@ import {
   getPasswordChecks,
   validateUsername,
 } from "@/utils/validation";
-import { COPY, TERMS, ROMAN, SAMPLE_EMAIL } from "./_mock/copy";
+import { COPY_BY_LANG, TERMS_BY_LANG, SAMPLE_EMAIL } from "./_mock/copy";
 import { MdEmail } from "react-icons/md";
 
+/*
+ * Typography scoped to the signup content only (.signup-scope).
+ * Unlayered .parch-* rules in globals.css beat Tailwind's layered utilities,
+ * so a scoped selector with higher specificity is used instead of !important.
+ * Jim Thompson Roman: the two headings (font-jimthompson) and .parch-btn.
+ */
+const SIGNUP_FONT_CSS = `
+.signup-scope { font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif; font-size: 13px; }
+.signup-scope .font-display,
+.signup-scope .font-serif2,
+.signup-scope .font-ui,
+.signup-scope .parch-label,
+.signup-scope .parch-input {
+  font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif;
+  font-size: 13px;
+}
+.signup-scope .parch-input::placeholder { font-size: 15px; }
+/* wizard step names: 13px, vertically centred with the circle */
+.signup-scope .signup-wizard-label { font-size: 15px; line-height: 1; }
+/* form labels: wider letters, equal 10px gap to the input */
+.signup-scope .signup-field-label { letter-spacing: 0.06em; text-transform: none; margin-bottom: 10px; font-weight: 600; }
+/* step 3 (verify email) body text: 15px */
+.signup-scope .signup-verify .font-serif2,
+.signup-scope .signup-verify .font-ui { font-size: 15px; }
+/* requirement box titles: normal letter-spacing */
+.signup-scope .signup-hint-title { letter-spacing: normal; text-transform: none; }
+/* terms list: number column + hanging text, stable width while scrolling */
+.signup-scope .signup-terms { scrollbar-gutter: stable; }
+.signup-scope .signup-terms li {
+  font-size: 16px; line-height: 1.7; text-align: left; overflow-wrap: break-word;
+}
+.signup-scope .signup-terms .term-num {
+  font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif;
+  font-size: 16px; line-height: 1.7; font-variant-numeric: tabular-nums;
+}
+.signup-scope .parch-btn { font-family: 'Jim Thompson Roman', 'Serithai', 'Google Sans', serif; }
+`;
+
 export default function SignupDraft() {
+  const { lang } = useDraftLang();
+  const COPY = COPY_BY_LANG[lang];
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [agree, setAgree] = useState(false);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
@@ -65,48 +106,50 @@ export default function SignupDraft() {
     setStep(3);
   };
 
-  const sub =
-    step === 1
-      ? COPY.pageSubStep1
-      : step === 2
-        ? COPY.pageSubStep2
-        : COPY.pageSubStep3;
-
   return (
     <>
-      <ParchShell title={COPY.pageTitle} sub={sub} backHref={routes.home}>
+      <ParchShell title={COPY.pageTitle} backHref={routes.home}>
+        <style>{SIGNUP_FONT_CSS}</style>
+        <div className="signup-scope">
         {/* step indicator */}
         {step !== 3 && (
-          <div className="relative z-20 mt-6 flex items-center justify-center gap-4">
+          <div className="relative z-20 mx-auto mt-6 grid max-w-3xl grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:gap-4">
             {[1, 2].map((s) => (
-              <div key={s} className="flex items-center gap-4">
-                <div className="flex items-center gap-2.5">
+              <Fragment key={s}>
+                <div
+                  className={`flex flex-col items-center gap-3.5 ${s === 1 ? "justify-self-end" : "col-start-3 justify-self-start"}`}
+                >
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full border font-display text-base transition-all ${
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-ibmplexsansthai text-sm transition-all ${
                       step === s
-                        ? "border-[#3b2a18] bg-[#4a3520] text-[#f3e6c8] shadow-[0_3px_10px_rgba(50,32,14,0.45),inset_0_1px_2px_rgba(255,235,200,0.2)]"
+                        ? "border-[#4a3520] bg-[#4a3520] text-[#f3e6c8] shadow-[0_3px_8px_rgba(50,32,14,0.45)]"
                         : "border-[#b89a63] bg-transparent text-[#a68d5f]"
                     }`}
                   >
                     {s}
                   </div>
                   <span
-                    className={`parch-label ${step === s ? "text-[#3a2c1a]" : ""}`}
+                    className={`parch-label signup-wizard-label ${step === s ? "text-[#3a2c1a]" : ""}`}
                   >
                     {s === 1 ? COPY.stepTerms : COPY.stepAccountInfo}
                   </span>
                 </div>
-                {s === 1 && <span className="text-[#b89a63]">——✦——</span>}
-              </div>
+                {s === 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="col-start-2 row-start-1 mt-[18px] h-px w-10 bg-[#b89a63] sm:w-32 md:w-44"
+                  />
+                )}
+              </Fragment>
             ))}
           </div>
         )}
 
         {/* ── Step 1: Terms ── */}
         {step === 1 && (
-          <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[1fr_1fr] lg:gap-32">
-            <div className="parch-sheet relative p-8 sm:p-10 lg:ml-16">
-              <h2 className="font-display text-center text-3xl text-[#3a2c1a]">
+          <div className="relative z-20 mx-auto grid max-w-[84rem] grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[1.35fr_1fr] lg:gap-28">
+            <div className="parch-sheet relative p-8 sm:p-10">
+              <h2 className="font-jimthompson text-center text-3xl text-[#3a2c1a]">
                 {COPY.termsHeading}
               </h2>
               <InkDivider>
@@ -114,19 +157,19 @@ export default function SignupDraft() {
               </InkDivider>
 
               <ol
-                className="my-5 max-h-[min(34rem,65vh)] min-h-[20rem] space-y-3.5 overflow-y-auto border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-5"
+                className="signup-terms my-5 h-[min(34rem,62vh)] space-y-3.5 overflow-y-auto border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-5"
                 style={{
                   scrollbarColor: "#b89a63 transparent",
-                  scrollbarWidth: "thin",
+                  scrollbarWidth: "auto",
                 }}
               >
-                {TERMS.map((term, i) => (
+                {TERMS_BY_LANG[lang].map((term, i) => (
                   <li
                     key={i}
-                    className="flex gap-3 font-serif2 text-[15px] leading-relaxed text-[#4a3820]"
+                    className="grid grid-cols-[2rem_1fr] gap-x-3 font-serif2 text-[#4a3820]"
                   >
-                    <span className="font-display text-lg text-[#8a6a35]">
-                      {ROMAN[i]}.
+                    <span className="term-num font-display text-[#8a6a35]">
+                      {i + 1}.
                     </span>
                     {term}
                   </li>
@@ -164,12 +207,12 @@ export default function SignupDraft() {
 
         {/* ── Step 2: Account form ── */}
         {step === 2 && (
-          <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[1fr_1fr] lg:gap-32">
+          <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[28rem_35rem] lg:justify-center lg:gap-16">
             <form
               onSubmit={handleSubmit}
-              className="parch-sheet relative mx-auto w-full max-w-md p-8 sm:p-10 lg:mx-0 lg:ml-16"
+              className="parch-sheet relative mx-auto w-full max-w-md p-8 sm:p-10 lg:mx-0"
             >
-              <h2 className="font-display mt-4 text-center text-3xl text-[#3a2c1a]">
+              <h2 className="font-jimthompson mt-4 text-center text-3xl text-[#3a2c1a]">
                 {COPY.formHeading}
               </h2>
               <InkDivider>
@@ -184,7 +227,7 @@ export default function SignupDraft() {
 
               <label
                 htmlFor="signup-username"
-                className="parch-label mt-4 block"
+                className="parch-label signup-field-label mt-4 block"
               >
                 {COPY.username}
               </label>
@@ -208,12 +251,15 @@ export default function SignupDraft() {
               />
               {userFocus && (
                 <div className="mt-2 border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-3 font-ui text-[12px]">
-                  <p className="parch-label mb-1">
+                  <p className="parch-label signup-hint-title mb-1">
                     {COPY.usernameRequirements}
                   </p>
                   <ul className="space-y-1 text-[#4a3820]">
                     {COPY.usernameRules.map((r) => (
-                      <li key={r}>- {r}</li>
+                      <li key={r} className="flex items-baseline gap-3">
+                        <span aria-hidden="true">✦</span>
+                        <span>{r}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -226,7 +272,7 @@ export default function SignupDraft() {
 
               <label
                 htmlFor="signup-email"
-                className="parch-label mb-1.5 mt-5 block"
+                className="parch-label signup-field-label mt-5 block"
               >
                 {COPY.email}
               </label>
@@ -256,7 +302,7 @@ export default function SignupDraft() {
 
               <label
                 htmlFor="signup-password"
-                className="parch-label mb-1.5 mt-5 block"
+                className="parch-label signup-field-label mt-5 block"
               >
                 {COPY.password}
               </label>
@@ -279,7 +325,7 @@ export default function SignupDraft() {
               </div>
               {(passFocus || (touched.pass && !passOk)) && (
                 <ul className="mt-2 space-y-1 border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-3 font-ui text-[12px]">
-                  <li className="parch-label mb-1">
+                  <li className="parch-label signup-hint-title mb-1">
                     {COPY.passwordRequirements}
                   </li>
                   {passRules.map((r) => (
@@ -327,10 +373,10 @@ export default function SignupDraft() {
         {/* ── Step 3: Email verification ── */}
         {step === 3 && (
           <div className="relative z-20 mx-auto max-w-xl px-6 py-14">
-            <div className="parch-sheet relative p-10 text-center">
+            <div className="signup-verify parch-sheet relative p-10 text-center">
               <MdEmail className="mx-auto mt-4 h-16 w-16 text-[#8a6a35]" />
 
-              <h2 className="font-display mt-5 text-3xl text-[#3a2c1a]">
+              <h2 className="font-jimthompson mt-5 text-3xl text-[#3a2c1a]">
                 {COPY.verifyHeading}
               </h2>
               <InkDivider>
@@ -361,6 +407,7 @@ export default function SignupDraft() {
             </div>
           </div>
         )}
+        </div>
       </ParchShell>
 
       {/* Preview state (draft only) */}

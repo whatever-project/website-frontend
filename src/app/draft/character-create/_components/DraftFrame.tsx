@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import { Flourish, InkDivider } from "@/components/Parchment"
 import { DRAFT_HUB } from "@/config/routes"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
 
 interface DraftFrameProps {
   /** small caps line above the title, e.g. "— IDENTITY · STEP III OF VI —" */
@@ -12,8 +13,8 @@ interface DraftFrameProps {
 
 /**
  * Page frame matching the character-create screenshots: own header
- * (← กลับสู่หมู่บ้าน / ✦ Arcane Vale) instead of ParchShell, so the
- * sub-line can change per step and no language switcher is shown.
+ * (← กลับสู่หมู่บ้าน / ✦ Whatever) instead of ParchShell, so the
+ * sub-line can change per step and the shared LanguageSwitcher (draft-local th/en) sits beside the brand label.
  */
 export default function DraftFrame({ sub, title, children }: DraftFrameProps) {
   return (
@@ -28,10 +29,13 @@ export default function DraftFrame({ sub, title, children }: DraftFrameProps) {
           <span className="inline-block transition-transform group-hover:-translate-x-1">←</span>
           กลับสู่หมู่บ้าน
         </Link>
-        <span className="parch-label flex items-center gap-2 whitespace-nowrap">
-          <Flourish className="h-4 w-4 text-[#8a6a35]" />
-          Arcane Vale
-        </span>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="parch-label flex items-center gap-2 whitespace-nowrap">
+            <Flourish className="h-4 w-4 text-[#8a6a35]" />
+            Whatever
+          </span>
+          <LanguageSwitcher />
+        </div>
       </header>
 
       <div className="relative z-20 px-6 pt-10 text-center sm:px-12">
@@ -52,7 +56,7 @@ export default function DraftFrame({ sub, title, children }: DraftFrameProps) {
       <div className="relative z-20">{children}</div>
 
       <footer className="relative z-20 px-6 pt-14 pb-10 text-center sm:px-12">
-        <p className="parch-label">✦ Arcane Vale — ชุมชนโรลเพลย์ในหุบเขาเวทมนตร์ ✦</p>
+        <p className="parch-label">✦ Whatever — ชุมชนโรลเพลย์ในหุบเขาเวทมนตร์ ✦</p>
       </footer>
     </div>
   )

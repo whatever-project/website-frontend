@@ -1,6 +1,6 @@
 /** Thai copy for the landing draft. */
 export const COPY = {
-  arcaneVale: "Whatever",
+  whatever: "Whatever",
   welcome: "ยินดีต้อนรับ",
   title: "นักเดินทาง",
   subtitle: "ดินแดนแห่งเวทมนตร์รอคอยการมาถึงของคุณ",
@@ -13,7 +13,7 @@ export const COPY = {
 
 /** English copy for the draft's language toggle (landing page only; login popup stays Thai). */
 export const COPY_EN: typeof COPY = {
-  arcaneVale: "Whatever",
+  whatever: "Whatever",
   welcome: "Welcome",
   title: "Wayfarer",
   subtitle: "A land of magic awaits your arrival",

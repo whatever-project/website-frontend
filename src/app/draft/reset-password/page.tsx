@@ -1,12 +1,15 @@
 "use client"
 
+import { useDraftLang } from "@/components/DraftLang";
 import Link from "next/link"
 import { useState, FormEvent } from "react"
 import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners, PasswordInput } from "@/components/Parchment"
 import { routes } from "@/config/routes"
-import { COPY, STATE_OPTIONS, type ResetState } from "./_mock/copy"
+import { COPY_BY_LANG, STATE_OPTIONS, type ResetState } from "./_mock/copy"
 
 export default function ResetPasswordDraft() {
+  const { lang } = useDraftLang();
+  const COPY = COPY_BY_LANG[lang];
   const [newPassword, setNewPassword] = useState("")
   const [state, setState] = useState<ResetState>("form")
 

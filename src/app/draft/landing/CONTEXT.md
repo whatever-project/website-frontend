@@ -213,7 +213,7 @@ User actions that will need an endpoint:
 | Open/close dialog, time controls, language toggle, links | none | Local UI or plain navigation |
 
 ## 8. Thai strings to move to i18n
-- Existing landing namespace: `welcome, title, subtitle, logIn, signUp, realTime, realTimeOff, timeLabel` (the draft's `realTime`/`realTimeOff` now take the clock string; in live next-intl use a `{time}` placeholder, e.g. "แสดงภาพตามเวลาปัจจุบัน {time} น.", and format the time with the current locale); existing `site.arcaneVale`. The current draft's English landing copy mirrors these keys.
+- Existing landing namespace: `welcome, title, subtitle, logIn, signUp, realTime, realTimeOff, timeLabel` (the draft's `realTime`/`realTimeOff` now take the clock string; in live next-intl use a `{time}` placeholder, e.g. "แสดงภาพตามเวลาปัจจุบัน {time} น.", and format the time with the current locale); existing `site.whatever`. The current draft's English landing copy mirrors these keys.
 - Reuse existing login namespace: `formHeading, identifier, identifierPlaceholder, password, passwordPlaceholder, rememberMe, forgotPassword, submit, submitting, noAccount, createOne, errorUnverified, errorGeneric, backToSignup`.
 - New dialog accessibility label: "กำลังโหลด" (loading).
 - Preview-state labels and the draft-local language-toggle labels are draft-only and should be removed rather than translated.

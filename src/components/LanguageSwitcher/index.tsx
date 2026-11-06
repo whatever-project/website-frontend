@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "@/i18n/navigation"
 import { routing } from "@/i18n/routing"
 import { DRAFT_PREFIX } from "@/config/routes"
 import { FaGlobe } from "react-icons/fa";
+import { useDraftLang } from "@/components/DraftLang"
 
 // Label for the target language, written in that language
 const SWITCH_LABEL: Record<string, string> = {
@@ -20,7 +21,7 @@ const TONES = {
 
 /**
  * 🌐 one-click toggle between th and en. Keeps the current path + query string.
- * Rendered in page headers next to the "Arcane Vale" label; hidden on /draft pages (Thai-only, no locale routing).
+ * Rendered in page headers next to the "Whatever" label. On /draft pages (no locale routing) it toggles the draft-local language instead.
  */
 export default function LanguageSwitcher({ tone = "parch" }: { tone?: keyof typeof TONES }) {
   const locale = useLocale()
@@ -28,11 +29,17 @@ export default function LanguageSwitcher({ tone = "parch" }: { tone?: keyof type
   const pathname = usePathname()
   const rawPathname = useRawPathname()
 
-  if (rawPathname === DRAFT_PREFIX || rawPathname.startsWith(`${DRAFT_PREFIX}/`)) return null
+  const draft = useDraftLang()
+  const inDraft = rawPathname === DRAFT_PREFIX || rawPathname.startsWith(`${DRAFT_PREFIX}/`)
 
-  const next = routing.locales.find((l) => l !== locale) ?? routing.defaultLocale
+  const current = inDraft ? draft.lang : locale
+  const next = routing.locales.find((l) => l !== current) ?? routing.defaultLocale
 
   const switchLocale = () => {
+    if (inDraft) {
+      draft.toggle()
+      return
+    }
     router.replace(`${pathname}${window.location.search}${window.location.hash}`, { locale: next })
   }
 
@@ -45,7 +52,7 @@ export default function LanguageSwitcher({ tone = "parch" }: { tone?: keyof type
       className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 font-ui text-[11px] tracking-[0.2em] uppercase transition ${TONES[tone]}`}
     >
       <span aria-hidden className="text-sm leading-none tracking-normal"><FaGlobe /></span>
-      {locale}
+      {current}
     </button>
   )
 }

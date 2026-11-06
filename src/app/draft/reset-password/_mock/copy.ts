@@ -25,3 +25,22 @@ export const STATE_OPTIONS: { value: ResetState; label: string }[] = [
   { value: "success", label: "สำเร็จ" },
   { value: "noToken", label: "ลิงก์ไม่ถูกต้อง" },
 ]
+
+/** English copy for the draft's language toggle (mirrors messages/en/reset-password.json). */
+export const COPY_EN: typeof COPY = {
+  pageTitle: "Reset Password",
+  pageSub: "— Reclaim Your Seal —",
+  heading: "Set New Password",
+  hint: "Choose a strong password (at least 8 characters)",
+  passwordLabel: "New Password",
+  passwordPlaceholder: "At least 8 characters",
+  submit: "Reset Password",
+  submitting: "Resetting…",
+  successHeading: "Password Reset!",
+  successBody: "All sessions have been signed out. Redirecting to sign in…",
+  invalidToken: "Invalid or missing reset token.",
+  requestNewLink: "Request a new link →",
+  sampleError: "Reset failed",
+}
+
+export const COPY_BY_LANG = { th: COPY, en: COPY_EN } as const

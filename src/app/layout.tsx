@@ -5,8 +5,8 @@ import DraftBadge from "@/components/DraftBadge";
 
 export const metadata = {
   title: {
-    default: "Arcane Vale",
-    template: "%s · Arcane Vale",
+    default: "Whatever",
+    template: "%s · Whatever",
   },
   description: "A magical community roleplay platform set in an enchanted valley.",
 };

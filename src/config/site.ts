@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "Arcane Vale",
+  name: "Whatever",
   description: "A magical community roleplay platform set in an enchanted valley.",
-  titleTemplate: "%s · Arcane Vale",
+  titleTemplate: "%s · Whatever",
 } as const

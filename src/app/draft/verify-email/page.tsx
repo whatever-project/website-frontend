@@ -1,11 +1,12 @@
 "use client"
 
+import { useDraftLang } from "@/components/DraftLang";
 import Link from "next/link"
 import { useState } from "react"
 import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/Parchment"
 import { routes } from "@/config/routes"
 import {
-  COPY,
+  COPY_BY_LANG,
   KIND_OPTIONS,
   STATE_OPTIONS,
   SERVER_ERROR_MESSAGE,
@@ -15,6 +16,8 @@ import {
 } from "./_mock/copy"
 
 export default function VerifyEmailDraft() {
+  const { lang } = useDraftLang();
+  const COPY = COPY_BY_LANG[lang];
   const [kind, setKind] = useState<VerifyKind>("signup")
   const [state, setState] = useState<VerifyState>("success")
 

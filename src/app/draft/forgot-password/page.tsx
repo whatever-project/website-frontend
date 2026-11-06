@@ -1,12 +1,15 @@
 "use client"
 
+import { useDraftLang } from "@/components/DraftLang";
 import Link from "next/link"
 import { useState, FormEvent } from "react"
 import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/Parchment"
 import { routes } from "@/config/routes"
-import { COPY, STATE_OPTIONS, type ForgotState } from "./_mock/copy"
+import { COPY_BY_LANG, STATE_OPTIONS, type ForgotState } from "./_mock/copy"
 
 export default function ForgotPasswordDraft() {
+  const { lang } = useDraftLang();
+  const COPY = COPY_BY_LANG[lang];
   const [email, setEmail] = useState("")
   const [state, setState] = useState<ForgotState>("idle")
 

@@ -1,10 +1,10 @@
 {
   "site": {
-    "name": "Arcane Vale",
+    "name": "Whatever",
     "tagline": "ดินแดนแห่งเวทมนตร์รอคอยการมาถึงของคุณ",
-    "footerText": "✦ Arcane Vale — ชุมชนโรลเพลย์ในหุบเขาเวทมนตร์ ✦",
+    "footerText": "✦ Whatever — ชุมชนโรลเพลย์ในหุบเขาเวทมนตร์ ✦",
     "backToVillage": "กลับสู่หมู่บ้าน",
-    "arcaneVale": "Arcane Vale"
+    "whatever": "Whatever"
   },
   "breadcrumbs": {
     "home": "หน้าหลัก",

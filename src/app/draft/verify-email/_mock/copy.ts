@@ -57,3 +57,29 @@ export const STATE_OPTIONS: { value: VerifyState; label: string }[] = [
   { value: "errorNoToken", label: "ไม่มีโทเค็น" },
   { value: "errorServer", label: "ข้อผิดพลาดจากเซิร์ฟเวอร์" },
 ]
+
+/** English copy for the draft's language toggle (mirrors messages/en/verify-email*.json). */
+export const COPY_EN: typeof COPY = {
+  signup: {
+    pageTitle: "Verify Email",
+    pageSub: "— Seal the Pact —",
+    loading: "Verifying your email…",
+    successHeading: "Email Verified!",
+    errorHeading: "Verification Failed",
+    noToken: "No verification token provided.",
+    successCta: "Sign In",
+    errorCta: "Back to Sign Up",
+  },
+  change: {
+    pageTitle: "Verify Email Change",
+    pageSub: "— Update Your Seal —",
+    loading: "Confirming your new email…",
+    successHeading: "Email Updated!",
+    errorHeading: "Verification Failed",
+    noToken: "No verification token provided.",
+    successCta: "Back to Account Settings",
+    errorCta: "Back to Account Settings",
+  },
+}
+
+export const COPY_BY_LANG = { th: COPY, en: COPY_EN } as const

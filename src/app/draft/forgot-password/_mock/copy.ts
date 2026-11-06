@@ -23,3 +23,21 @@ export const STATE_OPTIONS: { value: ForgotState; label: string }[] = [
   { value: "error", label: "เกิดข้อผิดพลาด" },
   { value: "success", label: "ส่งสำเร็จ" },
 ]
+
+/** English copy for the draft's language toggle (mirrors messages/en/forgot-password.json). */
+export const COPY_EN: typeof COPY = {
+  pageTitle: "Forgot Password",
+  pageSub: "— Reset Your Seal —",
+  heading: "Reset Your Password",
+  body: "Enter your email and we'll send a reset link if an account exists.",
+  emailLabel: "Email Address",
+  emailPlaceholder: "you@example.com",
+  submit: "Send Reset Link",
+  submitting: "Sending…",
+  successHeading: "Check Your Inbox",
+  successBody: "If an account with that email exists, a password reset link has been sent. The link expires in 30 minutes.",
+  backToSignIn: "↩ Back to Sign In",
+  sampleError: "Something went wrong",
+}
+
+export const COPY_BY_LANG = { th: COPY, en: COPY_EN } as const

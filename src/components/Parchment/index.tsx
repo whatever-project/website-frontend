@@ -151,7 +151,7 @@ export function ParchShell({
   children,
 }: {
   title: string
-  sub: string
+  sub?: string
   backHref?: string
   onBack?: () => void
   children: ReactNode
@@ -185,14 +185,14 @@ export function ParchShell({
         <div className="flex items-center gap-3 sm:gap-4">
           <span className="parch-label hidden items-center gap-2 whitespace-nowrap sm:flex">
             <Flourish className="h-4 w-4 text-[#8a6a35]" />
-            {t('arcaneVale')}
+            {t('whatever')}
           </span>
           <LanguageSwitcher />
         </div>
       </header>
 
       <div className="relative z-20 px-6 pt-10 text-center sm:px-12">
-        <p className="parch-label mb-3">{sub}</p>
+        {sub && <p className="parch-label mb-3">{sub}</p>}
         <h1
           className="font-jimthompson text-5xl tracking-tight text-[#3a2c1a] sm:text-6xl"
           style={{ textShadow: '0 1px 0 rgba(255,250,235,.6)' }}

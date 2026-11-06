@@ -45,7 +45,7 @@ export default function StepTerms({ accepted, onAcceptedChange }: StepTermsProps
         />
         <span className="font-ui text-[13.5px] leading-relaxed text-[#3a2c1a]">
           ข้าพเจ้าได้อ่านและเข้าใจข้อตกลง กฎ รายละเอียด และแนวทางการสร้างตัวละครทั้งหมดข้างต้น และ
-          <strong>ยินยอมผูกวิญญาณของตัวละครกับกฎแห่งหุบเขา Arcane Vale</strong>
+          <strong>ยินยอมผูกวิญญาณของตัวละครกับกฎแห่งหุบเขา Whatever</strong>
         </span>
       </label>
     </div>
