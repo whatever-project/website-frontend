@@ -501,6 +501,131 @@ input[type='range'].sun-slider::-moz-range-thumb {
 }
 .font-serithai { font-family: 'Serithai', 'Google Sans', sans-serif; }
 
+/* ---- Newly added fonts (public/fonts) ---- */
+
+/* Highcrest */
+@font-face {
+  font-family: 'Highcrest';
+  src: url('/fonts/Highcrest.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-highcrest { font-family: 'Highcrest', 'Google Sans', serif; }
+
+/* Brotheric (Demo) */
+@font-face {
+  font-family: 'Brotheric';
+  src: url('/fonts/Brotheric Regular Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-brotheric { font-family: 'Brotheric', 'Google Sans', serif; }
+
+@font-face {
+  font-family: 'Brotheric Ink Bleed';
+  src: url('/fonts/Brotheric Ink Bleed Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-brotheric-inkbleed { font-family: 'Brotheric Ink Bleed', 'Google Sans', serif; }
+
+/* Blue Mirage */
+@font-face {
+  font-family: 'Blue Mirage';
+  src: url('/fonts/blue-mirage.otf') format('opentype'), url('/fonts/blue-mirage.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Blue Mirage';
+  src: url('/fonts/blue-mirage-italic.otf') format('opentype'), url('/fonts/blue-mirage-italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+.font-bluemirage { font-family: 'Blue Mirage', 'Google Sans', serif; }
+
+/* Piston Black */
+@font-face {
+  font-family: 'Piston Black';
+  src: url('/fonts/PistonBlack-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-pistonblack { font-family: 'Piston Black', 'Google Sans', sans-serif; }
+
+/* Gitaste */
+@font-face {
+  font-family: 'Gitaste';
+  src: url('/fonts/gitaste.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-gitaste { font-family: 'Gitaste', 'Google Sans', serif; }
+
+/* Roline */
+@font-face {
+  font-family: 'Roline';
+  src: url('/fonts/roline.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-roline { font-family: 'Roline', 'Google Sans', serif; }
+
+/* NCL Gasdrifo (Demo) */
+@font-face {
+  font-family: 'NCL Gasdrifo';
+  src: url('/fonts/NCLGasdrifo-Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-nclgasdrifo { font-family: 'NCL Gasdrifo', 'Google Sans', serif; }
+
+/* Creattion (Demo) */
+@font-face {
+  font-family: 'Creattion';
+  src: url('/fonts/Creattion Demo.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-creattion { font-family: 'Creattion', 'Google Sans', serif; }
+
+/* Canterbury */
+@font-face {
+  font-family: 'Canterbury';
+  src: url('/fonts/Canterbury.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-canterbury { font-family: 'Canterbury', 'Google Sans', serif; }
+
+/* Script (SCRIPTIN / SCRIPALT) */
+@font-face {
+  font-family: 'Script Tin';
+  src: url('/fonts/SCRIPTIN.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-scriptin { font-family: 'Script Tin', 'Google Sans', cursive; }
+
+@font-face {
+  font-family: 'Script Alt';
+  src: url('/fonts/SCRIPALT.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-scriptalt { font-family: 'Script Alt', 'Google Sans', cursive; }
+
+/* Blackchancery */
+@font-face {
+  font-family: 'Black Chancery';
+  src: url('/fonts/BLKCHCRY.TTF') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+.font-blackchancery { font-family: 'Black Chancery', 'Google Sans', cursive; }
+
 
 /* ============ Gallery outline buttons (museum style) ============ */
 
