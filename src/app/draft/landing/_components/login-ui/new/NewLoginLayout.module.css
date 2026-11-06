@@ -1,0 +1,155 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   เลย์เอาต์ของ "UI ใหม่" (New Login UI)  ←  ไฟล์นี้คือที่เดียวที่ต้องแก้ขนาด/ระยะห่าง/ตำแหน่งของ New
+   (UI เดิมใช้ไฟล์ classic/ClassicLoginLayout.module.css แยกอิสระ แก้ไฟล์หนึ่งไม่กระทบอีกไฟล์)
+   ตัวอักษร (font/size/weight/letter-spacing/line-height) อยู่ใน NewLoginTypography.module.css ไม่ใช่ไฟล์นี้
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+   ชิ้นส่วนที่ควบคุมได้ (ตรงกับ data-layout ใน NewLoginLayout.tsx / LoginNotice.tsx):
+
+     form-box   กล่องฟอร์มบนม้วนกระดาษ 3D          width · max-height · padding ซ้าย-ขวา      (--form-*)
+     heading    หัวข้อ                              margin-top                                 (--heading-*)
+     divider    เส้นแบ่งลายประดับใต้หัวข้อ            margin บน/ล่าง                             (--divider-*)
+     label      ป้ายชื่อช่อง                         margin บน/ล่าง                             (--label-*)
+     input      ช่องกรอก (ชื่อผู้ใช้ + รหัสผ่าน)       width · height · padding · padding ขวาของช่องรหัสผ่าน (--input-*, --password-input-*)
+     options    แถว "จดจำฉัน" + "ลืมรหัสผ่าน?"        margin บน/ล่าง · ช่องว่างระหว่างสองฝั่ง      (--options-*)
+     remember   ป้าย "จดจำฉัน"                       ช่องว่างระหว่าง checkbox กับข้อความ          (--remember-gap)
+     checkbox   ช่อง checkbox                        ขนาด                                       (--checkbox-size)
+     button     ปุ่มเข้าสู่ระบบ                       width · height · padding                    (--button-*)
+     prompt     ประโยค "ยังไม่มีบัญชี?" + ลิงก์        margin-top                                 (--prompt-*)
+     notice     แบนเนอร์แจ้งเตือน                    padding · ระยะใต้ม้วนกระดาษ · ความกว้างสูงสุด (--notice-*)
+
+   วิธีแก้: เปลี่ยนค่าตัวแปรในหัวข้อ 1 ด้านล่าง ไม่ต้องแตะหัวข้อ 3 (การนำไปใช้)
+   ภาษา:   หัวข้อ 2 ไว้ปรับเฉพาะภาษาไทย (data-lang="th") หรืออังกฤษ (data-lang="en") ถ้าต้องการ (ตอนนี้ไม่มีค่าที่ต่างกัน)
+   มือถือ: ตอนนี้ยังไม่มีกฎมือถือใด ๆ (กล่องฟอร์มวัดเป็น % ของขนาดม้วนกระดาษที่ engine คำนวณจากหน้าจอ) — Phase 6 จะเพิ่มค่าสำหรับมือถือที่นี่
+   การ์ดสำรอง: UI ใหม่ไม่มีการ์ดสำรอง (ตอน WebGL ใช้ไม่ได้ระบบแสดงการ์ด Classic แทน) จึงไม่มีค่าสำหรับการ์ดสำรองในไฟล์นี้
+
+   ไม่ได้อยู่ในไฟล์นี้: ตัวอักษร (NewLoginTypography), สี/เงา/เส้นขอบ/เส้นใต้ของช่องกรอก (NewLogin.module.css, .parch-* ใน globals.css),
+   อนิเมชันเปิด/ปิดฟอร์ม และขนาดกล่องของ dialog ที่ engine 3D กำหนด (LoginModal.module.css)
+
+   ตัวเลือกด้านล่างใช้ ".layout [data-layout=…]" (specificity 0,2,0) จึงชนะ .parch-* ใน globals.css และ Tailwind utility
+   (Tailwind อยู่ใน @layer จึงแพ้กฎที่อยู่นอก layer เสมอ) ไม่มีกฎใดอ้างถึงชื่อ class ของ Tailwind
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 1. แผงควบคุม ─────────────────────────────────────────────────────────── */
+.layout {
+  /* form-box — กล่องฟอร์มบนม้วนกระดาษ (กล่องฟอร์มบนม้วนกระดาษ 3D) */
+  --form-width: min(80%, 23rem);
+  --form-max-height: 88%;
+  --form-padding-x: 0.25rem;
+
+  /* heading — ระยะเหนือหัวข้อ */
+  --heading-margin-top: 0;
+
+  /* divider — เส้นแบ่งลายประดับ (ระยะบน/ล่างของเส้น) */
+  --divider-margin-top: 0.55rem;
+  --divider-margin-bottom: 0.3rem;
+
+  /* label — ป้ายชื่อช่อง (ระยะเหนือป้าย = ระยะจากช่องก่อนหน้า, ระยะใต้ป้าย = ระยะป้ายถึงช่องกรอก) */
+  --label-margin-top: 1rem;
+  --label-margin-bottom: 0.3rem;
+
+  /* input — ช่องกรอกทั้งสองช่อง */
+  --input-width: 100%;
+  --input-height: 32px;
+  --input-padding: 4px 4px 3px;
+  --password-input-padding-right: 2.75rem; /* เผื่อพื้นที่ให้ไอคอนตา (แสดง/ซ่อนรหัสผ่าน) */
+
+  /* options — แถว "จดจำฉัน" / "ลืมรหัสผ่าน?" */
+  --options-margin-top: 0.8rem;
+  --options-margin-bottom: 1.2rem;
+  --options-gap: 0.5rem;
+  --remember-gap: 0.625rem;
+  --checkbox-size: 15px;
+
+  /* button — ปุ่มเข้าสู่ระบบ */
+  --button-width: 100%;
+  --button-height: auto;
+  --button-padding: 10px 0 12px;
+
+  /* prompt — "ยังไม่มีบัญชี?" */
+  --prompt-margin-top: 0.95rem;
+
+  /* notice — แบนเนอร์แจ้งเตือน
+     offset/max-width: ตอนอยู่ใต้ม้วนกระดาษ 3D (ระยะจากขอบล่างของกล่อง dialog และความกว้างสูงสุด)
+     padding: ระยะในแบนเนอร์ */
+  --notice-offset: 14px;
+  --notice-max-width: min(92vw, 26rem);
+  --notice-padding: 0.5rem 0.75rem;
+}
+
+
+/* ── 2. ค่าเฉพาะภาษา (ทับค่าข้างบนเมื่อหน้า login เป็นภาษานั้น) ────────────────────────────────────────── */
+/* ยังไม่มีค่าที่ต่างกันระหว่างไทยและอังกฤษ  ตัวอย่าง:  .layout[data-lang="en"] { --button-padding: 11px 0 13px; } */
+
+
+/* ── 3. การนำไปใช้ — ไม่ต้องแก้ ──────────────────────────────────────────────────────────────────────────────── */
+
+/* กล่องฟอร์มบนม้วนกระดาษ (คลาส sheetBox ติดเฉพาะกล่องนี้) */
+.sheetBox {
+  width: var(--form-width);
+  max-height: var(--form-max-height);
+  padding-left: var(--form-padding-x);
+  padding-right: var(--form-padding-x);
+}
+
+.layout [data-layout="heading"] {
+  margin-top: var(--heading-margin-top);
+}
+
+/* เส้นแบ่งมาจากคอมโพเนนต์ InkDivider ที่ใช้ร่วมกัน (แก้ไม่ได้) จึงอ้างด้วยคลาส .ink-divider ของคอมโพเนนต์เอง ไม่ใช่ Tailwind */
+.layout :global(.ink-divider) {
+  margin-top: var(--divider-margin-top);
+  margin-bottom: var(--divider-margin-bottom);
+}
+
+.layout [data-layout="label"] {
+  margin-top: var(--label-margin-top);
+  margin-bottom: var(--label-margin-bottom);
+}
+
+.layout :is([data-layout="input"], [data-layout="password-input"]) {
+  box-sizing: border-box;
+  width: var(--input-width);
+  height: var(--input-height);
+  padding: var(--input-padding);
+}
+
+/* ช่องรหัสผ่านต้องเว้นด้านขวาไว้ให้ไอคอนตา (ต้องอยู่หลังกฎ input ข้างบน) */
+.layout [data-layout="password-input"] {
+  padding-right: var(--password-input-padding-right);
+}
+
+.layout [data-layout="options"] {
+  margin-top: var(--options-margin-top);
+  margin-bottom: var(--options-margin-bottom);
+  gap: var(--options-gap);
+}
+
+.layout [data-layout="remember"] {
+  gap: var(--remember-gap);
+}
+
+.layout [data-layout="checkbox"] {
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+}
+
+.layout [data-layout="button"] {
+  width: var(--button-width);
+  height: var(--button-height);
+  padding: var(--button-padding);
+}
+
+.layout [data-layout="prompt"] {
+  margin-top: var(--prompt-margin-top);
+}
+
+/* notice: ตัวแบนเนอร์ถือคลาส .layout เอง (อยู่นอกฟอร์ม/ใน LoginNotice) จึงเป็นตัวเลือกแบบ compound */
+.layout[data-layout="notice"] {
+  padding: var(--notice-padding);
+}
+.layout[data-layout="notice"][data-placement="below-sheet"] {
+  top: calc(100% + var(--notice-offset));
+  max-width: var(--notice-max-width);
+}

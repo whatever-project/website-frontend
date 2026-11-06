@@ -47,49 +47,6 @@
   }
 }
 
-/* Compact spacing/sizing for the form when it sits on the (smaller) 3D parchment. Same design language, same
-   fields; only margins, paddings and font sizes shrink so nothing overflows the paper. */
-.compactForm {
-  width: min(80%, 23rem);
-  max-height: 88%;
-}
-.compactForm h2 {
-  margin-top: 0;
-  font-size: 1.65rem;
-  line-height: 1.2;
-}
-.compactForm :global(.ink-divider) {
-  margin-top: 0.55rem;
-  margin-bottom: 0.3rem;
-}
-.compactForm :global(.parch-label) {
-  margin-top: 1rem;
-  margin-bottom: 0.3rem;
-  font-size: 13px;
-  letter-spacing: 0.22em;
-}
-.compactForm :global(.parch-input) {
-  font-size: 15px;
-  padding: 9px 12px;
-}
-.compactForm :global(.parch-btn) {
-  font-size: 16px;
-  padding: 10px 0 12px;
-}
-.compactForm :global(.parch-check) {
-  width: 15px;
-  height: 15px;
-}
-.compactForm :global(.mb-7) {
-  margin-top: 0.8rem;
-  margin-bottom: 1.2rem;
-}
-.compactForm :global(.mt-6) {
-  margin-top: 0.95rem;
-}
-.compactForm :global(.mb-4) {
-  margin-bottom: 0.4rem;
-}
-.compactForm :global(.text-\[13px\]) {
-  font-size: 12.5px;
-}
+/* Form box sizing, spacing and gaps are NOT here any more: they live in one layout file per UI
+   (classic/ClassicLoginLayout.module.css, new/NewLoginLayout.module.css). This file keeps the shared modal behaviour only:
+   backdrop, canvas, form reveal and the flat card pop-in. */

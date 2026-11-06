@@ -49,9 +49,9 @@ export const LOGIN_COPY_EN: typeof LOGIN_COPY = {
 export const LOGIN_COPY_BY_LANG = { th: LOGIN_COPY, en: LOGIN_COPY_EN } as const
 
 /** Draft-only: which login UI the preview panel shows. "classic" is the original and the default. */
-export type LoginUiVariant = "classic" | "parchment"
+export type LoginUiVariant = "classic" | "new"
 
 export const LOGIN_UI_OPTIONS: { value: LoginUiVariant; label: string }[] = [
   { value: "classic", label: "UI เดิม" },
-  { value: "parchment", label: "UI ใหม่" },
+  { value: "new", label: "UI ใหม่" },
 ]

@@ -1,0 +1,185 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ตัวอักษรของ "UI ใหม่" (New Login UI)  ←  ไฟล์นี้คือที่เดียวที่ต้องแก้ typography ของ New
+   (UI เดิมใช้ไฟล์ classic/ClassicLoginTypography.module.css แยกอิสระ แก้ไฟล์หนึ่งไม่กระทบอีกไฟล์)
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+   มี 5 กลุ่มหลัก  (ตรงกับ data-typo ใน NewLoginLayout.tsx / LoginNotice.tsx):
+
+     heading   หัวข้อ "ยินดีต้อนรับกลับ" (h2)
+     body      ข้อความทั่วไป: ป้ายชื่อช่อง (label), "จดจำฉัน", ลิงก์ "ลืมรหัสผ่าน?", "ยังไม่มีบัญชี?", ลิงก์ "สร้างบัญชีใหม่" (signup)
+               →  แก้ฟอนต์/ขนาด/น้ำหนัก ... ของ body ที่เดียว ทุกตัวข้างบนเปลี่ยนตาม
+     input     ข้อความที่พิมพ์ในช่อง และ placeholder (placeholder ใช้ค่าเดียวกับ input เสมอ)
+     button    ตัวหนังสือในปุ่ม "เข้าสู่ระบบ"
+     notice    แบนเนอร์แจ้งเตือน (error / อีเมลยังไม่ยืนยัน ใต้ม้วนกระดาษ)  →  กลุ่มอิสระ ไม่สืบทอดอะไรจาก body (มีฟอนต์ของตัวเอง)
+
+   ตัวที่ใช้ body แต่ "มีค่าไม่เหมือน body จริง ๆ" ถูกแยกเป็นข้อยกเว้นเล็ก ๆ (หัวข้อ 2) — ที่เหลือสืบทอด body ทั้งหมด:
+     label    ใช้ body ยกเว้น  น้ำหนัก (500)  ขนาด (13px)  และระยะห่างตัวอักษร (0.22em)
+     signup   ใช้ body ยกเว้น  น้ำหนัก (500)
+
+   วิธีแก้: เปลี่ยนค่าตัวแปรในหัวข้อ 1–2 ด้านล่าง (ชื่อ = --<กลุ่ม>-<คุณสมบัติ>) ไม่ต้องแตะหัวข้อ 4 (การนำไปใช้)
+   ฟอนต์: ใส่ชื่อเดียวต่อช่อง  -font-en = ฟอนต์สำหรับอักษรละติน  -font-th = ฟอนต์สำหรับอักษรไทย (ตัวละตินใช้ -en ส่วนตัวอักษรไทยที่ -en ไม่มีจะตกมาใช้ -th)
+          ชื่อต้องเป็นฟอนต์ที่ประกาศไว้แล้ว (@font-face ใน src/styles/globals.css หรือ shared/LoginFontFaces.module.css) ไม่ต้องใส่ fallback เพราะใส่ท้ายให้แล้ว
+   ภาษา:   หัวข้อ 3 ใช้ปรับเฉพาะตอนหน้า login เป็นภาษาไทย (data-lang="th") หรืออังกฤษ (data-lang="en")
+   UI ใหม่แสดงเฉพาะบนม้วนกระดาษ 3D (ตอน WebGL ใช้ไม่ได้ระบบจะแสดงการ์ด Classic แทน) จึงไม่มีค่าสำหรับการ์ดสำรองในไฟล์นี้
+
+   ไม่ได้อยู่ในไฟล์นี้ (ไม่ใช่ typography ของตัวอักษร): สีตัวอักษร (className ใน NewLoginLayout.tsx), text-transform: uppercase ของ label
+   (.parch-label ใน src/styles/globals.css), เส้นใต้/ช่องว่างในช่องกรอก (NewLogin.module.css), ระยะห่าง/ขนาดช่อง/ปุ่ม (new/NewLoginLayout.module.css)
+
+   ถ้าเปลี่ยน size ของกลุ่มใด line-height ที่เป็นตัวเลขไม่มีหน่วย (เช่น 1.5) จะคูณตามขนาดนั้นอัตโนมัติ
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 1. แผงควบคุม: 4 กลุ่มหลัก (ค่าตอนอยู่บนม้วนกระดาษ 3D = กรณีปกติ) ───────────────────────────────────── */
+.typography {
+  /* heading — หัวข้อ (h2) */
+  --heading-font-en: "Jim Thompson Roman";
+  --heading-font-th: "Google Sans";
+  --heading-weight: 400;
+  --heading-size: 1.65rem;
+  --heading-letter-spacing: normal;
+  --heading-line-height: 1.2;
+  --heading-word-spacing: normal;
+
+  /* body — ข้อความทั่วไปทั้งหมด (label, จดจำฉัน, ลืมรหัสผ่าน, ยังไม่มีบัญชี, สร้างบัญชีใหม่) */
+  --body-font-en: "Jost";
+  --body-font-th: "IBM Plex Sans Thai";
+  --body-weight: 400;
+  --body-size: 12.5px;
+  --body-letter-spacing: normal;
+  --body-line-height: 1.5;
+  --body-word-spacing: normal;
+
+  /* input — ข้อความที่พิมพ์ในช่อง (ช่องชื่อผู้ใช้และรหัสผ่าน) และ placeholder */
+  --input-font-en: "IBM Plex Sans Thai";
+  --input-font-th: "IBM Plex Sans Thai";
+  --input-weight: 400;
+  --input-size: 15px;
+  --input-letter-spacing: normal;
+  --input-line-height: 1.35;
+  --input-word-spacing: normal;
+
+  /* button — ตัวหนังสือในปุ่มเข้าสู่ระบบ (เป็น <span> สืบทอดค่าทั้งหมดจากปุ่ม) */
+  --button-font-en: "Montserrat";
+  --button-font-th: "Jim Thompson Roman";
+  --button-weight: 400;
+  --button-size: 16px;
+  --button-letter-spacing: 0.22em;
+  --button-line-height: 1.5;
+  --button-word-spacing: normal;
+
+  /* notice — แบนเนอร์แจ้งเตือน (กลุ่มอิสระ ไม่สืบทอดจาก body) ใช้ค่าเดียวกันทั้งบนม้วนกระดาษและบนการ์ดสำรอง
+     ขนาดและ line-height ตรงกับ text-sm ของ Tailwind เดิม: 0.875rem และ 1.25/0.875 */
+  --notice-font-en: "Jost";
+  --notice-font-th: "Google Sans";
+  --notice-weight: 400;
+  --notice-size: 0.875rem;
+  --notice-letter-spacing: normal;
+  --notice-line-height: calc(1.25 / 0.875);
+  --notice-word-spacing: normal;
+}
+
+
+/* ── 2. ข้อยกเว้นของ body (ค่าที่ไม่เหมือน body จริง ๆ — อย่าเพิ่มข้อยกเว้นใหม่ถ้าไม่จำเป็น) ──────────────────── */
+.typography {
+  /* label — ป้ายชื่อช่อง: ขนาด น้ำหนัก และระยะห่างตัวอักษรของตัวเอง (ฟอนต์/line-height/word-spacing ใช้ของ body)
+     ตัวพิมพ์ใหญ่มาจาก text-transform ใน globals.css */
+  --label-weight: 500;
+  --label-size: 13px;
+  --label-letter-spacing: 0.22em;
+
+  /* signup — ลิงก์ "สร้างบัญชีใหม่" / "Create one": น้ำหนัก 500 ตั้งใจ (ตรงกับ UI เดิม) ที่เหลือใช้ของ body */
+  --signup-weight: 500;
+}
+
+
+/* ── 3. ค่าเฉพาะภาษา (ทับค่าข้างบนเมื่อหน้า login เป็นภาษานั้น) ────────────────────────────────────────── */
+
+/* ภาษาไทย: ยังไม่มีค่าที่ต่างจากข้างบน  ตัวอย่าง:  .typography[data-lang="th"] { --body-size: 14px; } */
+
+/* ภาษาอังกฤษ: ปุ่ม "LOG IN" ใช้ Montserrat น้ำหนัก 500 ห่างตัวอักษร 4px และย่อตัวหนังสือในปุ่มเหลือ 0.8 เท่า
+   (ย่อที่ตัวหนังสือ <span> ไม่ใช่ตัวปุ่ม ขนาดปุ่มจึงไม่เปลี่ยน) */
+.typography[data-lang="en"] {
+  --button-weight: 500;
+  --button-letter-spacing: 4px;
+  --button-text-scale: 0.8;
+}
+
+
+/* ── 4. การนำไปใช้ — ไม่ต้องแก้ ──────────────────────────────────────────────────────────────────────────────
+   ตัวเลือก ".typography …[data-typo=…]" (specificity 0,2,0) ชนะทั้ง .parch-* / .font-* ใน globals.css และ Tailwind utility
+   (Tailwind อยู่ใน @layer จึงแพ้กฎที่อยู่นอก layer เสมอ) กฎข้อยกเว้นอยู่หลังกฎ body เสมอ (specificity เท่ากัน ตัวหลังชนะ) */
+
+.typography [data-typo="heading"] {
+  font-family: var(--heading-font-en), var(--heading-font-th), serif;
+  font-weight: var(--heading-weight);
+  font-size: var(--heading-size);
+  letter-spacing: var(--heading-letter-spacing);
+  line-height: var(--heading-line-height);
+  word-spacing: var(--heading-word-spacing);
+}
+
+/* body: label · จดจำฉัน · ลืมรหัสผ่าน · ยังไม่มีบัญชี */
+.typography :is([data-typo="label"], [data-typo="remember"], [data-typo="forgot"], [data-typo="prompt"]) {
+  font-family: var(--body-font-en), var(--body-font-th), "Google Sans", sans-serif;
+  font-weight: var(--body-weight);
+  font-size: var(--body-size);
+  letter-spacing: var(--body-letter-spacing);
+  line-height: var(--body-line-height);
+  word-spacing: var(--body-word-spacing);
+}
+/* องค์ประกอบข้างใน (checkbox ใน "จดจำฉัน", ลิงก์ signup ใน "ยังไม่มีบัญชี?") ใช้ฟอนต์ของ body */
+.typography :is([data-typo="remember"], [data-typo="prompt"]) * {
+  font-family: var(--body-font-en), var(--body-font-th), "Google Sans", sans-serif;
+}
+
+/* ข้อยกเว้น: label (ขนาด น้ำหนัก ระยะตัวอักษร) */
+.typography [data-typo="label"] {
+  font-weight: var(--label-weight);
+  font-size: var(--label-size);
+  letter-spacing: var(--label-letter-spacing);
+}
+/* ข้อยกเว้น: signup (น้ำหนัก) — ขนาด/ระยะ/line-height สืบทอดจากประโยค "ยังไม่มีบัญชี?" */
+.typography [data-typo="signup"] {
+  font-weight: var(--signup-weight);
+}
+/* notice: กลุ่มอิสระ ไม่สืบทอดจาก body — ตัวแบนเนอร์ถือคลาส .typography เอง (อยู่นอกฟอร์ม ใต้ม้วนกระดาษ) จึงเป็นตัวเลือกแบบ compound
+   องค์ประกอบข้างใน (ไอคอน ลิงก์) ใช้ฟอนต์ของ notice */
+.typography[data-typo="notice"] {
+  font-family: var(--notice-font-en), var(--notice-font-th), "Google Sans", sans-serif;
+  font-weight: var(--notice-weight);
+  font-size: var(--notice-size);
+  letter-spacing: var(--notice-letter-spacing);
+  line-height: var(--notice-line-height);
+  word-spacing: var(--notice-word-spacing);
+}
+.typography[data-typo="notice"] * {
+  font-family: var(--notice-font-en), var(--notice-font-th), "Google Sans", sans-serif;
+}
+
+.typography [data-typo="input"] {
+  font-family: var(--input-font-en), var(--input-font-th), "Google Sans", sans-serif;
+  font-weight: var(--input-weight);
+  font-size: var(--input-size);
+  letter-spacing: var(--input-letter-spacing);
+  line-height: var(--input-line-height);
+  word-spacing: var(--input-word-spacing);
+}
+/* placeholder: ไม่มีตัวแปรของตัวเอง ใช้ค่าของ input (สืบทอดจากช่องกรอก) */
+
+.typography [data-typo="button"] {
+  font-family: var(--button-font-en), var(--button-font-th), "Google Sans", sans-serif;
+  font-weight: var(--button-weight);
+  font-size: var(--button-size);
+  letter-spacing: var(--button-letter-spacing);
+  line-height: var(--button-line-height);
+  word-spacing: var(--button-word-spacing);
+}
+/* ตัวหนังสือในปุ่มรับค่าจากปุ่มทั้งหมด */
+.typography [data-typo="button"] > span {
+  font-family: inherit;
+  font-weight: inherit;
+}
+.typography[data-lang="en"] [data-typo="button"] > span {
+  display: inline-block;
+  transform: scale(var(--button-text-scale), var(--button-text-scale));
+}

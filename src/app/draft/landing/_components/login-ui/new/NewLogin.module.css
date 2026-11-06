@@ -1,0 +1,75 @@
+/* "UI ใหม่" (the NEW login UI): the original login UI with exactly two differences. Nothing else here; layout, spacing, button,
+   error banner and sign-up line all come from the same classes as the original UI (see NewLoginLayout.tsx).
+
+   1. INPUTS. The boxed inputs become underlined inputs (.input below).
+   2. LOGIN BUTTON SHADOW. A softer shadow, scoped by the ".new" class that LoginModal puts on the form wrapper.
+
+   TYPOGRAPHY is NOT set in this file. Every font family / size / weight / letter-spacing / line-height / word-spacing of the New UI
+   is in NewLoginTypography.module.css (one place, per text role). A former rule here, ".new :not(h2) { font-family: Anupark;
+   font-weight: 400 }", was a leftover of an early Anupark experiment and was removed; the sign-up link is weight 500 like Classic. */
+
+/* Login button shadow, NEW UI only (the original .parch-btn in globals.css is untouched and still used by the OLD UI): softer and
+   ~35% lighter so the button rests gently on the parchment. Before: 0 4px 14px / .35 (hover: 0 6px 20px / .45 + 18px gold glow).
+   Colour, size, typography and the hover/disabled behaviour are unchanged; only the box-shadow values differ. */
+.new :global(.parch-btn) {
+  box-shadow: 0 3px 8px rgba(50, 36, 14, 0.22), inset 0 1px 0 rgba(233, 217, 174, 0.2);
+}
+.new :global(.parch-btn):hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
+}
+
+/* Underlined input: same width, same 42.5px height and same horizontal alignment as the original box (so the form's spacing is
+   unchanged); no background, no box, no inset shadow, no radius, no browser focus ring. The text sits on the line like
+   handwriting on the parchment. */
+.input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(92, 62, 30, 0.5);
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  /* width / height / padding (incl. the extra right padding of the password field): see NewLoginLayout.module.css.
+     font-size / line-height of the typed text: see --input-size and --input-line-height in NewLoginTypography.module.css */
+  color: #3a2410;
+  caret-color: #5a3a1a;
+  transition: border-color 200ms ease;
+}
+
+.input::placeholder {
+  color: rgba(92, 62, 30, 0.5);
+  opacity: 1;
+}
+
+.input:hover:not(:disabled) {
+  border-bottom-color: rgba(92, 62, 30, 0.75);
+}
+
+/* Focus: the line deepens and doubles in weight (1px border + a 1px line drawn just above it = a 2px line): clearly visible for
+   keyboard users, no box. The extra line is a background gradient, NOT a box-shadow: the input is 286.3px wide (fractional), and
+   a box-shadow offset downwards left a faint vertical sliver along the right edge (by the eye icon) while focused. */
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border-bottom-color: #46290f;
+  background: linear-gradient(#46290f, #46290f) left bottom / 100% 1px no-repeat;
+}
+
+.input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Autofill: keep the browser from painting its yellow/blue box over the parchment. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #3a2410;
+  caret-color: #5a3a1a;
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+}

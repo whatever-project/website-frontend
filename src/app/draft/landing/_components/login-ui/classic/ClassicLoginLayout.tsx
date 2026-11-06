@@ -1,11 +1,13 @@
 import Link from "next/link"
 import { Flourish, InkDivider, PasswordInput } from "@/components/Parchment"
 import { routes } from "@/config/routes"
-import type { LoginLayoutProps } from "../loginLayoutTypes"
+import type { LoginLayoutProps } from "../shared/loginLayoutTypes"
 
 /**
  * The ORIGINAL login UI ("UI เดิม"): boxed inputs, a dark rectangular button, the sign-up line under the button.
  * Kept as the working reference and fallback; the redesign never touches this file.
+ * TYPOGRAPHY is not set in this file: every text element carries a data-typo role (heading, label, input, remember, forgot, button, prompt,
+ * signup; the notice is in LoginNotice) and all fonts / sizes / weights / spacing are in ClassicLoginTypography.module.css. Only colors stay here. Size / spacing / gaps are not set here either: each element also carries a data-layout role and all of it is in ClassicLoginLayout.module.css.
  */
 export default function ClassicLoginLayout({
   copy,
@@ -16,23 +18,29 @@ export default function ClassicLoginLayout({
   remember,
   onRememberChange,
   identifierRef,
+  notice,
 }: LoginLayoutProps) {
   return (
     <>
-      <h2 id="landing-login-title" className="font-jimthompson mt-2 text-center text-3xl text-[#3a2c1a]">
+      <h2 id="landing-login-title" data-typo="heading" data-layout="heading" className="text-center text-[#3a2c1a]">
         {copy.formHeading}
       </h2>
       <InkDivider>
         <Flourish className="h-4 w-4" />
       </InkDivider>
 
-      <label htmlFor="landing-login-identifier" className="parch-label mt-5 mb-1.5 block">
+      {/* Flat fallback card only: the notice sits here, directly above the first label (undefined, so nothing rendered, on the 3D sheet). */}
+      {notice}
+
+      <label htmlFor="landing-login-identifier" data-typo="label" data-layout="label" className="parch-label block">
         {copy.identifier}
       </label>
       <input
         ref={identifierRef}
         id="landing-login-identifier"
-        className="parch-input font-serithai"
+        data-typo="input"
+        data-layout="input"
+        className="parch-input"
         value={values.usernameOrEmail}
         onChange={(event) => onIdentifierChange(event.target.value)}
         placeholder={copy.identifierPlaceholder}
@@ -40,12 +48,14 @@ export default function ClassicLoginLayout({
         required
       />
 
-      <label htmlFor="landing-login-password" className="parch-label mt-5 mb-1.5 block">
+      <label htmlFor="landing-login-password" data-typo="label" data-layout="label" className="parch-label block">
         {copy.password}
       </label>
       <PasswordInput
         id="landing-login-password"
-        className="parch-input w-full font-serithai"
+        data-typo="input"
+        data-layout="password-input"
+        className="parch-input"
         placeholder={copy.passwordPlaceholder}
         value={values.password}
         onChange={(event) => onPasswordChange(event.target.value)}
@@ -53,34 +63,36 @@ export default function ClassicLoginLayout({
         required
       />
 
-      <div className="mt-4 mb-7 flex flex-wrap items-center justify-between gap-2">
-        <label data-login-text className="flex cursor-pointer items-center gap-2.5 font-ui text-[13px] text-[#5d4626]">
+      <div data-layout="options" className="flex flex-wrap items-center justify-between">
+        <label data-typo="remember" data-layout="remember" className="flex cursor-pointer items-center text-[#5d4626]">
           <input
             type="checkbox"
             checked={remember}
             onChange={(event) => onRememberChange(event.target.checked)}
+            data-layout="checkbox"
             className="parch-check"
           />
           {copy.rememberMe}
         </label>
         <Link
-          data-login-text
+          data-typo="forgot"
           href={routes.forgotPassword}
-          className="font-ui text-[13px] text-[#a68d5f] underline decoration-dotted underline-offset-4 transition hover:text-[#8a6a35]"
+          className="text-[#a68d5f] underline decoration-dotted underline-offset-4 transition hover:text-[#8a6a35]"
         >
           {copy.forgotPassword}
         </Link>
       </div>
 
-      <button type="submit" disabled={state === "loading"} className="parch-btn">
+      <button type="submit" data-typo="button" data-layout="button" disabled={state === "loading"} className="parch-btn">
         <span>{state === "loading" ? copy.submitting : copy.submit}</span>
       </button>
 
-      <p data-login-text className="mt-6 text-center font-ui text-[13px] text-[#8a7350]">
+      <p data-typo="prompt" data-layout="prompt" className="text-center text-[#8a7350]">
         {copy.noAccount}{" "}
         <Link
+          data-typo="signup"
           href={routes.signup}
-          className="font-medium text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
+          className="text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
         >
           {copy.createOne}
         </Link>

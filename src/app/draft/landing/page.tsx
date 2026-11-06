@@ -4,17 +4,20 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { getTimeState } from "@/utils/timeOfDay";
 import { routes } from "@/config/routes";
-import { FaGlobe, FaSun } from "react-icons/fa";
-import { PiClockCounterClockwise } from "react-icons/pi";
-import { FaRegSun } from "react-icons/fa6";
+import { FaGlobe } from "react-icons/fa";
 import { MdSunny } from "react-icons/md";
 import { BsMoonStarsFill } from "react-icons/bs";
-import Stars from "./_components/shared/Stars";
+import Stars from "./_components/landing/Stars";
 import LoginModal from "./_components/login-ui/LoginModal";
-import { preloadScrollLogin, releaseScrollLogin } from "./_components/scroll/useScrollLoginAnimation";
-import sliderStyles from "./_components/shared/TimeSlider.module.css";
+import { preloadScrollLogin, releaseScrollLogin } from "./_components/login-ui/scroll/useScrollLoginAnimation";
+import sliderStyles from "./_components/landing/TimeSlider.module.css";
 import { COPY_BY_LANG, type DraftLang } from "./_mock/copy";
 import { BACKDROP_SRC } from "./_utils/assets";
+import DevicePreviewHost from "./_components/draft-tools/DevicePreviewHost";
+import DevicePreviewLauncher from "./_components/draft-tools/DevicePreviewLauncher";
+import { DEV_PREVIEW_ENABLED } from "./_components/draft-tools/devPreviewFlag";
+import { listenPreviewCommands, mergeCurrentSnapshot, reportPreviewStatus, setCurrentSnapshot, setEmbedded } from "./_components/draft-tools/previewBridge";
+import { DEFAULT_SNAPSHOT, clearSnapshotParams, parsePreviewRoute, replacePreviewSearch, usePreviewRoute } from "./_components/draft-tools/previewRoute";
 
 // Both auth buttons share one size; nowrap keeps the label on a single line.
 // Inline fontFamily so it wins over `.gallery-btn`'s own font-family.
@@ -26,7 +29,20 @@ const AUTH_BTN_STYLE = {
   textShadow: "0 1px 10px rgba(0,0,0,.8)",
 };
 
-export default function LandingDraft() {
+/**
+ * The landing route. Normally it is just the landing page. In a development build only, the URL can switch it into the developer DEVICE
+ * PREVIEW (see draft-tools/previewRoute.ts):
+ *   ?device=...  the host: a toolbar plus an iframe of THIS SAME route at an exact device size (the landing page itself is not mounted
+ *                in the host, so there is only ever one 3D engine: the one inside the iframe);
+ *   ?embed=1     this is the real page inside that iframe: no preview chrome, driven by the host.
+ */
+export default function LandingDraftRoute() {
+  const route = usePreviewRoute();
+  if (route.device && !route.embed) return <DevicePreviewHost device={route.device} snapshot={route.snapshot} />;
+  return <LandingDraft embed={route.embed} />;
+}
+
+function LandingDraft({ embed }: { embed: boolean }) {
   const nowHour = () => {
     const d = new Date();
     return d.getHours() + d.getMinutes() / 60;
@@ -40,7 +56,45 @@ export default function LandingDraft() {
   const loginButtonRef = useRef<HTMLButtonElement>(null);
   const closeLogin = useCallback(() => {
     setLoginOpen(false);
+    // On the normal page the preview selections carried over from a device preview apply to that one opening only.
+    if (!parsePreviewRoute(window.location.search).embed) setCurrentSnapshot(null);
     window.requestAnimationFrame(() => loginButtonRef.current?.focus());
+  }, []);
+
+  // Developer device preview only (a no-op in a production build and on a plain /draft/landing URL).
+  //  - embedded (?embed=1): this page is the real page inside the host's iframe: apply the host's selections, report back, obey commands.
+  //  - normal page opened with selections in the URL (coming back from a device): apply them once, then clean the URL.
+  // The route is read from the URL here (not from props) because the first hydration pass always sees the neutral route.
+  useEffect(() => {
+    if (!DEV_PREVIEW_ENABLED) return;
+    const route = parsePreviewRoute(window.location.search);
+    if (route.device && !route.embed) return; // the host is about to replace this page
+    if (route.embed) {
+      setEmbedded(true);
+      setCurrentSnapshot(route.snapshot);
+      const open = route.snapshot.loginOpen ? window.setTimeout(() => setLoginOpen(true), 0) : undefined;
+      reportPreviewStatus({ ready: true });
+      const stop = listenPreviewCommands((command) => {
+        mergeCurrentSnapshot(command);
+        if (command.loginOpen === true) setLoginOpen(true);
+      });
+      return () => {
+        window.clearTimeout(open);
+        stop();
+        setEmbedded(false);
+        setCurrentSnapshot(null);
+      };
+    }
+    if (route.hasSnapshot) {
+      setCurrentSnapshot(route.snapshot);
+      // Applied from a timer, and the URL is cleaned in that same timer: React StrictMode runs this effect twice in development (run,
+      // cleanup, run), so the second run must still find the URL untouched and schedule the same thing again.
+      const apply = window.setTimeout(() => {
+        if (route.snapshot.loginOpen) setLoginOpen(true);
+        replacePreviewSearch(clearSnapshotParams);
+      }, 0);
+      return () => window.clearTimeout(apply);
+    }
   }, []);
 
   // Build the login parchment (download, parse, GPU upload) as soon as the page has mounted, so it is ready
@@ -147,6 +201,11 @@ export default function LandingDraft() {
 
       {/* bottom vignette */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" />
+
+      {/* Developer device preview (dev builds only, normal page only, hidden while the login is open: its Preview panel has the same buttons).
+          In the embedded page the host's own "Back to Dev Tools" badge is hidden so the simulated viewport shows the page, not dev chrome. */}
+      {!embed && !loginOpen && <DevicePreviewLauncher snapshot={{ ...DEFAULT_SNAPSHOT, uiLang: lang }} />}
+      {embed && <style>{`a[href="/draft/dev-tools"] { display: none !important; }`}</style>}
 
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
