@@ -256,7 +256,7 @@ export default function SignupDraft() {
 html { scrollbar-width: none; }
 html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
       )}
-      <ParchShell title={COPY.pageTitle} backHref={routes.home}>
+      <ParchShell title={step === 3 ? "" : COPY.pageTitle} backHref={routes.home}>
         <style>{SIGNUP_FONT_CSS}</style>
         <div className="signup-scope">
         {/* step indicator */}
@@ -537,7 +537,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
 
         {/* ── Step 3: Email verification (fantasy letter: paper.png + Letter seal.png) ── */}
         {step === 3 && (
-          <div className="signup-wrap relative z-20 mx-auto max-w-3xl px-6 py-14">
+          <div className="signup-wrap relative z-20 mx-auto flex min-h-[calc(100vh-11rem)] max-w-3xl items-center justify-center px-6 py-14">
             {/* Both images are 1500x1500 canvases with transparent margins. The box has the aspect of the visible paper
                 (1370x809 px), and the paper image is offset inside it, so the whole sheet (tilt, torn edge) shows uncropped
                 and un-stretched. Everything is positioned in % of this box, so it scales with it. */}

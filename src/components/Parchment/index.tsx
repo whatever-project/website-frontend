@@ -191,6 +191,7 @@ export function ParchShell({
         </div>
       </header>
 
+      {title && (
       <div className="relative z-20 px-6 pt-10 text-center sm:px-12">
         {sub && <p className="parch-label mb-3">{sub}</p>}
         <h1
@@ -205,6 +206,7 @@ export function ParchShell({
           </InkDivider>
         </div>
       </div>
+      )}
 
       <div className="relative z-20">{children}</div>
 
