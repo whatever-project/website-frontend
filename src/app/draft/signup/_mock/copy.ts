@@ -2,10 +2,11 @@
 export const COPY = {
   pageTitle: "สมัครสมาชิก",
   stepTerms: "ข้อกำหนด",
-  stepAccountInfo: "ข้อมูลบัญชี",
+  stepAccountInfo: "ลงทะเบียน",
   termsHeading: "ข้อกำหนดและเงื่อนไข",
   iAgree: "ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขแล้ว",
   iAgreeRequired: "(จำเป็น)",
+  scrollToAccept: "เลื่อนอ่านข้อกำหนดให้ถึงข้อสุดท้ายก่อน จึงจะกดยอมรับได้",
   next: "ถัดไป",
   formHeading: "ทะเบียนนักเดินทาง",
   username: "ชื่อผู้ใช้",
@@ -22,7 +23,7 @@ export const COPY = {
   verifyLetterSent: "ส่งจดหมายยืนยันไปที่",
   alreadyVerified: "ยืนยันแล้ว?",
   usernameRequirements: "ข้อกำหนดชื่อผู้ใช้",
-  usernameRules: ["3–25 ตัวอักษร", "ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ (A–Z) และตัวเลข (0–9)", "ห้ามมีช่องว่างและอักขระพิเศษอื่น ๆ"],
+  usernameRules: ["3 – 25 ตัวอักษร", "ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ (A–Z) และตัวเลข (0–9)", "ห้ามมีช่องว่างและอักขระพิเศษอื่น ๆ"],
   passwordRequirements: "ข้อกำหนดรหัสผ่าน",
   passRules: ["อย่างน้อย 8 ตัวอักษร", "มีตัวเลขอย่างน้อยหนึ่งตัว", "มีทั้งตัวพิมพ์ใหญ่และตัวพิมพ์เล็ก"],
   usernameErr: {
@@ -58,6 +59,7 @@ export const COPY_EN: typeof COPY = {
   termsHeading: "Terms & Conditions",
   iAgree: "I have read and agree to the Terms & Conditions",
   iAgreeRequired: "(Required)",
+  scrollToAccept: "Scroll to the last term to enable the checkbox.",
   next: "Next",
   formHeading: "Wayfarer Registry",
   username: "Username",
@@ -74,7 +76,7 @@ export const COPY_EN: typeof COPY = {
   verifyLetterSent: "A verification letter was sent to",
   alreadyVerified: "Already verified?",
   usernameRequirements: "Username Requirements",
-  usernameRules: ["3–25 characters", "Only English letters (A–Z) and digits (0–9) are allowed", "No spaces or other special characters"],
+  usernameRules: ["3 – 25 characters", "Only English letters (A–Z) and digits (0–9) are allowed", "No spaces or other special characters"],
   passwordRequirements: "Password Requirements",
   passRules: ["At least 8 characters", "At least one number", "Both uppercase and lowercase letters"],
   usernameErr: {

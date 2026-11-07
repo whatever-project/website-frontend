@@ -2,7 +2,7 @@
 //
 //  Static images in public/assets, referenced by URL:
 //   /assets/landing/quill/      the Midnight Arcane quill
-//   /assets/village.jpg         the backdrop, SHARED with the live landing page (src/views/public/landing): deliberately not moved
+//   /assets/Snow Landing.png    the backdrop (the live landing page still uses /assets/village.jpg)
 //
 //  The parchment model is a BUNDLER asset, not a public/ file: it is resolved relative to this file with import.meta.url and
 //  emitted with a hashed name. It cannot live in public/assets because src/proxy.ts (shared, outside this folder) routes every
@@ -10,7 +10,7 @@
 //  rewritten to /en/assets/....glb and 404 (verified). Its Blender sources, older exports and previews are NOT here any more:
 //  they are parked as zip files in ../_archive/ (see _archive/README.md) and are not referenced by any code.
 
-export const BACKDROP_SRC = "/assets/village.jpg"
+export const BACKDROP_SRC = "/assets/Snow%20Landing.png"
 
 export const QUILL_SRC = "/assets/landing/quill/midnight-arcane-quill.png"
 
