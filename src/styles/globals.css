@@ -4,11 +4,14 @@
    - IBM Plex Sans Thai: wght 100,200,300,400,500,600,700 (static weights, not variable). No italic or width axis exists.
    - Anuphan:            wght 100-700 (variable). No italic or width axis exists.
    - Montserrat:         wght 100-900 and italic (variable). No width axis exists.
+   - Google Sans:        wght 400-700 (variable), Latin AND Thai (plus other scripts). Google serves it split by unicode-range, so a page only
+                         downloads the subsets it actually uses. This import replaced a hand-written Thai-only @font-face (identical Thai range).
    Use the .font-* classes below, or font-family directly; weights/widths via font-weight / font-stretch (e.g. font-stretch: 75%). */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wdth%2Cwght@62.5..100%2C100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital%2Cwght@0%2C100..900;1%2C100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@400..700&display=swap");
 @import "tailwindcss";
 
 @layer base {
@@ -347,15 +350,7 @@ input[type='range'].sun-slider::-moz-range-thumb {
 
 /* ============ Requested typefaces ============ */
 
-/* ilove Google Sans */
-@font-face {
-  font-family: 'Google Sans';
-  font-style: normal;
-  src: url(https://fonts.gstatic.com/s/googlesans/v70/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iq2qgCIlsw.woff2) format('woff2');
-  font-weight: 400 700;
-  font-display: swap;
-  unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
-}
+/* ilove Google Sans: the face itself comes from the @import at the top of this file (Latin + Thai, no @font-face needed here) */
 .font-googlesans { font-family: 'Google Sans', serif; }
 
 /* Google Fonts utilities (the faces themselves are loaded by the @import lines at the top of this file) */
@@ -694,3 +689,113 @@ input[type='range'].sun-slider::-moz-range-thumb {
     0 0 26px rgba(233, 196, 106, 0.28);
 }
 .liquid-glass:active { transform: translateY(0); }
+
+/* ============ Landing page typography (per-language fonts) ============
+   Used by src/app/draft/landing/page.tsx: the page root has class "landing-typography" and lang="th|en"; each text carries data-typo="<role>".
+   Roles: brand, langtoggle, welcome, title, subtitle, auth (login / sign-up buttons), realtime.
+
+   To change a font, edit the variables in section 1 (both languages) or section 2 (one language). Names: --<role>-font-en / -font-th.
+   The font stack is `var(--<role>-font-en), var(--<role>-font-th), "Google Sans", sans-serif` and the browser picks a font PER CHARACTER
+   (first family that has the glyph). Google Sans has Thai glyphs, so an override that only sets -th is never reached while -en is still Google
+   Sans: in a language block set BOTH slots (the fonts used below all have Latin and Thai).
+
+   The welcome line also has its size here (--welcome-size / --welcome-size-sm); its line-height stays a Tailwind utility in page.tsx.
+   The buttons also use --button-weight / --button-letter-spacing / --button-text-scale. Their data-typo is "auth", not "button", on purpose:
+   the login dialog renders inside the landing root and has its own data-typo="button". The label sits in a <span> (inline-block) that is scaled.
+
+   Language comes from the lang attribute (:lang(th) / :lang(en)); on the live site <html lang> (next-intl) can drive the same rules.
+   These rules are un-layered, so they beat Tailwind utilities and .gallery-btn (specificity 0,2,0 vs 0,1,0). */
+
+/* 1. Defaults for both languages */
+.landing-typography {
+  --brand-font-en: "Google Sans";
+  --brand-font-th: "Google Sans";
+
+  --langtoggle-font-en: "Google Sans";
+  --langtoggle-font-th: "Google Sans";
+
+  --welcome-font-en: "Google Sans";
+  --welcome-font-th: "Google Sans";
+  /* welcome line size: --welcome-size on phones, --welcome-size-sm from 40rem (640px, Tailwind's sm) up */
+  --welcome-size: 1.25rem;
+  --welcome-size-sm: 1.5rem;
+
+  --title-font-en: "Google Sans";
+  --title-font-th: "Google Sans";
+
+  --subtitle-font-en: "Google Sans";
+  --subtitle-font-th: "Google Sans";
+
+  /* buttons: the defaults are the original look (regular weight, 0.15em letter-spacing, label not scaled) */
+  --button-font-en: "Google Sans";
+  --button-font-th: "Google Sans";
+  --button-weight: 400;
+  --button-letter-spacing: 0.15em;
+  --button-text-scale: 1;
+
+  --realtime-font-en: "Google Sans";
+  --realtime-font-th: "Google Sans";
+}
+
+/* 2. Per-language values (override section 1 while the page is in that language) */
+.landing-typography:lang(en) {
+  --welcome-font-en: "Josefin Sans";
+  --title-font-en: "Jim Thompson Roman";
+  --subtitle-font-en: "Josefin Sans";
+  --realtime-font-en: "Josefin Sans";
+
+  /* buttons: Montserrat, weight 500, letter-spacing 4px, label scaled to 0.8 (the span is scaled, so the button keeps its size) */
+  --button-font-en: "Montserrat";
+  --button-weight: 500;
+  --button-letter-spacing: 4px;
+  --button-text-scale: 0.8;
+}
+
+.landing-typography:lang(th) {
+  --welcome-font-en: "Jim Thompson Roman";
+  --welcome-font-th: "Jim Thompson Roman";
+  --title-font-en: "Jim Thompson Roman";
+  --title-font-th: "Jim Thompson Roman";
+  --subtitle-font-en: "IBM Plex Sans Thai";
+  --subtitle-font-th: "IBM Plex Sans Thai";
+  --button-font-en: "Jim Thompson Roman";
+  --button-font-th: "Jim Thompson Roman";
+  --realtime-font-en: "IBM Plex Sans Thai";
+  --realtime-font-th: "IBM Plex Sans Thai";
+}
+
+/* 3. Applied rules (no need to edit) */
+.landing-typography [data-typo="brand"] {
+  font-family: var(--brand-font-en), var(--brand-font-th), "Google Sans", sans-serif;
+}
+.landing-typography [data-typo="langtoggle"] {
+  font-family: var(--langtoggle-font-en), var(--langtoggle-font-th), "Google Sans", sans-serif;
+}
+.landing-typography [data-typo="welcome"] {
+  font-family: var(--welcome-font-en), var(--welcome-font-th), "Google Sans", sans-serif;
+  font-size: var(--welcome-size);
+}
+@media (min-width: 40rem) {
+  .landing-typography [data-typo="welcome"] {
+    font-size: var(--welcome-size-sm);
+  }
+}
+.landing-typography [data-typo="title"] {
+  font-family: var(--title-font-en), var(--title-font-th), "Google Sans", sans-serif;
+}
+.landing-typography [data-typo="subtitle"] {
+  font-family: var(--subtitle-font-en), var(--subtitle-font-th), "Google Sans", sans-serif;
+}
+.landing-typography [data-typo="auth"] {
+  font-family: var(--button-font-en), var(--button-font-th), "Google Sans", sans-serif;
+  font-weight: var(--button-weight);
+  letter-spacing: var(--button-letter-spacing);
+}
+/* transform only works on non-inline boxes, so the label span must be inline-block */
+.landing-typography [data-typo="auth"] > span {
+  display: inline-block;
+  transform: scale(var(--button-text-scale), var(--button-text-scale));
+}
+.landing-typography [data-typo="realtime"] {
+  font-family: var(--realtime-font-en), var(--realtime-font-th), "Google Sans", sans-serif;
+}

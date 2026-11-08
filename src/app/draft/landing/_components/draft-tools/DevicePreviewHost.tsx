@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
-import { LOGIN_STATE_OPTIONS, LOGIN_UI_OPTIONS } from "../../_mock/login"
+import { LOGIN_STATE_OPTIONS } from "../../_mock/login"
 import DeviceButtons from "./DeviceButtons"
 import { getModeNote } from "./PreviewPanel"
 import { INITIAL_STATUS, PREVIEW_SET_EVENT, PREVIEW_STATUS_EVENT, type PreviewCommand, type PreviewStatus } from "./previewBridge"
@@ -127,7 +127,7 @@ function HostInner({ device, snapshot }: { device: DeviceSpec; snapshot: Preview
   )
 
   const flat = snap.forceFlat || status.sceneError
-  const modeNote = getModeNote(flat, status.sceneError, snap.uiVariant)
+  const modeNote = getModeNote(flat, status.sceneError)
   const applyCustom = () => {
     const width = Number(customWidth), height = Number(customHeight)
     if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return
@@ -168,12 +168,6 @@ function HostInner({ device, snapshot }: { device: DeviceSpec; snapshot: Preview
           <button type="button" onClick={() => update({ loginOpen: false })} aria-pressed={!snap.loginOpen} className={buttonClass(!snap.loginOpen)}>
             Close
           </button>
-          <span className="parch-label mr-1 ml-2">UI</span>
-          {LOGIN_UI_OPTIONS.map((option) => (
-            <button key={option.value} type="button" onClick={() => update({ uiVariant: option.value })} aria-pressed={snap.uiVariant === option.value} className={buttonClass(snap.uiVariant === option.value)}>
-              {option.label}
-            </button>
-          ))}
           <span className="parch-label mr-1 ml-2">Lang</span>
           {(["th", "en"] as const).map((code) => (
             <button key={code} type="button" onClick={() => update({ uiLang: code })} aria-pressed={(snap.uiLang ?? "th") === code} className={buttonClass((snap.uiLang ?? "th") === code)}>

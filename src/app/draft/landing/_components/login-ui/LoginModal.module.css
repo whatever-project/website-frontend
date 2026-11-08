@@ -47,6 +47,6 @@
   }
 }
 
-/* Form box sizing, spacing and gaps are NOT here any more: they live in one layout file per UI
-   (classic/ClassicLoginLayout.module.css, new/NewLoginLayout.module.css). This file keeps the shared modal behaviour only:
+/* Form box sizing, spacing and gaps are NOT here any more: they live in the layout file
+   (classic/ClassicLoginLayout.module.css). This file keeps the shared modal behaviour only:
    backdrop, canvas, form reveal and the flat card pop-in. */

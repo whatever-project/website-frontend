@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
    ตัวอักษรของ "UI เดิม" (Classic Login UI)  ←  ไฟล์นี้คือที่เดียวที่ต้องแก้ typography ของ Classic
-   (UI ใหม่ใช้ไฟล์ new/NewLoginTypography.module.css แยกอิสระ แก้ไฟล์หนึ่งไม่กระทบอีกไฟล์)
    ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 
    มี 5 กลุ่มหลัก  (ตรงกับ data-typo ใน ClassicLoginLayout.tsx / LoginNotice.tsx):
@@ -10,7 +9,7 @@
                →  แก้ฟอนต์/ขนาด/น้ำหนัก ... ของ body ที่เดียว ทุกตัวข้างบนเปลี่ยนตาม
      input     ข้อความที่พิมพ์ในช่อง และ placeholder (placeholder ใช้ค่าเดียวกับ input เสมอ)
      button    ตัวหนังสือในปุ่ม "เข้าสู่ระบบ"
-     notice    แบนเนอร์แจ้งเตือน (error / อีเมลยังไม่ยืนยัน ใต้ม้วนกระดาษ)  →  กลุ่มอิสระ ไม่สืบทอดอะไรจาก body (มีฟอนต์ของตัวเอง)
+     notice    แบนเนอร์แจ้งเตือน (error / อีเมลยังไม่ยืนยัน อยู่ในฟอร์มเหนือป้ายชื่อช่องแรก)  →  กลุ่มอิสระ ไม่สืบทอดอะไรจาก body (มีฟอนต์ของตัวเอง)
 
    ตัวที่ใช้ body แต่ "มีค่าไม่เหมือน body จริง ๆ" ถูกแยกเป็นข้อยกเว้นเล็ก ๆ (หัวข้อ 2) — ที่เหลือสืบทอด body ทั้งหมด:
      label    ใช้ body ยกเว้น  น้ำหนัก (500)  ขนาด (13px)  และระยะห่างตัวอักษร (0.22em)
@@ -19,8 +18,8 @@
    วิธีแก้: เปลี่ยนค่าตัวแปรในหัวข้อ 1–2 ด้านล่าง (ชื่อ = --<กลุ่ม>-<คุณสมบัติ>) ไม่ต้องแตะหัวข้อ 5 (การนำไปใช้)
    ฟอนต์: ใส่ชื่อเดียวต่อช่อง  -font-en = ฟอนต์สำหรับอักษรละติน  -font-th = ฟอนต์สำหรับอักษรไทย (ตัวละตินใช้ -en ส่วนตัวอักษรไทยที่ -en ไม่มีจะตกมาใช้ -th)
           ชื่อต้องเป็นฟอนต์ที่ประกาศไว้แล้ว (@font-face ใน src/styles/globals.css หรือ shared/LoginFontFaces.module.css) ไม่ต้องใส่ fallback เพราะใส่ท้ายให้แล้ว
-   ภาษา:   หัวข้อ 3 ใช้ปรับเฉพาะตอนหน้า login เป็นภาษาไทย (data-lang="th") หรืออังกฤษ (data-lang="en")
-   การ์ดสำรอง: หัวข้อ 4 คือขนาดตอนที่ WebGL ใช้ไม่ได้ (การ์ดแบนแทนม้วนกระดาษ 3D, แสดงเฉพาะ Classic)
+   ภาษา:   หัวข้อ 3 ใช้ปรับเฉพาะตอนหน้า login เป็นภาษาไทย (:lang(th)) หรืออังกฤษ (:lang(en)) ภาษามาจาก attribute lang ที่ root ของ LoginModal
+   การ์ดสำรอง (WebGL ใช้ไม่ได้ → การ์ดแบนแทนม้วนกระดาษ 3D, แสดงเฉพาะ Classic): ใช้ค่าชุดเดียวกับม้วนกระดาษทุกประการ ไม่มีค่าแยกอีกต่อไป
 
    ไม่ได้อยู่ในไฟล์นี้ (ไม่ใช่ typography ของตัวอักษร): สีตัวอักษร (className ใน ClassicLoginLayout.tsx), text-transform: uppercase ของ label
    (.parch-label ใน src/styles/globals.css), ระยะห่าง/ขนาดช่อง/ปุ่ม (classic/ClassicLoginLayout.module.css)
@@ -68,13 +67,13 @@
   --button-word-spacing: normal;
 
   /* notice — แบนเนอร์แจ้งเตือน (กลุ่มอิสระ ไม่สืบทอดจาก body) ใช้ค่าเดียวกันทั้งบนม้วนกระดาษและบนการ์ดสำรอง
-     ขนาดและ line-height ตรงกับ text-sm ของ Tailwind เดิม: 0.875rem และ 1.25/0.875 */
+     ฟอนต์ไทยเป็นตัวเดียวกับข้อความทั่วไป (body) เพื่อให้เข้ากับธีมของม้วนกระดาษ; ตัวละตินใช้ Jost เหมือน body */
   --notice-font-en: "Jost";
-  --notice-font-th: "Google Sans";
+  --notice-font-th: "IBM Plex Sans Thai";
   --notice-weight: 400;
-  --notice-size: 0.875rem;
+  --notice-size: 13px;
   --notice-letter-spacing: normal;
-  --notice-line-height: calc(1.25 / 0.875);
+  --notice-line-height: 1.5;
   --notice-word-spacing: normal;
 }
 
@@ -87,34 +86,25 @@
   --label-size: 13px;
   --label-letter-spacing: 0.22em;
 
-  /* signup — ลิงก์ "สร้างบัญชีใหม่" / "Create one": น้ำหนัก 500 ตั้งใจ (ตรงกับ UI ใหม่) ที่เหลือใช้ของ body */
+  /* signup — ลิงก์ "สร้างบัญชีใหม่" / "Create one": น้ำหนัก 500 ตั้งใจ ที่เหลือใช้ของ body */
   --signup-weight: 500;
 }
 
 
 /* ── 3. ค่าเฉพาะภาษา (ทับค่าข้างบนเมื่อหน้า login เป็นภาษานั้น) ────────────────────────────────────────── */
 
-/* ภาษาไทย: ยังไม่มีค่าที่ต่างจากข้างบน  ตัวอย่าง:  .typography[data-lang="th"] { --body-size: 14px; } */
+/* ภาษาไทย: ยังไม่มีค่าที่ต่างจากข้างบน  ตัวอย่าง:  .typography:lang(th) { --body-size: 14px; } */
 
 /* ภาษาอังกฤษ: ปุ่ม "LOG IN" ใช้ Montserrat น้ำหนัก 500 ห่างตัวอักษร 4px และย่อตัวหนังสือในปุ่มเหลือ 0.8 เท่า
    (ย่อที่ตัวหนังสือ <span> ไม่ใช่ตัวปุ่ม ขนาดปุ่มจึงไม่เปลี่ยน) */
-.typography[data-lang="en"] {
+.typography:lang(en) {
   --button-weight: 500;
   --button-letter-spacing: 4px;
   --button-text-scale: 0.8;
 }
 
 
-/* ── 4. การ์ดสำรอง (WebGL ใช้ไม่ได้ → การ์ดแบนแทนม้วนกระดาษ; LoginModal ติดคลาส flatCard เฉพาะกรณีนี้) ──────────
-   ขนาดตรงนี้ = ค่าเดิมของการ์ดสำรองที่มาจาก globals.css และ Tailwind ทุกประการ (ใหญ่กว่า/ต่างจากบนม้วนกระดาษเล็กน้อย) */
-.typography.flatCard {
-  --heading-size: 1.875rem;
-  --label-size: 10.5px;
-  --label-letter-spacing: 0.28em;
-  --input-size: 16px;
-  --body-size: 13px;
-  --button-size: 17px;
-}
+/* ── 4. (ว่าง) การ์ดสำรองไม่มีค่าขนาดแยกแล้ว: ใช้ค่าในหัวข้อ 1–3 เหมือนม้วนกระดาษ (เดิมมีบล็อก .typography.flatCard ที่ใช้ขนาดใหญ่กว่าเล็กน้อย) ── */
 
 
 /* ── 5. การนำไปใช้ — ไม่ต้องแก้ ──────────────────────────────────────────────────────────────────────────────
@@ -154,8 +144,8 @@
 .typography [data-typo="signup"] {
   font-weight: var(--signup-weight);
 }
-/* notice: กลุ่มอิสระ ไม่สืบทอดจาก body — ตัวแบนเนอร์ถือคลาส .typography เอง (อยู่นอกฟอร์ม ใต้ม้วนกระดาษ) จึงเป็นตัวเลือกแบบ compound
-   องค์ประกอบข้างใน (ไอคอน ลิงก์) ใช้ฟอนต์ของ notice */
+/* notice: กลุ่มอิสระ ไม่สืบทอดจาก body — ตัวแบนเนอร์ถือคลาส .typography เอง (LoginNotice รับคลาสนี้ทาง className) จึงเป็นตัวเลือกแบบ compound
+   องค์ประกอบข้างใน (ลิงก์) ใช้ฟอนต์ของ notice */
 .typography[data-typo="notice"] {
   font-family: var(--notice-font-en), var(--notice-font-th), "Google Sans", sans-serif;
   font-weight: var(--notice-weight);
@@ -191,7 +181,7 @@
   font-family: inherit;
   font-weight: inherit;
 }
-.typography[data-lang="en"] [data-typo="button"] > span {
+.typography:lang(en) [data-typo="button"] > span {
   display: inline-block;
   transform: scale(var(--button-text-scale), var(--button-text-scale));
 }

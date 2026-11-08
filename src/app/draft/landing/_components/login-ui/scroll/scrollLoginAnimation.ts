@@ -1,4 +1,4 @@
-// Parchment login sheet driven by the baked animation inside `Parchment_Rolling_Animation_v03.glb`.
+// Parchment login sheet driven by the baked animation inside `Parchment_Rolling_Animation.glb`.
 //
 // The GLB holds one mesh with 40 "Roll pose" morph targets and a single 6 s clip
 // (closed -> open -> hold -> closed). All target weights are 0 while fully open, i.e. the base mesh is the
@@ -7,6 +7,7 @@
 import * as THREE from "three"
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
+import { SHEET_HEIGHT, SHEET_VIEWPORT_FRACTION, computeSheetLayout } from "./sheetLayout"
 
 export type ScrollState = "closed" | "opening" | "open" | "closing" | "scrubbing"
 
@@ -24,16 +25,12 @@ export interface ScrollMountHandlers {
   onLayout?: (layout: SheetLayout) => void
 }
 
-// Sheet footprint in model units (from the GLB's POSITION accessor bounds; x: -2.14..2.14, y: -2.73..2.56).
-const SHEET_WIDTH = 4.28
-const SHEET_HEIGHT = 5.29
+// The size of the paper (height, width, the horizontal stretch of the model) is computed by the shared sheetLayout.ts, which the
+// flat fallback card uses too. The camera / scene constants stay here.
 const SHEET_CENTER_Y = -0.085
 const CAMERA_ELEVATION_DEG = 10
-// On-screen height of the flat sheet: a fraction of the container height (0.49 -> ~455 px on a 928 px viewport),
-// but never so small that the login form no longer fits, and never taller than the container.
-const SHEET_VIEWPORT_FRACTION = 0.49
-const MIN_SHEET_PX = 445
-const MAX_SHEET_FRACTION = 0.92
+// How long the paper takes to grow / shrink when the login message appears / goes away (exponential ease, ~95% in this time).
+const SHEET_EXTRA_EASE_MS = 180
 // The form fades in during the last part of the unroll instead of waiting for it to finish.
 const FORM_REVEAL_PROGRESS = 0.9
 // The decorative quill starts entering once the sheet is this far open.
@@ -104,6 +101,13 @@ export class ScrollLoginAnimation {
   private segmentStart = 0
   private segmentEnd = 0
   private viewHeight = SHEET_HEIGHT / SHEET_VIEWPORT_FRACTION
+  private widthScale = 1
+  // Canvas size in CSS px (renderer.setSize is only called when it really changes).
+  private canvasWidth = 0
+  private canvasHeight = 0
+  // Extra form height (px) caused by the login message: the value the paper is laid out for now, and the value it eases towards.
+  private extraCurrent = 0
+  private extraTarget = 0
 
   constructor(private readonly glbUrl: string) {
     // Slightly elevated view so the top curl and the bottom roll read as curved paper, not flat bands.
@@ -316,6 +320,13 @@ export class ScrollLoginAnimation {
         if (completedDirection < 0 && this.model) this.model.visible = false
       }
     }
+    // The paper eases to the height needed for the login message (exponential ease, ~95% after SHEET_EXTRA_EASE_MS).
+    if (this.extraCurrent !== this.extraTarget) {
+      const difference = this.extraTarget - this.extraCurrent
+      const step = 1 - Math.exp(-(delta * 1000) / (SHEET_EXTRA_EASE_MS / 3))
+      this.extraCurrent = Math.abs(difference) < 0.25 ? this.extraTarget : this.extraCurrent + difference * step
+      this.applyLayout()
+    }
     this.updateFormState()
     if (this.dirty) this.render()
     this.frameRequest = requestAnimationFrame(this.animate)
@@ -373,23 +384,48 @@ export class ScrollLoginAnimation {
   private resize() {
     const width = Math.max(1, this.container?.clientWidth ?? window.innerWidth)
     const height = Math.max(1, this.container?.clientHeight ?? window.innerHeight)
+    if (width !== this.canvasWidth || height !== this.canvasHeight) {
+      this.canvasWidth = width
+      this.canvasHeight = height
+      this.renderer.setSize(width, height, false)
+    }
+    this.applyLayout()
+  }
+
+  /**
+   * Sizes the paper for the current canvas size and the current extra form height (the login message): the world height the
+   * canvas shows, the horizontal stretch of the model, the camera, and the size handed to CSS. The numbers come from sheetLayout.ts
+   * (shared with the flat fallback card).
+   */
+  private applyLayout() {
+    const width = this.canvasWidth
+    const height = this.canvasHeight
+    if (width < 1 || height < 1) return
     const aspect = width / height
-    // Choose the world height shown by the canvas so that the sheet ends up SHEET_PX tall on screen.
-    const sheetPx = Math.min(Math.max(height * SHEET_VIEWPORT_FRACTION, MIN_SHEET_PX), height * MAX_SHEET_FRACTION)
-    this.viewHeight = (SHEET_HEIGHT * height) / sheetPx
+    const layout = computeSheetLayout(width, height, this.extraCurrent)
+    // Choose the world height shown by the canvas so that the sheet ends up `layout.sheetPx` tall on screen.
+    this.viewHeight = (SHEET_HEIGHT * height) / layout.sheetPx
+    this.widthScale = layout.widthScale
+    if (this.model) this.model.scale.x = this.widthScale
     this.camera.left = (-this.viewHeight * aspect) / 2
     this.camera.right = (this.viewHeight * aspect) / 2
     this.camera.top = this.viewHeight / 2
     this.camera.bottom = -this.viewHeight / 2
     this.camera.updateProjectionMatrix()
-    this.renderer.setSize(width, height, false)
     this.dirty = true
+    this.handlers.onLayout?.({ width: layout.widthPx, height: layout.sheetPx })
+  }
 
-    const pixelsPerUnit = height / this.viewHeight
-    this.handlers.onLayout?.({
-      width: SHEET_WIDTH * pixelsPerUnit,
-      height: SHEET_HEIGHT * pixelsPerUnit,
-    })
+  /**
+   * Extra height (px) that the login message adds to the form; 0 when there is none. The paper eases to the size that leaves the
+   * gaps around the form unchanged (about 180 ms, instant for `prefers-reduced-motion` or when `instant` is set).
+   */
+  setContentExtra(px: number, instant = false) {
+    this.extraTarget = Math.max(0, px)
+    if (instant || !this.mounted || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.extraCurrent = this.extraTarget
+      this.applyLayout()
+    }
   }
 
   private disposeObject(root: THREE.Object3D) {

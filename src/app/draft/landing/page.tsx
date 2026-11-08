@@ -10,6 +10,7 @@ import { BsMoonStarsFill } from "react-icons/bs";
 import Stars from "./_components/landing/Stars";
 import LoginModal from "./_components/login-ui/LoginModal";
 import { preloadScrollLogin, releaseScrollLogin } from "./_components/login-ui/scroll/useScrollLoginAnimation";
+import { preloadLoginAssets } from "./_components/login-ui/scroll/preloadLoginAssets";
 import sliderStyles from "./_components/landing/TimeSlider.module.css";
 import { COPY_BY_LANG, type DraftLang } from "./_mock/copy";
 import { BACKDROP_SRC } from "./_utils/assets";
@@ -20,11 +21,11 @@ import { listenPreviewCommands, mergeCurrentSnapshot, reportPreviewStatus, setCu
 import { DEFAULT_SNAPSHOT, clearSnapshotParams, parsePreviewRoute, replacePreviewSearch, usePreviewRoute } from "./_components/draft-tools/previewRoute";
 
 // Both auth buttons share one size; nowrap keeps the label on a single line.
-// Inline fontFamily so it wins over `.gallery-btn`'s own font-family.
+// Font, weight, letter-spacing and the text scale come from data-typo="auth" in src/styles/globals.css (".landing-typography", it wins over `.gallery-btn`'s own
+// font-family); no inline fontFamily and no tracking utility here. The label must sit in a <span>: the scale is applied to it.
 const AUTH_BTN =
-  "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 text-center text-base tracking-[0.15em]";
+  "gallery-btn inline-flex h-12 w-52 items-center justify-center whitespace-nowrap px-4 uppercase text-center text-base";
 const AUTH_BTN_STYLE = {
-  fontFamily: "'Jim Thompson Roman', 'Prompt', serif",
   background: "rgba(12, 14, 22, 0.55)", // darker than .gallery-btn so labels stay legible on a bright backdrop
   textShadow: "0 1px 10px rgba(0,0,0,.8)",
 };
@@ -37,6 +38,9 @@ const AUTH_BTN_STYLE = {
  *   ?embed=1     this is the real page inside that iframe: no preview chrome, driven by the host.
  */
 export default function LandingDraftRoute() {
+  // Runs during server rendering too: React writes <link rel="preload"> for the 53 MB model and the quill into the HTML head, so they start
+  // downloading before hydration instead of after the engine chunk has loaded.
+  preloadLoginAssets();
   const route = usePreviewRoute();
   if (route.device && !route.embed) return <DevicePreviewHost device={route.device} snapshot={route.snapshot} />;
   return <LandingDraft embed={route.embed} />;
@@ -97,9 +101,14 @@ function LandingDraft({ embed }: { embed: boolean }) {
     }
   }, []);
 
-  // Build the login parchment (download, parse, GPU upload) as soon as the page has mounted, so it is ready
-  // before the visitor clicks Login. The small delay keeps it out of the first paint.
+  // Build the login parchment (download, parse, GPU upload), decode the quill and load the login fonts as soon as the browser is idle
+  // (at most 1 s after mount), so it is ready before the visitor clicks Login. Waiting for idle keeps it out of the first paint.
+  // The raw downloads of the model and the quill already started at HTML time (preloadLoginAssets, called in LandingDraftRoute).
   useEffect(() => {
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(() => preloadScrollLogin(), { timeout: 1000 });
+      return () => window.cancelIdleCallback(id);
+    }
     const id = setTimeout(preloadScrollLogin, 150);
     return () => clearTimeout(id);
   }, []);
@@ -140,7 +149,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
   const ts = getTimeState(hour);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#10131f] select-none">
+    <div lang={lang} className="landing-typography relative h-screen w-full overflow-hidden bg-[#10131f] select-none">
       {/* village backdrop */}
       <img
         src={BACKDROP_SRC}
@@ -209,7 +218,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
 
       {/* top bar */}
       <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
-        <div className="font-ui text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">
+        <div data-typo="brand" className="text-[11px] tracking-[0.5em] text-amber-100/80 uppercase">
           {COPY.arcaneVale}
         </div>
         {/* Draft-local toggle: the shared LanguageSwitcher renders nothing on /draft/*, so it swaps mock copy instead */}
@@ -219,7 +228,8 @@ function LandingDraft({ embed }: { embed: boolean }) {
           aria-label={
             lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"
           }
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-100/30 px-3 py-1 font-ui text-[11px] tracking-[0.2em] whitespace-nowrap text-amber-100/80 uppercase transition hover:border-amber-100/60 hover:text-amber-50"
+          data-typo="langtoggle"
+          className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-100/30 px-3 py-1 text-[11px] tracking-[0.2em] whitespace-nowrap text-amber-100/80 uppercase transition hover:border-amber-100/60 hover:text-amber-50"
         >
           <span aria-hidden className="text-sm leading-none tracking-normal">
             <FaGlobe />
@@ -240,7 +250,8 @@ function LandingDraft({ embed }: { embed: boolean }) {
       {/* centre title */}
       <main className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
         <p
-          className="rise-in font-jimthompson text-2xl tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:text-3xl"
+          data-typo="welcome"
+          className="rise-in leading-8 tracking-[0.55em] text-[#f1e8d8]/85 uppercase sm:leading-9"
           style={{
             textShadow: "0 2px 6px rgba(0,0,0,.7), 0 2px 24px rgba(0,0,0,.7)",
           }}
@@ -248,7 +259,8 @@ function LandingDraft({ embed }: { embed: boolean }) {
           {COPY.welcome}
         </p>
         <h1
-          className="rise-in-1 font-jimthompson mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[7.5vw]"
+          data-typo="title"
+          className="rise-in-1 mt-3 text-[13vw] leading-[1.05] tracking-[0.06em] text-[#f2ead9] uppercase sm:text-[9vw] lg:text-[6vw]"
           style={{
             textShadow:
               "0 2px 8px rgba(0,0,0,.75), 0 2px 34px rgba(0,0,0,.7), 0 0 60px rgba(233,196,106,.18)",
@@ -257,7 +269,8 @@ function LandingDraft({ embed }: { embed: boolean }) {
           {COPY.title}
         </h1>
         <p
-          className="rise-in-2 font-josefin mt-6 text-xs font-normal tracking-[0.32em] text-amber-50 uppercase"
+          data-typo="subtitle"
+          className="rise-in-2 mt-6 text-xs font-normal tracking-[0.20em] text-amber-50 uppercase"
           style={{
             textShadow: "0 1px 6px rgba(0,0,0,.85), 0 1px 14px rgba(0,0,0,.7)",
           }}
@@ -272,17 +285,19 @@ function LandingDraft({ embed }: { embed: boolean }) {
             onClick={() => setLoginOpen(true)}
             onPointerEnter={preloadScrollLogin}
             onFocus={preloadScrollLogin}
+            data-typo="auth"
             className={AUTH_BTN}
             style={AUTH_BTN_STYLE}
           >
-            {COPY.logIn}
+            <span>{COPY.logIn}</span>
           </button>
           <Link
             href={routes.signup}
+            data-typo="auth"
             className={AUTH_BTN}
             style={AUTH_BTN_STYLE}
           >
-            {COPY.signUp}
+            <span>{COPY.signUp}</span>
           </Link>
         </div>
       </main>
@@ -291,7 +306,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
       <footer className="absolute inset-x-0 bottom-0 z-20 px-6 pb-7 sm:px-10">
         <div className="mx-auto flex max-w-xl flex-col gap-2">
           {/* relative z-10: stays above the slider's enlarged click area, which reaches a few px up */}
-          <div className="relative z-10 flex items-center justify-center font-josefin text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
+          <div data-typo="realtime" className="relative z-10 flex items-center justify-center text-[10px] font-light tracking-[0.25em] text-amber-100/40 uppercase">
             <button
               type="button"
               onClick={() => setLive((v) => !v)}

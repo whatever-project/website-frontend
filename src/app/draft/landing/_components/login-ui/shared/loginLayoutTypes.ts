@@ -2,9 +2,8 @@ import type { ReactNode, RefObject } from "react"
 import type { LOGIN_COPY, LoginState } from "../../../_mock/login"
 
 /**
- * What every login layout receives from LoginForm. The two layouts (classic/ClassicLoginLayout and
- * new/NewLoginLayout) are pure presentation: all form state, validation, submission and copy selection live
- * once, in LoginForm.
+ * What the login layout receives from LoginForm. The layout (classic/ClassicLoginLayout) is pure presentation:
+ * all form state, validation, submission and copy selection live once, in LoginForm.
  */
 export interface LoginLayoutProps {
   copy: typeof LOGIN_COPY
@@ -16,8 +15,8 @@ export interface LoginLayoutProps {
   onRememberChange: (value: boolean) => void
   identifierRef: RefObject<HTMLInputElement | null>
   /**
-   * Optional slot for the login notice INSIDE the form, between the divider and the first field label. Only the flat fallback card
-   * passes it (the 3D scroll shows the notice outside the sheet); the layouts used on the 3D sheet never receive it.
+   * Optional slot for the login notice INSIDE the form, between the divider and the first field label. LoginModal passes it on the
+   * 3D paper and on the flat fallback card alike (the form grows to fit it); it is undefined while there is no message.
    */
   notice?: ReactNode
 }

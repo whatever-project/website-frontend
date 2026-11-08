@@ -29,7 +29,7 @@ export default function ClassicLoginLayout({
         <Flourish className="h-4 w-4" />
       </InkDivider>
 
-      {/* Flat fallback card only: the notice sits here, directly above the first label (undefined, so nothing rendered, on the 3D sheet). */}
+      {/* The login notice (error / unverified / general), if there is one, sits here directly above the first label: on the 3D paper and on the flat card. */}
       {notice}
 
       <label htmlFor="landing-login-identifier" data-typo="label" data-layout="label" className="parch-label block">
