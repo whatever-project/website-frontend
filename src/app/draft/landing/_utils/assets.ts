@@ -8,10 +8,10 @@
 //  emitted with a hashed name. It cannot live in public/assets because src/proxy.ts (shared, outside this folder) routes every
 //  request whose extension is not in its static list through i18n, and .glb is not in that list: /assets/....glb would be
 //  rewritten to /en/assets/....glb and 404 (verified). Its Blender sources, older exports and previews are NOT here any more:
-//  they are parked as zip files in ../_archive/ (see _archive/README.md) and are not referenced by any code.
+//  they were removed (recoverable from git history) and are not referenced by any code.
 
 export const BACKDROP_SRC = "/assets/Snow%20Landing.png"
 
 export const QUILL_SRC = "/assets/landing/quill/midnight-arcane-quill.png"
 
-export const PARCHMENT_GLB_URL = new URL("../_assets/scroll/Parchment_Rolling_Animation_v03.glb", import.meta.url).href
+export const PARCHMENT_GLB_URL = new URL("../_assets/scroll/Parchment_Rolling_Animation.glb", import.meta.url).href

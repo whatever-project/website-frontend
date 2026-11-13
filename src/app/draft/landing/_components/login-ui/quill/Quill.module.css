@@ -15,7 +15,12 @@
 .quill {
   position: absolute;
   left: calc(100% - 46px); /* nib 46 px inside the paper's right edge (was 26) */
-  bottom: 50px; /* was 16px: the nib now floats ~6px above the roll's top edge instead of sitting on the roll */
+  /* The nib (this box's bottom-left corner) sits on the vertical centre of the "ยังไม่มีบัญชี?" line: useQuillAnchor.ts measures
+     the line and sets --quill-bottom on the dialog box; the shadow copy of this class lives in the same box and inherits it.
+     50px is only the fallback until that is measured (it was the fixed value for the old, shorter paper).
+     --quill-lower moves the nib that many px below the centre of the line (towards its underline); raise it to lower the quill more. */
+  --quill-lower: 24px;
+  bottom: calc(var(--quill-bottom, 50px) - var(--quill-lower));
   width: 314px;
   height: 307px;
   pointer-events: none;

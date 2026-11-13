@@ -1,13 +1,17 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { LOGIN_COPY_BY_LANG, type LoginState, type LoginUiVariant } from "../../_mock/login"
+import { LOGIN_COPY_BY_LANG, type LoginState } from "../../_mock/login"
 import type { DraftLang } from "../../_mock/copy"
 import { useScrollLoginAnimation } from "./scroll/useScrollLoginAnimation"
 import PreviewPanel from "../draft-tools/PreviewPanel"
 import { getCurrentSnapshot, isEmbedded, listenPreviewCommands, reportPreviewStatus } from "../draft-tools/previewBridge"
 import QuillFeather from "./quill/QuillFeather"
 import QuillShadow from "./quill/QuillShadow"
+import { useQuillAnchor } from "./quill/useQuillAnchor"
+import { useQuillWanted } from "./quill/useQuillWanted"
+import { useNoticeExtra } from "./shared/useNoticeExtra"
+import { useFlatSheetSize } from "./shared/useFlatSheetSize"
 import LoginForm from "./shared/LoginForm"
 import LoginNotice from "./shared/LoginNotice"
 import styles from "./LoginModal.module.css"
@@ -15,25 +19,19 @@ import "./shared/LoginFontFaces.module.css"
 import classicStyles from "./classic/ClassicLogin.module.css"
 import classicLayout from "./classic/ClassicLoginLayout.module.css"
 import classicTypography from "./classic/ClassicLoginTypography.module.css"
-import newStyles from "./new/NewLogin.module.css"
-import newLayout from "./new/NewLoginLayout.module.css"
-import newTypography from "./new/NewLoginTypography.module.css"
 
 /**
  * The login dialog: the dimmed backdrop, the transparent 3D parchment canvas, the form on the sheet, the decorative quill,
- * and the draft preview controls. Form logic is in LoginForm; the two UI variants are in login-ui/classic and login-ui/new (shared login pieces: login-ui/shared).
- * Typography is owned by one file per UI (classic/ClassicLoginTypography.module.css, new/NewLoginTypography.module.css): this file only
- * puts the active UI's `.typography` class on the form box and on the notice. Layout (size / spacing / gaps) works the same way:
- * classic/ClassicLoginLayout.module.css and new/NewLoginLayout.module.css, one file per UI; this file keeps only the shared modal behaviour.
+ * and the draft preview controls. Form logic is in LoginForm; the UI is in login-ui/classic (shared login pieces: login-ui/shared).
+ * Typography is owned by classic/ClassicLoginTypography.module.css: this file only puts its `.typography` class on the form box
+ * and on the notice. Layout (size / spacing / gaps) works the same way: classic/ClassicLoginLayout.module.css;
+ * this file keeps only the shared modal behaviour.
  */
 export default function LoginModal({ onClose, lang = "th" }: { onClose: () => void; lang?: DraftLang }) {
-  // Language of the login dialog (starts from the landing page language). Both UI versions follow it; Thai is the original copy.
+  // Language of the login dialog (starts from the landing page language). Thai is the original copy.
   // The developer device preview (draft-tools/previewRoute.ts) can start the dialog from earlier preview selections; null on the normal page.
   const [uiLang, setUiLang] = useState<DraftLang>(() => getCurrentSnapshot()?.uiLang ?? lang)
   const [state, setState] = useState<LoginState>(() => getCurrentSnapshot()?.loginState ?? "idle")
-  // Draft-only UI experiment. Switching only changes props/classes: the form (and its typed text), the WebGL engine and
-  // the feather are never remounted.
-  const [uiVariant, setUiVariant] = useState<LoginUiVariant>(() => getCurrentSnapshot()?.uiVariant ?? "classic")
   // Draft-only PREVIEW switch (PreviewPanel, "Mode" row): shows the existing flat fallback card although WebGL works, so it can be
   // inspected without disabling WebGL. It never changes how a real failure is detected (`sceneError` below is untouched).
   const [forceFlat, setForceFlat] = useState(() => getCurrentSnapshot()?.forceFlat ?? false)
@@ -41,9 +39,22 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
   const closingRef = useRef(false)
   const stageRef = useRef<HTMLDivElement>(null)
   const identifierRef = useRef<HTMLInputElement>(null)
-  const { error: sceneError, formActive, quillVisible, close } = useScrollLoginAnimation(stageRef)
+  const { error: sceneError, formActive, quillVisible, close, setContentExtra } = useScrollLoginAnimation(stageRef)
   // The flat fallback card is shown when the 3D scene failed (production behaviour) OR when the preview switch forces it.
   const flat = sceneError || forceFlat
+  // The dialog box that tracks the 3D paper. The quill's nib is kept on the sign-up line by measuring that line (useQuillAnchor).
+  const sheetBoxRef = useRef<HTMLDivElement>(null)
+  useQuillAnchor(sheetBoxRef, !flat)
+  // The quill (and its two shadow copies) is only rendered on windows where it can be seen: no image download on tablets and phones.
+  const showQuill = useQuillWanted()
+  // The login message makes the form taller; the 3D paper (and the flat card, which has the paper's exact size) grows by the same
+  // amount, so the gaps around the form stay what they are without a message. See useNoticeExtra / sheetLayout.ts.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const noticeExtra = useNoticeExtra(rootRef, `${state}|${uiLang}|${flat}`)
+  useEffect(() => {
+    setContentExtra(noticeExtra)
+  }, [noticeExtra, setContentExtra])
+  useFlatSheetSize(rootRef, flat, noticeExtra)
 
   // The sheet rolls back up first, then the dialog is dismissed.
   const requestClose = useCallback(async () => {
@@ -66,7 +77,6 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
       listenPreviewCommands((command) => {
         if (command.uiLang) setUiLang(command.uiLang)
         if (command.loginState) setState(command.loginState)
-        if (command.uiVariant) setUiVariant(command.uiVariant)
         if (command.forceFlat !== undefined) setForceFlat(command.forceFlat)
         if (command.loginOpen === false) void requestCloseRef.current()
       }),
@@ -104,26 +114,22 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
     if (interactive) identifierRef.current?.focus()
   }, [interactive])
 
-  // The flat fallback card (WebGL unavailable, or forced by the preview switch) always uses the original UI.
-  const isNew = uiVariant === "new" && !flat
   const copy = LOGIN_COPY_BY_LANG[uiLang]
-  // The active UI's classes: typography (one file per UI) and its non-typography styles (e.g. the button shadow).
-  const typographyClass = isNew ? newTypography.typography : classicTypography.typography
-  const variantClass = isNew ? newStyles.new : classicStyles.classic
-  // Layout (size / spacing / gaps) is owned by one file per UI, like typography: `.layout` carries its variables, `.sheetBox` is the form box on the sheet.
-  const layoutClass = isNew ? newLayout.layout : classicLayout.layout
-  const sheetBoxClass = isNew ? newLayout.sheetBox : classicLayout.sheetBox
+  // The UI's classes: typography, its non-typography styles (e.g. the button shadow) and layout (size / spacing / gaps):
+  // `.layout` carries the layout variables, `.sheetBox` is the form box on the sheet.
+  const typographyClass = classicTypography.typography
+  const variantClass = classicStyles.classic
+  const layoutClass = classicLayout.layout
+  const sheetBoxClass = classicLayout.sheetBox
 
-  // Flat fallback card only: the notice is rendered INSIDE the form (above the first label) through LoginForm's `notice` slot.
-  // On the 3D sheet the notice stays where it was (a separate element under the bottom roll, further below).
-  const flatNotice = (
+  // The login notice is rendered INSIDE the form (above the first label) through LoginForm's `notice` slot, on the 3D sheet and on the
+  // flat fallback card alike; the form grows to fit it. It carries the same typography / layout classes as the box that wraps it.
+  const notice = (
     <LoginNotice
       state={state}
       copy={copy}
-      lang={uiLang}
       visible={interactive}
-      placement="in-card"
-      className={`${classicTypography.typography} ${classicTypography.flatCard} ${classicLayout.layout}`}
+      className={`${classicTypography.typography} ${classicLayout.layout}`}
     />
   )
 
@@ -133,14 +139,16 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
       onSubmit={() => setState("error")}
       interactive={interactive}
       identifierRef={identifierRef}
-      variant={isNew ? "new" : "classic"}
       copy={copy}
-      notice={flat ? flatNotice : undefined}
+      notice={notice}
     />
   )
 
   return (
+    // `lang` on the root: every `:lang(th)` / `:lang(en)` rule in the classic CSS (and the notice) follows the dialog language from here.
     <div
+      ref={rootRef}
+      lang={uiLang}
       className={`${styles.backdrop} fixed inset-0 z-50 overflow-hidden bg-[#10131f]/65 backdrop-blur-[2px]`}
       onClick={() => void requestClose()}
     >
@@ -158,8 +166,7 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
             role="dialog"
             aria-modal="true"
             aria-labelledby="landing-login-title"
-            data-lang={uiLang}
-            className={`${styles.sheet} ${classicTypography.typography} ${classicTypography.flatCard} ${classicStyles.classic} ${classicLayout.layout} ${classicLayout.flatCard} parch-sheet`}
+            className={`${styles.sheet} ${classicTypography.typography} ${classicStyles.classic} ${classicLayout.layout} ${classicLayout.flatCard} parch-sheet`}
             onClick={(event) => event.stopPropagation()}
           >
             {form}
@@ -167,6 +174,7 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
         </div>
       ) : (
         <div
+          ref={sheetBoxRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="landing-login-title"
@@ -175,27 +183,17 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
           className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
         >
           {/* The quill's cast shadow on the paper: before the form, so the form paints above it. */}
-          <QuillShadow visible={quillVisible} />
+          {showQuill && <QuillShadow visible={quillVisible} />}
 
           <div
             inert={!interactive}
-            data-lang={uiLang}
             className={`${styles.formReveal} ${layoutClass} ${sheetBoxClass} ${typographyClass} ${variantClass} ${interactive ? "" : styles.formHidden} overflow-y-auto`}
             onClick={(event) => event.stopPropagation()}
           >
             {form}
           </div>
 
-          {/* The login notice sits under the bottom roll, outside the sheet (same for both UI versions). */}
-          <LoginNotice
-            state={state}
-            copy={copy}
-            lang={uiLang}
-            visible={interactive}
-            className={`${typographyClass} ${layoutClass}`}
-          />
-
-          <QuillFeather visible={quillVisible} />
+          {showQuill && <QuillFeather visible={quillVisible} />}
         </div>
       )}
 
@@ -204,8 +202,6 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
       <PreviewPanel
         state={state}
         onStateChange={setState}
-        uiVariant={uiVariant}
-        onUiVariantChange={setUiVariant}
         flat={flat}
         sceneError={sceneError}
         onForceFlatChange={setForceFlat}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useSyncExternalStore } from "react"
-import { LOGIN_STATE_OPTIONS, LOGIN_UI_OPTIONS, type LoginState, type LoginUiVariant } from "../../_mock/login"
+import { LOGIN_STATE_OPTIONS, type LoginState } from "../../_mock/login"
 import type { DraftLang } from "../../_mock/copy"
 import { DEV_PREVIEW_ENABLED } from "./devPreviewFlag"
 
@@ -11,7 +11,7 @@ import { DEV_PREVIEW_ENABLED } from "./devPreviewFlag"
  *
  *   ?device=mobile-s|mobile-m|mobile-l|tablet|custom[&w=&h=]   show the device preview HOST (toolbar + iframe of the real page)
  *   ?embed=1                                                    this page IS the real page inside the host's iframe (no preview chrome)
- *   ?open=1 &variant=classic|new &lang=th|en &state=<login state> &flat=1     the login preview selections (the "snapshot")
+ *   ?open=1 &lang=th|en &state=<login state> &flat=1     the login preview selections (the "snapshot")
  *
  * In a production build every function here returns the neutral route, so the tools can never be reached.
  */
@@ -38,7 +38,6 @@ export const CUSTOM_LIMITS = { min: 240, max: 1600 }
 /** The login preview selections that survive switching between desktop and a device (and reloads). */
 export interface PreviewSnapshot {
   loginOpen: boolean
-  uiVariant: LoginUiVariant
   /** null = start from the landing page language. */
   uiLang: DraftLang | null
   loginState: LoginState
@@ -46,7 +45,7 @@ export interface PreviewSnapshot {
   forceFlat: boolean
 }
 
-export const DEFAULT_SNAPSHOT: PreviewSnapshot = { loginOpen: false, uiVariant: "classic", uiLang: null, loginState: "idle", forceFlat: false }
+export const DEFAULT_SNAPSHOT: PreviewSnapshot = { loginOpen: false, uiLang: null, loginState: "idle", forceFlat: false }
 
 export interface PreviewRoute {
   embed: boolean
@@ -57,7 +56,7 @@ export interface PreviewRoute {
 }
 
 const NEUTRAL_ROUTE: PreviewRoute = { embed: false, device: null, snapshot: DEFAULT_SNAPSHOT, hasSnapshot: false }
-const SNAPSHOT_KEYS = ["open", "variant", "lang", "state", "flat"]
+const SNAPSHOT_KEYS = ["open", "lang", "state", "flat"]
 const DEVICE_KEYS = ["device", "w", "h"]
 
 const clampSize = (value: number) => Math.min(CUSTOM_LIMITS.max, Math.max(CUSTOM_LIMITS.min, Math.round(value)))
@@ -72,12 +71,10 @@ export function parsePreviewRoute(search: string): PreviewRoute {
     const width = Number(p.get("w")), height = Number(p.get("h"))
     if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) device = { id: "custom", label: "Custom", width: clampSize(width), height: clampSize(height) }
   }
-  const variant = LOGIN_UI_OPTIONS.find((o) => o.value === p.get("variant"))?.value ?? DEFAULT_SNAPSHOT.uiVariant
   const lang = p.get("lang")
   const state = LOGIN_STATE_OPTIONS.find((o) => o.value === p.get("state"))?.value ?? DEFAULT_SNAPSHOT.loginState
   const snapshot: PreviewSnapshot = {
     loginOpen: p.get("open") === "1",
-    uiVariant: variant,
     uiLang: lang === "th" || lang === "en" ? lang : null,
     loginState: state,
     forceFlat: p.get("flat") === "1",
@@ -88,7 +85,6 @@ export function parsePreviewRoute(search: string): PreviewRoute {
 export function writeSnapshotParams(p: URLSearchParams, s: PreviewSnapshot) {
   for (const key of SNAPSHOT_KEYS) p.delete(key)
   if (s.loginOpen) p.set("open", "1")
-  p.set("variant", s.uiVariant)
   if (s.uiLang) p.set("lang", s.uiLang)
   p.set("state", s.loginState)
   if (s.forceFlat) p.set("flat", "1")
