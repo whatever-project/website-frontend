@@ -1,7 +1,7 @@
-/* ชื่อฟอนต์แฝง "… EN" สำหรับหน้า login (ใช้ร่วมกันทั้ง Classic และ New)
+/* ชื่อฟอนต์แฝง "… EN" สำหรับหน้า login (ใช้โดย Classic)
  *
- * ไฟล์นี้มีเฉพาะ @font-face  ไม่มีกฎ typography ใด ๆ  (ฟอนต์/ขนาด/น้ำหนักของแต่ละ UI อยู่ใน
- *   classic/ClassicLoginTypography.module.css  และ  new/NewLoginTypography.module.css)
+ * ไฟล์นี้มีเฉพาะ @font-face  ไม่มีกฎ typography ใด ๆ  (ฟอนต์/ขนาด/น้ำหนักอยู่ใน
+ *   classic/ClassicLoginTypography.module.css)
  *
  * ชื่อแฝงเหล่านี้ยังไม่มีบทบาทไหนใช้ แต่เตรียมไว้ให้ใส่ในช่อง --<บทบาท>-font-en ของไฟล์ typography เมื่อต้องการใช้ฟอนต์ที่มี
  * "ทั้งไทยและอังกฤษ" เป็นฟอนต์ละติน: ชื่อแฝงจะวาดเฉพาะอักษรละติน (unicode-range) อักษรไทยจึงตกไปใช้ช่อง -font-th

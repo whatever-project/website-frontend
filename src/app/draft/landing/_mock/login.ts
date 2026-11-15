@@ -13,7 +13,8 @@ export const LOGIN_COPY = {
   errorUnverified: "อีเมลของคุณยังไม่ได้รับการยืนยัน กรุณาตรวจสอบกล่องจดหมายก่อนเข้าสู่ระบบ",
   errorGeneric: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
   backToSignup: "กลับไปสมัครสมาชิก →",
-  sampleApiError: "Invalid credentials",
+  // Thai for the API's "Invalid credentials" (the English copy below keeps the English text).
+  sampleApiError: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
 }
 
 export type LoginState = "idle" | "loading" | "error" | "unverified" | "generic"
@@ -26,8 +27,7 @@ export const LOGIN_STATE_OPTIONS: { value: LoginState; label: string }[] = [
   { value: "generic", label: "ข้อผิดพลาดทั่วไป" },
 ]
 
-/** English copy, used only by the redesigned ("UI ใหม่") variant when the landing page language is English.
- *  The original login UI always uses LOGIN_COPY (Thai), exactly as before. */
+/** English copy, used when the login dialog language is English. Thai (LOGIN_COPY) is the original copy. */
 export const LOGIN_COPY_EN: typeof LOGIN_COPY = {
   formHeading: "Welcome Back",
   identifier: "Username or email",
@@ -47,11 +47,3 @@ export const LOGIN_COPY_EN: typeof LOGIN_COPY = {
 }
 
 export const LOGIN_COPY_BY_LANG = { th: LOGIN_COPY, en: LOGIN_COPY_EN } as const
-
-/** Draft-only: which login UI the preview panel shows. "classic" is the original and the default. */
-export type LoginUiVariant = "classic" | "new"
-
-export const LOGIN_UI_OPTIONS: { value: LoginUiVariant; label: string }[] = [
-  { value: "classic", label: "UI เดิม" },
-  { value: "new", label: "UI ใหม่" },
-]
