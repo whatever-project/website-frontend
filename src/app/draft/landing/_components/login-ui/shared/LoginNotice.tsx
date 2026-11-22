@@ -1,5 +1,3 @@
-import Link from "next/link"
-import { routes } from "@/config/routes"
 import type { LOGIN_COPY, LoginState } from "../../../_mock/login"
 
 /**
@@ -27,9 +25,11 @@ interface LoginNoticeProps {
   visible: boolean
   /** Extra classes: the active UI's `.typography` and `.layout` classes. */
   className?: string
+  /** Unverified e-mail only: reopens the 6-digit code dialog (shown as a link-style button next to "back to sign up"). */
+  onEnterCode?: () => void
 }
 
-export default function LoginNotice({ state, copy, visible, className = "" }: LoginNoticeProps) {
+export default function LoginNotice({ state, copy, visible, className = "", onEnterCode }: LoginNoticeProps) {
   const notice = getLoginNotice(state, copy)
   if (!notice) return null
   return (
@@ -43,10 +43,12 @@ export default function LoginNotice({ state, copy, visible, className = "" }: Lo
       className={`w-full transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"} ${className}`}
     >
       {notice.message}
-      {notice.unverified && (
+      {notice.unverified && onEnterCode && (
         <>
           {" "}
-          <Link href={routes.signup}>{copy.backToSignup}</Link>
+          <button type="button" onClick={onEnterCode}>
+            {copy.enterCode}
+          </button>
         </>
       )}
     </div>

@@ -31,10 +31,10 @@ n/a (round 1: baseline copy of the live page).
 The page has three steps on one route.
 | # | Section | What it shows | What the user can do | Text source |
 |---|---|---|---|---|
-| 1 | Page header + step indicator | Title "สมัครสมาชิก", sub changes per step, circles 1 "ข้อกำหนด" and 2 "ข้อมูลบัญชี" (hidden on step 3) | none | copied from live page |
+| 1 | Page header + step indicator | Title "สมัครสมาชิก", sub changes per step, circles 1 "ข้อกำหนด" and 2 "ข้อมูลบัญชี" (a completed step shows a check mark; on step 2 circle 1 is clickable to go back, never forward; on step 3 both show check marks behind the popup) | none | copied from live page |
 | 2 | Step 1: Terms | "ข้อกำหนดและเงื่อนไข", scrollable list of 7 numbered terms (I–VII), checkbox "ฉันได้อ่านและยอมรับ… (จำเป็น)", "ถัดไป" button, letter illustration (desktop) | Tick the checkbox, go to step 2 | copied from live page |
 | 3 | Step 2: Account form | Seal "✦", heading "ทะเบียนนักเดินทาง", username, email, password (show/hide), rule boxes, "สร้างบัญชี" button, "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" | Fill in and submit; go to login | copied from live page |
-| 4 | Step 3: Verify email | Envelope icon, "ยืนยันอีเมลของคุณ", "สร้างบัญชีแล้ว! …", "ส่งจดหมายยืนยันไปที่ <email>", "ยืนยันแล้ว? เข้าสู่ระบบ" | Go to login | copied from live page |
+| 4 | Step 3: Verify email (modal over step 2) | Dimmed overlay over the step 2 form; paper-letter modal: "We sent a 6-digit code to <email>. It expires in 5 minutes.", 6 single-digit boxes, "Verify email" button, resend countdown / "Resend code", spam hint, "Wrong email? Change it"; change-email view; "Email verified" view with Continue. Wrong-code / locked / expired messages. Closable with X / Esc. Same modal (login variant) when logging in with an unverified email | Verify, resend, change email, close, continue (all mock) | round 4: designer's email-verification spec; back-end rules in CONTEXT.md 5a |
 
 ## 4. Data on the page
 | Data item | Example value | Comes from | Changes? |
@@ -51,7 +51,7 @@ The page has three steps on one route.
 - **Error:** red banner at the top of the form with the server's message.
 - **Success:** step 3.
 - **Validation messages:**
-  - Username: no spaces; 3–25 characters; only A–Z, 0–9, `_ . -`. Rule box appears while the field is focused.
+  - Username: no spaces; 3–25 characters; only A–Z and 0–9 (no special characters, `_ . -` included). A one-line rules hint is always shown under the field; when a rule is broken the same line shows the red error message; when the username is valid it shows "Great! This username is available" (green) or "This username is already taken" (red) after an availability check (mock in the draft).
   - Email: "กรุณากรอกอีเมลให้ถูกต้อง".
   - Password: at least 8 characters; at least one digit; upper and lower case. Checklist with ✓/✕ appears on focus or when invalid.
   - Errors are shown as "✕ …" under the field; the field border turns red.

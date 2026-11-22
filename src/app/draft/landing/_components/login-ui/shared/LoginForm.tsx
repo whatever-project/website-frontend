@@ -6,7 +6,8 @@ import ClassicLoginLayout from "../classic/ClassicLoginLayout"
 
 interface LoginFormProps {
   state: LoginState
-  onSubmit: () => void
+  /** Called on submit with what was typed (the draft uses it to simulate the "unverified e-mail" login). */
+  onSubmit: (values: { usernameOrEmail: string; password: string }) => void
   /** False while the sheet is still rolling: inputs stay disabled so nothing can be typed or focused. */
   interactive?: boolean
   identifierRef?: RefObject<HTMLInputElement | null>
@@ -14,6 +15,8 @@ interface LoginFormProps {
   copy?: typeof LOGIN_COPY
   /** The notice rendered inside the form, between the divider and the first label (3D paper and flat card). Undefined when there is none. */
   notice?: ReactNode
+  /** When set, the "create an account" link calls this instead of navigating (LoginModal `closeOnSignup`). */
+  onSignupClick?: () => void
 }
 
 /**
@@ -27,6 +30,7 @@ export default function LoginForm({
   identifierRef,
   copy = LOGIN_COPY,
   notice,
+  onSignupClick,
 }: LoginFormProps) {
   const [values, setValues] = useState({ usernameOrEmail: "", password: "" })
   const [remember, setRemember] = useState(false)
@@ -34,7 +38,7 @@ export default function LoginForm({
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    onSubmit()
+    onSubmit(values)
   }
 
   const layoutProps = {
@@ -47,6 +51,7 @@ export default function LoginForm({
     onRememberChange: setRemember,
     identifierRef: identifierRef ?? fallbackRef,
     notice,
+    onSignupClick,
   }
 
   return (

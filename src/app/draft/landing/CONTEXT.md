@@ -4,8 +4,8 @@ status: designing
 route_group: public
 target_route: /
 draft_url: /draft/landing
-round: 12
-updated: 2026-11-04
+round: 14
+updated: 2026-11-15
 ---
 
 # Landing: dev context
@@ -46,18 +46,46 @@ landing/
   _mock/                            copy.ts (landing copy, TH/EN), login.ts (login copy, preview states)
   _assets/scroll/Parchment_Rolling_Animation.glb   the ONLY runtime model
 public/assets/landing/quill/        midnight-arcane-quill.png
-public/assets/village.jpg           the backdrop, shared with the live landing page
+public/assets/landing-autumn.png    the draft backdrop (the live landing page still uses village.jpg); see "Backdrop image and its crop per viewport"
 ```
 
 ### Device preview (Phase 6A: preview and diagnosis only, no responsive redesign)
 
 Inspect the real landing page and login at mobile / tablet viewport sizes without resizing the browser. Development builds only (`DEV_PREVIEW_ENABLED` in draft-tools/devPreviewFlag.ts, the same rule as the other preview controls); in a production build the URL parameters are ignored and no control is rendered.
 
-- Open: on `/draft/landing` use the **Device** pill at the top (login closed) or the **Device** row of the Preview panel inside the login dialog. Presets: Mobile Small 375 x 667, Mobile Standard 390 x 844, Mobile Large 430 x 932, Tablet 768 x 1024, plus Custom (width x height, 240-1600). **Desktop** returns to the normal page.
+- Open: on `/draft/landing` use the **Device** pill at the top (login closed) or the **Device** row of the Preview panel inside the login dialog. Presets: Mobile Small 360 x 800, Mobile Standard 390 x 844, Mobile Large 430 x 932, Tablet 768 x 1024, Tablet Landscape 1024 x 768, Laptop 1366 x 768, Desktop HD 1920 x 1080, plus Custom (width x height, 240-1920). **Desktop** returns to the normal page.
 - How it works: the URL of the ONE landing route selects the mode (`?device=...` host, `?embed=1` the real page inside the host's iframe, `?open=1&lang=&state=&flat=1` the login selections). The host is a toolbar plus an **iframe of the same route with exactly the device's CSS size**, so real media queries / viewport units respond (a scaled-down desktop page would not). The host does NOT mount the landing page itself, so there is only ever one 3D engine: the one inside the iframe; every device switch builds a fresh iframe (the old one is emptied first). If the viewport is larger than the window the area scrolls; it is never shrunk.
 - Controls (all outside the simulated viewport): Device, Login Open / Close (Close rolls the sheet up like Esc), Lang, Mode (3D scroll / Flat fallback), State (5 preview states). They survive device switches, reloads (URL) and "Desktop".
 - Host <-> iframe: same origin, no postMessage. The host dispatches a CustomEvent on `iframe.contentWindow`; the embedded page dispatches status events on its own window (`previewBridge.ts`). The in-page Preview panel and launcher are not drawn inside the simulated viewport, and the global "Back to Dev Tools" badge is hidden there (embedded page only).
 - Limits: the iframe has the same user agent, pixel ratio, mouse input and no browser toolbars / safe areas as the desktop window, so touch-only media (`hover: none`, `pointer: coarse`), `env(safe-area-inset-*)`, dynamic mobile toolbars (`dvh`) and real devices' font scaling are not reproduced. The Next.js dev indicator is drawn by Next itself.
+
+### Backdrop image and its crop per viewport
+
+- File: `public/assets/landing-autumn.png`, 1670 x 941 (16:9). The URL is `BACKDROP_SRC` in `_utils/assets.ts`; `page.tsx` draws it as a full-screen `<img>` with `object-cover`. The spring / summer / winter PNGs of the same size are in `public/assets` but the draft does not use them (the live landing page still uses `village.jpg`).
+- Focus subject: the man on the steps, about x 980 to 1280 of the source (centre about x 1130, 68% across).
+- How the crop works: `object-cover` keeps the full height of the image and crops the sides. `object-position` chooses which slice stays visible; a higher horizontal % moves the image further left, so more of the right side (the man) is shown. Vertical is always 50%. Current rules, on the `<img>` in `page.tsx`:
+
+| Window width | Rule | Visible slice of the source |
+|---|---|---|
+| under 640px (Mobile S / M / L) | `max-sm:object-[74%_50%]` | S 360 x 800: x 923 to 1346; M 390 x 844: x 914 to 1349; L 430 x 932: x 915 to 1349 |
+| 640 to 979px (Tablet 768 x 1024) | `sm:max-[979px]:object-[65%_50%]` | x 627 to 1333 |
+| 980px and wider (Tablet Landscape, Laptop, Desktop HD) | none (centred) | Tablet Landscape 1024 x 768: x 208 to 1462; 16:9 windows: the whole image |
+
+  The 640 / 979 limits are the page's existing "tablet" range (see the Tablet viewports row in the iteration log).
+- To retune a size: visible width = 941 x (viewport width / viewport height); left edge = position % x (1670 minus visible width). Keep the man (x 980 to 1280) inside the slice.
+- If the artwork is cropped manually instead (ratio, and the crop at the full 941 px height):
+
+| Viewport | Ratio | Crop of the 1670 x 941 source |
+|---|---|---|
+| Mobile S 360 x 800 | 9:20 (0.45) | 423 x 941 |
+| Mobile M 390 x 844 / Mobile L 430 x 932 | about 9:19.5 (0.46) | 435 x 941 / 434 x 941 (one 9:19.5 crop can serve S, M and L) |
+| Tablet 768 x 1024 | 3:4 (0.75) | 706 x 941 |
+| Tablet Landscape 1024 x 768 | 4:3 (1.33) | 1255 x 941 |
+| Laptop 1366 x 768 / Desktop HD 1920 x 1080 | 16:9 (1.78) | the whole image |
+
+  The 941 px source height is low for phones at 2x to 3x pixel density, so crops of this file look soft on real devices: export crops from a higher-resolution original (about 1080 x 2400 for phones, 1536 x 2048 for tablets, 2560 x 1440 for desktop). Separate files would be wired with `<picture>` and media queries in `page.tsx`, and the `object-position` classes above would then be removed.
+- Not affected by the crop: the mist, colour grade, stars and window-glow layers are positioned by viewport %, not by the image.
+- Check it with `/draft/landing?device=mobile-s`, `mobile-m`, `mobile-l`, `tablet` (see "Device preview").
 
 ### Preview the flat fallback card
 
@@ -185,6 +213,11 @@ Revision of the already-live landing page `/`. The login button now opens a 3D p
 
 ## 2b. Changes since promotion
 
+Round 13 (apply to the live landing login dialog): **email verification by 6-digit code** for the "correct password, email not verified" login. The login popup (3D scroll sheet and the flat fallback card) now opens the verification modal over itself. UI only; back-end rules are in `draft/signup/CONTEXT.md` 5a. This replaces the earlier wiring on `/draft/login`, which the designer no longer uses (reverted).
+- `LoginModal.tsx`: `verifyOpen` state (starts open when the preview state is `unverified`); opened by the Preview state "ยังไม่ยืนยันอีเมล", by the host's preview command, or by a mock submit with an identifier containing "unverified". Rendered inside the root, before `PreviewPanel`, in a click-stopping wrapper. The sheet / flat card is `inert` behind it. Esc closes only the verification modal (the login sheet's Esc handler is skipped while it is open); closing keeps the amber notice. "Use a different account" closes it and clears the notice.
+- `LoginForm.tsx`: `onSubmit` now receives the typed values. `LoginNotice.tsx`: the unverified notice gets an "Enter verification code" button (`onEnterCode`), styled like the notice link in `ClassicLogin.module.css`. `_mock/login.ts`: `enterCode`. `PreviewPanel.tsx`: lists the modal's own states while it is open.
+- Dev-only URL: `/draft/landing?open=1&state=unverified[&verify=wrong|locked|expired|resend|change|verified]`.
+
 n/a — this draft has not previously been picked up by dev. Round 2 file-level changes are recorded in the Iteration log.
 
 ## 2d. Unused files (dev may delete)
@@ -204,7 +237,7 @@ n/a — this draft has not previously been picked up by dev. Round 2 file-level 
 | `three` (+ `GLTFLoader`, `EffectComposer`, `RenderPass`, `SSAOPass`, `OutputPass` from `three/examples/jsm`)                                                                  | npm, **newly installed by the designer/dev for this round** | 3D scroll                                                   |
 | `routes`                                                                                                                                                                      | `@/config/routes`                                           | Signup and forgot-password link targets                     |
 | `gallery-btn`, `sun-slider`, `rise-in`, `mist-drift`, `candle-flicker`, `star-twinkle`, `parch-sheet`, `parch-label`, `parch-input`, `parch-check`, `parch-btn`, font classes | `src/styles/globals.css`                                    | Existing scene, form, and type styling                      |
-| `/assets/village.jpg`                                                                                                                                                         | `public/assets/`                                            | Existing backdrop, referenced by path                       |
+| `/assets/village.jpg`                                                                                                                                                         | `public/assets/`                                            | Live landing page's backdrop only; the draft uses `landing-autumn.png` (see "Backdrop image and its crop per viewport") |
 
 ## 4. New elements (not in the repo before this draft)
 
@@ -231,6 +264,10 @@ New colours / fonts / spacing / animations / CSS:
 - No new palette colours or fonts in the dialog CSS module; it uses the existing parchment palette (the loading roll uses two ivory hex values).
 - The current working copy also contains landing legibility styling outside the requested popup scope; dev should compare before promotion.
 
+### Round 13: email-verification dialog (imported, not new files here)
+
+`VerifyEmailModal`, `PaperLetter` (the real `paper.png` as a 9-slice) and `CodeInput` live in `draft/signup/_components/verify/` and the copy in `draft/signup/_mock/verify.ts`; the landing login popup imports them (candidates to promote to shared components, see `draft/signup/CONTEXT.md` section 4).
+
 ## 5. Needs dev (couldn't be done inside the draft)
 
 - **Dependencies:** add `three` and `@types/three` (0.187.0 installed locally for this round) to `package.json`. `three` is only imported from `_components/login-ui/scroll/scrollLoginAnimation.ts` via dynamic `import()`.
@@ -243,6 +280,13 @@ New colours / fonts / spacing / animations / CSS:
 - Remove the Preview state switch and draft-local landing language toggle; use the existing live language switch, locale-aware navigation, and `useTranslations` namespaces.
 - Add the loading label "กำลังโหลด" (screen-reader only). There is no close-button label any more (the X was removed in round 4); consider an accessible close affordance for screen-reader/keyboard users if dev wants one (Esc works). Existing form strings can reuse the `login` messages.
 - "จดจำฉัน" remains unsent, matching the current live login behaviour.
+- **Make the login dialog a shared component (to do later, NOT done in the draft; asked for in round 16):** the login dialog is now opened from two pages (the landing "เข้าสู่ระบบ" button and the signup page's "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" line), so it should be one reusable component instead of a landing-internal folder that signup imports by relative path (`../landing/_components/login-ui/LoginModal`).
+  - *What it is:* `_components/login-ui/` — `LoginModal.tsx` (overlay, 3D scroll sheet + flat fallback, Esc / focus / scroll lock, embeds `VerifyEmailModal`), `scroll/` (Three.js animation, preload), `quill/`, `classic/` (layout, typography and style CSS modules), `shared/` (`LoginForm`, `LoginNotice`, hooks); plus the copy in `_mock/login.ts` and the verification dialog from `draft/signup/_components/verify/`.
+  - *Where:* `src/components/LoginModal/` (one folder, default export, per `docs/ai/COMPONENTS.md`; add it to that file when done). Until then a draft-only shared folder (e.g. `app/draft/_shared/`) is the alternative if drafts must not touch `src/components/`.
+  - *Public API to keep:* `onClose`, `lang`, `closeOnSignup` (sign-up links close the dialog instead of navigating; used on the signup page), `showPreviewPanel` (draft only). Add: a way to open it from anywhere (e.g. a small provider / `useLoginModal()` so the landing button, the signup page, and later auth-guard redirects share one instance), and `onLoggedIn` / redirect target after success.
+  - *Decouple before promoting:* copy from `_mock/login.ts` → `messages/{th,en}/login.json` via `useTranslations` (not the draft's `LOGIN_COPY_BY_LANG`); remove the draft-only tooling (`draft-tools/PreviewPanel`, `previewBridge`, `previewRoute`, `devPreviewFlag`, the `verify` / `open` URL params and mock "unverified" rule); sign-up links use `routes.signup` (the draft uses `${DRAFT_PREFIX}${routes.signup}`), and the live signup page can open the dialog or link to `/login`; reuse `@/i18n/navigation` links.
+  - *Also needed:* the `three` dependency and the 56 MB model asset notes above, and the verification dialog wiring below.
+- **Email verification (round 13):** when the real login returns `verification_required`, open the verification modal (variant `login`) instead of only showing the unverified notice; endpoints, pending-token cookie, attempts, cooldown and tests are in `draft/signup/CONTEXT.md` 5a. Add `enterCode` to the `login` messages. Remove the `verify` URL param, the mock "unverified" identifier rule and the Preview-panel rows.
 
 ## 6. Page states
 
@@ -260,6 +304,8 @@ New colours / fonts / spacing / animations / CSS:
 | Error            | submit or Preview state                                          | Notice above the username field with sample `Invalid credentials` (Thai: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง")                                                                           |
 | Unverified       | Preview state                                                    | Amber banner and "กลับไปสมัครสมาชิก →"                                                                                 |
 | Generic error    | Preview state                                                    | Red banner "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"                                                                       |
+| Unverified, code dialog | Preview state "ยังไม่ยืนยันอีเมล" / submit with an identifier containing "unverified" | Paper-letter dialog over the dimmed login sheet: 6 code boxes (signup-style layout, own first sentence "Your email isn't verified yet. We sent a new 6-digit code to <email>."), "Verify and log in", resend countdown, "Wrong email? Change it", "Use a different account"; correct code in the draft is `123456`; sub-states via the Preview panel or `&verify=` |
+| Unverified, dialog closed | Esc / X on the code dialog | Amber notice with "กรอกรหัสยืนยัน" (reopens the dialog) and "กลับไปสมัครสมาชิก →" |
 | Success          | live-only successful login                                       | Redirect to dashboard; no real success in draft                                                                        |
 
 ## 7. Mock data → API entities
@@ -284,8 +330,9 @@ User actions that will need an endpoint:
 ## 8. Thai strings to move to i18n
 
 - Existing landing namespace: `welcome, title, subtitle, logIn, signUp, realTime, realTimeOff, timeLabel` (the draft's `realTime`/`realTimeOff` now take the clock string; in live next-intl use a `{time}` placeholder, e.g. "แสดงภาพตามเวลาปัจจุบัน {time} น.", and format the time with the current locale: Thai 24 h with "น.", English 12 h with AM/PM and a two-digit hour, e.g. "Real Time 02:07 PM" (the English label is the designer's wording, edited in `_mock/copy.ts`; the Thai text is "แสดงภาพตามเวลาปัจจุบัน"); the draft does the 12 h formatting by hand in `_mock/copy.ts` `to12Hour`); existing `site.whatever`. The current draft's English landing copy mirrors these keys.
-- Reuse existing login namespace: `formHeading, identifier, identifierPlaceholder, password, passwordPlaceholder, rememberMe, forgotPassword, submit, submitting, noAccount, createOne, errorUnverified, errorGeneric, backToSignup`.
+- Reuse existing login namespace: `formHeading, identifier, identifierPlaceholder, password, passwordPlaceholder, rememberMe, forgotPassword, submit, submitting, noAccount, createOne, errorUnverified, errorGeneric` (`backToSignup` is no longer used by the dialog, round 17).
 - The wrong-password message: the draft's `sampleApiError` is a placeholder for the API's `ApiError.message` ("Invalid credentials"); the Thai copy shows "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", the English copy keeps the English text. In live code map the API's invalid-credentials error to a translated string instead of showing the raw message.
+- Round 13: `enterCode` ("กรอกรหัสยืนยัน" / "Enter verification code") for the `login` namespace; the verification dialog's own copy is in `draft/signup/_mock/verify.ts` (list in `draft/signup/CONTEXT.md` section 8).
 - New dialog accessibility label: "กำลังโหลด" (loading).
 - Preview-state labels and the draft-local language-toggle labels are draft-only and should be removed rather than translated.
 
@@ -293,15 +340,23 @@ User actions that will need an endpoint:
 
 - **Assumed (designer to confirm):** the demo's drag-to-rotate is turned off (it would fight the form); the loading spinner has no visible text; form text keeps its normal login size instead of the demo's 9–10 px text. X/backdrop/Escape close behaviour, existing link destinations and the full-form-on-the-sheet scope were explicitly confirmed.
 - No X button (removed in round 4). Any tap outside the form (dim area or the paper around it, including while the sheet is still unrolling) and Esc close the dialog; taps on the form, the fallback card and the Preview panel do not. Chosen because phones have no Esc and the sheet covers the whole screen there.
+- Round 13 assumptions: the verification dialog is not dismissed by tapping the backdrop (unlike the login sheet) and Esc closes only it first; the mock trigger is an identifier containing "unverified".
 - **Open:** none for the requested dialog. The separate draft-local landing language/legibility edits are outside this request and should be compared by dev before promotion.
 
 ## 10. Iteration log
 
 | Round | Date       | What changed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Why / who asked                                                                                                                         |
 | ----- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 17    | 2026-11-17 | The unverified notice in the login popup no longer has the "กลับไปสมัครสมาชิก →" link: only the message and the "กรอกรหัสยืนยัน" button remain (`LoginNotice.tsx`: link and `onSignupClick` prop removed; `ClassicLogin.module.css`: the notice link rules removed; `_mock/login.ts`: `backToSignup` removed) | Designer request |
+| 16    | 2026-11-17 | `LoginModal` can be reused by another page: new optional props `closeOnSignup` (the sign-up links close the dialog instead of navigating; `onSignupClick` threaded through `LoginForm` → `ClassicLoginLayout`) and `showPreviewPanel` (default true; false hides this dialog's Preview panel). The signup page opens it from its "เข้าสู่ระบบ" line. Promoting it to a shared component is written up in section 5 for the dev | Designer request |
+| 15    | 2026-11-17 | Sign-up links in `page.tsx` (the "สมัครสมาชิก" button), `ClassicLoginLayout.tsx` (the line under the login button) and `LoginNotice.tsx` (its "back to sign up" link was removed again in round 17) open the draft page `/draft/signup` (`${DRAFT_PREFIX}${routes.signup}`). **Live: they go back to `routes.signup` when promoted** | Designer request |
+| 14    | 2026-11-15 | Draft-only Preview panel is collapsible (new `draft-tools/PreviewCollapse.tsx`, remembered in localStorage `draft-preview-collapsed`; collapsed it is a small "Preview" pill); the verification-dialog preview buttons now show the selected state (`LoginModal.tsx` keeps the chosen id, `PreviewPanel.tsx` props `verifyActiveId` / `onVerifyPreview(id)`) | Designer request |
+| 13    | 2026-11-15 | `LoginModal.tsx` / `LoginForm.tsx` / `LoginNotice.tsx` / `PreviewPanel.tsx` / `_mock/login.ts` / `ClassicLogin.module.css`: email-verification dialog (imported from the signup draft) opens over the login popup for an unverified e-mail; "Enter verification code" button on the notice; moved here from `/draft/login` | Designer no longer uses `/draft/login` |
 | 1     | 2026-10-24 | First version: replica of the live page                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Make an editable draft for the design team                                                                                              |
 | 2     | 2026-11-02 | `page.tsx`: login button opens a dialog and receives focus on close; `_mock/copy.ts`: added login copy/states; added `LoginModal.tsx` and `LoginModal.module.css` for the screenshot layout and unroll effect                                                                                                                                                                                                                                                                                                                                                                                                                                          | Designer supplied the login screenshot and requested a parchment-unroll popup on landing                                                |
 | 3     | 2026-11-04 | `LoginModal.tsx` rewritten around a Three.js parchment scroll; form extracted to `LoginForm.tsx`; added `scrollLoginAnimation.ts`, `useScrollLoginAnimation.ts`, the GLB in `_assets/scroll/` and the demo HTML in `_assets/source/`; `LoginModal.module.css` reworked; Preview state panel moved to the bottom-left like the other drafts; `page.tsx` and `_mock/*` unchanged                                                                                                                                                                                                                                                                         | Designer supplied the Kimi "Fantasy Parchment Scroll Demo" and asked for it to replace the login popup, with the full form on the sheet |
+| 35    | 2026-11-23 | `page.tsx`: the backdrop image on phones (window width under 640px: Mobile S/M/L) has `object-position` 74% 50% (`max-sm:object-[74%_50%]`), so the crop shifts left of centre and the man stays in view; tablet windows (640 to 979px) use 62% 50% (`sm:max-[979px]:object-[65%_50%]`), a smaller shift; 980px and wider keep the centred crop; see "Backdrop image and its crop per viewport" | Designer request |
+| 34    | 2026-11-23 | Device preview presets (`draft-tools/previewRoute.ts`, `DeviceButtons.tsx`): Mobile Small 375x667 to 360x800; new Tablet Landscape 1024x768, Laptop 1366x768, Desktop HD 1920x1080; Custom limit 1600 to 1920. Same presets on `/draft/signup`; the other draft pages (not login) get the preview from `GenericDevicePreview.tsx` | Designer request |
 | 33    | 2026-11-08 | Pre-loading before the Login click: early `<link rel="preload">` hints for the 53 MB model (low priority, `crossorigin`) and the quill (`scroll/preloadLoginAssets.ts` via `react-dom` `preload`, with a local `react-dom-preload.d.ts`); `preloadScrollLogin` now starts on idle, keeps and `decode()`s the quill image and `document.fonts.load()`s the login faces; the quill and its shadow copies are not rendered below 980px (`quill/useQuillWanted.ts`); quill PNG resized 1536x1024 -> 960x640 (1.39 -> 0.32 MB). Measured numbers and the open model-size problem in "Pre-loading the scroll and the quill" | Designer asked to pre-load the scroll and quill to prevent lag on the first click |
 | 32    | 2026-11-08 | Tablet viewports (window width 640 to 979px): the 3D paper is 8% shorter (`SHEET_TABLET_HEIGHT_SCALE` 0.92 in `scroll/sheetLayout.ts`, floor at the minimum sheet), so the empty band above the title and below the sign-up line is about 20px smaller (768x1024: 57.9 -> 37.8px); width in px unchanged; phones and 980px+ windows unchanged | Designer asked for a bit less top and bottom space of the scroll on tablets |
 | 31    | 2026-11-08 | Flat fallback card made narrower and shorter: width = 0.92 x the paper's width (`--flat-card-width-ratio`), height wraps its content (`height: auto`, `--flat-card-padding-y`); `.flatPage` has no padding and uses `align-items: safe center`. Replaces the "same size as the scroll" step for height and width. Measured 406.2 x 460px idle / 533px with a message at 1280x928 | Designer asked for a slightly narrower, shorter flat card |

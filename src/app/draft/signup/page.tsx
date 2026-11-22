@@ -1,26 +1,28 @@
 "use client";
 
 import { useDraftLang } from "@/components/DraftLang";
-import Link from "next/link";
 import { Fragment, useEffect, useRef, useState, FormEvent } from "react";
 import {
   ParchShell,
   InkDivider,
   Flourish,
-  WaxSeal,
-  SheetCorners,
   PasswordInput,
 } from "@/components/Parchment";
 import LetterStack from "@/components/LetterStack";
 import { routes } from "@/config/routes";
-import {
-  EMAIL_RE,
-  getPasswordChecks,
-  validateUsername,
-} from "@/utils/validation";
+import { EMAIL_RE, getPasswordChecks } from "@/utils/validation";
+// Draft-local username rule (letters + digits only); the shared validateUsername also allows _ . - (see CONTEXT.md section 5).
+import { validateUsername } from "./_utils/validateUsername";
 import { COPY_BY_LANG, TERMS_BY_LANG, SAMPLE_EMAIL } from "./_mock/copy";
+import { checkUsernameAvailable } from "./_mock/usernames";
+import { VERIFY_COPY_BY_LANG, VERIFY_PREVIEW_OPTIONS, type VerifyInitial } from "./_mock/verify";
+import VerifyEmailModal from "./_components/verify/VerifyEmailModal";
+// The landing draft's login dialog (candidate to promote to a shared component, see CONTEXT.md section 5).
+import LoginModal from "../landing/_components/login-ui/LoginModal";
 import { DEV_PREVIEW_ENABLED } from "../landing/_components/draft-tools/devPreviewFlag";
 import DeviceButtons from "../landing/_components/draft-tools/DeviceButtons";
+import { PreviewCollapsible } from "../landing/_components/draft-tools/PreviewCollapse";
+import { buttonClass } from "../landing/_components/draft-tools/previewStyles";
 import {
   replacePreviewSearch,
   usePreviewRoute,
@@ -40,7 +42,7 @@ import {
  * Typography scoped to the signup content only (.signup-scope).
  * Unlayered .parch-* rules in globals.css beat Tailwind's layered utilities,
  * so a scoped selector with higher specificity is used instead of !important.
- * Jim Thompson Roman: the two headings (font-jimthompson) and .parch-btn.
+ * Jim Thompson Roman: the two headings (font-jimthompson); buttons use .signup-btn (see below).
  */
 const SIGNUP_FONT_CSS = `
 .signup-scope { font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif; font-size: 13px; }
@@ -57,13 +59,12 @@ const SIGNUP_FONT_CSS = `
 .signup-scope .signup-wizard-label { font-size: 14px; line-height: 1; letter-spacing: normal; }
 /* digits in IBM Plex Sans Thai sit slightly high: nudge them down so they look centred in the circle (all sizes) */
 .signup-scope .signup-wizard-circle { line-height: 1; padding: 0.28em 0 0; }
+/* the check mark is an SVG, so it needs no digit nudge */
+.signup-scope .signup-wizard-circle--check { padding: 0; }
 /* "scroll to the end" notice (after the .font-ui 13px rule so it wins) */
 .signup-scope .signup-agree-hint { font-size: 11px; line-height: 1.4; }
 /* form labels: wider letters, equal 10px gap to the input */
 .signup-scope .signup-field-label { letter-spacing: 0.06em; text-transform: none; margin-bottom: 10px; font-weight: 600; }
-/* step 3 (verify email) body text: 15px */
-.signup-scope .signup-verify .font-serif2,
-.signup-scope .signup-verify .font-ui { font-size: 15px; }
 /* requirement box titles: normal letter-spacing */
 .signup-scope .signup-hint-title { letter-spacing: normal; text-transform: none; }
 /* terms list: number column + hanging text, stable width while scrolling */
@@ -74,7 +75,24 @@ const SIGNUP_FONT_CSS = `
   font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif;
   font-size: 16px; line-height: 1.7; font-variant-numeric: tabular-nums;
 }
-.signup-scope .parch-btn { font-family: 'Jim Thompson Roman', 'Serithai', 'Google Sans', serif; }
+/* buttons: same as the landing login dialog's submit button (draft/landing/_components/login-ui/classic/*.module.css, copied because those
+   modules are scoped to the whole login form). Colour, border, hover and disabled still come from .parch-btn. Montserrat for Latin, Jim Thompson
+   Roman for Thai; in English the label <span> is scaled to 0.8 with 4px letter-spacing (needs lang on .signup-scope). */
+.signup-scope .signup-btn {
+  font-family: 'Montserrat', 'Jim Thompson Roman', 'Google Sans', sans-serif;
+  font-weight: 400; font-size: 16px; letter-spacing: 0.22em; line-height: 1.5;
+  padding: 10px 0 12px; text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(50, 36, 14, 0.22), inset 0 1px 0 rgba(233, 217, 174, 0.2);
+}
+.signup-scope .signup-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
+}
+.signup-scope .signup-btn:lang(en) { font-weight: 500; letter-spacing: 4px; }
+.signup-scope .signup-btn:lang(en) > span { display: inline-block; transform: scale(0.8); }
+/* step 2 Back button: the outline look (colour, border, hover fill come from .parch-btn-outline), without the filled button's dark shadow */
+.signup-scope .signup-btn.signup-btn-back { box-shadow: none; color: #5d4626; }
+.signup-scope .signup-btn.signup-btn-back:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(80, 58, 22, 0.18); }
+.signup-scope .signup-btn.signup-btn-back:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* page scrollbar: transparent track, no arrow buttons, no white strip */
 html { background: #e0cfa5; }
@@ -92,39 +110,33 @@ html::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 .signup-scope .signup-terms { scrollbar-width: none; }
 .signup-scope .signup-terms::-webkit-scrollbar { display: none; }
 
+/* step 1 and 2, 1280px and up (where the illustration shows): the illustration fills its grid column (480px, no negative-margin overhang), so the
+   gap to the panel is the grid gap, 52px (xl:gap-13), and it can never overlap the panel */
+.signup-scope .signup-art { container-type: inline-size; }
+.signup-scope .signup-art img { width: 100cqw; margin-right: 0; }
+
 /* tablet (640-1023px): everything a step smaller, single column kept narrow and centred */
 @media (max-width: 1023px) {
   .parch-bg h1 { font-size: 3rem; }
-  .signup-scope .signup-wrap { padding: 2rem; }
+  .signup-scope .signup-wrap { padding: 3rem 2rem 2rem; } /* top 3rem = py-12, the same stepper-to-panel gap as desktop */
   .signup-scope .parch-sheet { max-width: 36rem; margin-inline: auto; }
   .signup-scope .parch-sheet h2 { font-size: 1.75rem; }
   .signup-scope .signup-terms { max-height: min(28rem, 55vh); }
   .signup-scope .signup-terms li, .signup-scope .signup-terms .term-num { font-size: 15px; }
-  .signup-scope .signup-verify .font-serif2, .signup-scope .signup-verify .font-ui { font-size: 14px; }
 }
-/* mobile (<640px): sizes scale with the viewport width so 375 / 390 / 430 all fit */
+/* mobile (<640px): sizes scale with the viewport width so 360 / 375 / 390 / 430 all fit */
 @media (max-width: 639px) {
   .parch-bg h1 { font-size: clamp(1.9rem, 9.5vw, 2.5rem); margin-top: -0.75rem; }
-  .signup-scope .signup-wrap { padding: 1.75rem 1rem 1.5rem; }
+  .signup-scope .signup-wrap { padding: 3rem 1rem 1.5rem; } /* top 3rem = same stepper-to-panel gap as desktop */
   .signup-scope .parch-sheet { padding: 1.25rem; }
   .signup-scope .parch-sheet h2 { font-size: clamp(1.25rem, 6vw, 1.6rem); margin-top: 0; }
   .signup-scope .parch-sheet h2.signup-terms-title { margin-top: 1.25rem; }
-  /* compact wizard: 36px circles, 13px labels under them, tighter vertical space */
+  /* wizard: same circle / label sizes as the other viewports (the compact phone overrides were removed), only a slightly tighter top margin */
   .signup-scope .signup-wizard { margin-top: -0.25rem; }
-  .signup-scope .signup-wizard-step { gap: 0.5rem; }
-  .signup-scope .signup-wizard-circle { width: 24px; height: 24px; font-size: 11px; }
-  .signup-scope .signup-wizard-connector { margin-top: 12px; }
-  .signup-scope .signup-wizard-label { font-size: 12px; letter-spacing: normal; }
   .signup-scope .signup-terms { max-height: min(22rem, 46vh); padding: 0.75rem; }
   .signup-scope .signup-agree { padding-left: 0.75rem; }
   .signup-scope .signup-terms li { grid-template-columns: 1.5rem 1fr; column-gap: 0.5rem; }
   .signup-scope .signup-terms li, .signup-scope .signup-terms .term-num { font-size: clamp(12.5px, 3.6vw, 14.5px); line-height: 1.6; }
-  .signup-scope .parch-btn { font-size: 15px; }
-  .signup-scope .signup-verify .verify-title { font-size: clamp(1rem, 5.2vw, 1.3rem); margin-bottom: 0.4rem; }
-  .signup-scope .signup-verify .verify-divider .ink-divider { margin: clamp(0.2rem, 1.6vw, 0.5rem) 0; gap: 8px; }
-  .signup-scope .signup-verify .verify-divider svg { width: 0.75rem; height: 0.75rem; }
-  .signup-scope .signup-verify .font-serif2, .signup-scope .signup-verify .font-ui { font-size: clamp(11.5px, 3.2vw, 13px); line-height: 1.45; }
-  .signup-scope .signup-verify .font-ui { margin-top: 0.3rem; }
   /* all signup steps on mobile only: a lighter page background (the vignette and dark corner gradients are toned down) */
   .parch-bg:has(.signup-scope) {
     background:
@@ -143,8 +155,9 @@ export default function SignupDraft() {
   const [agree, setAgree] = useState(false);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
 
-  const [userFocus, setUserFocus] = useState(false);
   const [passFocus, setPassFocus] = useState(false);
+  // Result of the (mock) username availability check, for the username it was asked about (see CONTEXT.md section 5).
+  const [avail, setAvail] = useState<{ name: string; ok: boolean } | null>(null);
   const [touched, setTouched] = useState<{
     user?: boolean;
     email?: boolean;
@@ -154,6 +167,15 @@ export default function SignupDraft() {
   // Draft-only preview toggles
   const [showApiError, setShowApiError] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
+
+  // Step 3 popup (email verification modal): the draft Preview panel can start it in a given state. `key` remounts the modal.
+  const [verifyPreview, setVerifyPreview] = useState<{ key: number; id: string; initial?: VerifyInitial }>({ key: 0, id: "code" });
+  // The address an unverified account is waiting on. Set when the form is submitted, kept when the modal is closed with "Later" (the account
+  // stays unverified, so step 2 shows a notice that reopens the modal), cleared once the code is accepted.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const VCOPY = VERIFY_COPY_BY_LANG[lang];
+  // "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" opens the landing's login dialog over this page instead of leaving it.
+  const [loginOpen, setLoginOpen] = useState(false);
 
   // Terms must be read to the end before the checkbox / Next unlock. If the text already fits in the box (no scrolling
   // needed, e.g. wide desktop), it counts as read. Once read it stays read.
@@ -183,6 +205,9 @@ export default function SignupDraft() {
     setStep(next.step);
     setShowApiError(next.showApiError);
     setShowLoading(next.showLoading);
+    // &verify=wrong|locked|expired|resend|change|verified starts the step 3 modal in that state (draft preview only)
+    const opt = VERIFY_PREVIEW_OPTIONS.find((o) => o.id === next.verify);
+    if (opt && next.verify !== "code") setVerifyPreview({ key: 1, id: opt.id, initial: opt.initial });
   }, [inHost]);
   // Host -> this page (embedded): preview selections arrive as events, so the form is never reloaded.
   useEffect(() => {
@@ -192,6 +217,12 @@ export default function SignupDraft() {
       if (d.step) setStep(d.step);
       if (typeof d.showApiError === "boolean") setShowApiError(d.showApiError);
       if (typeof d.showLoading === "boolean") setShowLoading(d.showLoading);
+      // the host's verification-state buttons; entering step 3 without one starts on "code"
+      if (d.verify !== undefined || d.step === 3) {
+        const id = d.verify ?? "code";
+        const opt = VERIFY_PREVIEW_OPTIONS.find((o) => o.id === id);
+        setVerifyPreview((v) => ({ key: v.key + 1, id, initial: opt?.initial }));
+      }
     };
     window.addEventListener(SIGNUP_PREVIEW_SET_EVENT, onSet);
     return () => window.removeEventListener(SIGNUP_PREVIEW_SET_EVENT, onSet);
@@ -207,11 +238,27 @@ export default function SignupDraft() {
   const enterDevice = (device: DeviceSpec) =>
     replacePreviewSearch((p) => {
       writeDeviceParams(p, device);
-      writeSignupStateParams(p, { step, showApiError, showLoading });
+      writeSignupStateParams(p, { step, showApiError, showLoading, verify: verifyPreview.id });
     });
 
   const userErrCode = validateUsername(form.username);
   const userErr = userErrCode ? COPY.usernameErr[userErrCode] : null;
+  // Ask "is it taken?" only once the username passes validation; 400 ms debounce; a response for an older value is ignored (see userAvail).
+  useEffect(() => {
+    const name = form.username;
+    if (name.length === 0 || validateUsername(name)) return;
+    let stale = false;
+    const timer = setTimeout(async () => {
+      const ok = await checkUsernameAvailable(name);
+      if (!stale) setAvail({ name, ok });
+    }, 400);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+  }, [form.username]);
+  const userAvail =
+    !userErr && form.username.length > 0 && avail?.name === form.username ? (avail.ok ? "available" : "taken") : null;
   const emailErr =
     form.email.length > 0 && !EMAIL_RE.test(form.email)
       ? COPY.emailErrFormat
@@ -226,6 +273,7 @@ export default function SignupDraft() {
   const passOk = passRules.every((r) => r.ok);
   const formOk =
     !userErr &&
+    userAvail !== "taken" &&
     form.username.length > 0 &&
     !emailErr &&
     form.email.length > 0 &&
@@ -235,9 +283,12 @@ export default function SignupDraft() {
     e.preventDefault();
     setTouched({ user: true, email: true, pass: true });
     if (!formOk) return;
+    setPendingEmail(form.email);
+    setVerifyPreview((v) => ({ key: v.key + 1, id: "code" }));
     setStep(3);
   };
 
+  const shownStep = step === 3 ? 2 : step;
   // Preview host: the real page in a device-sized iframe (all hooks above have already run).
   if (preview.device && !preview.embed) {
     return (
@@ -256,51 +307,78 @@ export default function SignupDraft() {
 html { scrollbar-width: none; }
 html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
       )}
-      <ParchShell title={step === 3 ? "" : COPY.pageTitle} backHref={routes.home}>
+      <ParchShell title={COPY.pageTitle} backHref={routes.home}>
         <style>{SIGNUP_FONT_CSS}</style>
-        <div className="signup-scope">
-        {/* step indicator */}
-        {step !== 3 && (
-          <div className="relative z-20 mx-auto signup-wizard mt-6 grid max-w-3xl grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:gap-4">
-            {[1, 2].map((s) => (
-              <Fragment key={s}>
-                <div
-                  className={`signup-wizard-step flex flex-col items-center gap-3.5 ${s === 1 ? "justify-self-end" : "col-start-3 justify-self-start"}`}
-                >
+        <div className="signup-scope" lang={lang}>
+        {/* step indicator (step 3 is a popup over step 2, so step 2 stays highlighted) */}
+        <div className="relative z-20 mx-auto signup-wizard mt-6 grid max-w-3xl grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:gap-4" inert={step === 3}>
+            {[1, 2].map((s) => {
+              // completed = the user is past this step; only completed steps can be clicked (back only, never forward), and not while the
+              // step 3 modal is open (the whole indicator is inert then)
+              const completed = step > s;
+              const clickable = completed && step !== 3;
+              const current = !completed && shownStep === s;
+              const label = s === 1 ? COPY.stepTerms : COPY.stepAccountInfo;
+              const stepClass = `signup-wizard-step flex flex-col items-center gap-3.5 ${s === 1 ? "justify-self-end" : "col-start-3 justify-self-start"}`;
+              const circle = (
+                <>
                   <div
                     className={`signup-wizard-circle flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-ibmplexsansthai text-sm transition-all ${
-                      step === s
-                        ? "border-[#4a3520] bg-[#4a3520] text-[#f3e6c8]"
-                        : "border-[#b89a63] bg-transparent text-[#a68d5f]"
+                      completed
+                        ? "signup-wizard-circle--check border-[#8a6a35] bg-[#8a6a35] text-[#f3e6c8] group-hover:bg-[#6b5033]"
+                        : current
+                          ? "border-[#4a3520] bg-[#4a3520] text-[#f3e6c8]"
+                          : "border-[#b89a63] bg-transparent text-[#a68d5f]"
                     }`}
                   >
-                    {s}
+                    {completed ? (
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12.5l4.5 4.5L19 7.5" />
+                      </svg>
+                    ) : (
+                      s
+                    )}
                   </div>
                   <span
-                    className={`parch-label signup-wizard-label ${step === s ? "text-[#3a2c1a]" : ""}`}
+                    className={`parch-label signup-wizard-label ${current ? "text-[#3a2c1a]" : completed ? "text-[#6b5533] group-hover:text-[#3a2c1a]" : ""}`}
                   >
-                    {s === 1 ? COPY.stepTerms : COPY.stepAccountInfo}
+                    {label}
                   </span>
-                </div>
-                {s === 1 && (
-                  <span
-                    aria-hidden="true"
-                    className="signup-wizard-connector col-start-2 row-start-1 mt-4 flex h-px w-16 items-center gap-1.5 text-[#b89a63] sm:w-32 sm:gap-2 md:w-44 lg:gap-0"
-                  >
-                    <span className="h-px flex-1 bg-current" />
-                    <span className="text-[10px] leading-none sm:text-xs lg:hidden">✦</span>
-                    <span className="h-px flex-1 bg-current" />
-                  </span>
-                )}
-              </Fragment>
-            ))}
-          </div>
-        )}
+                </>
+              );
+              return (
+                <Fragment key={s}>
+                  {clickable ? (
+                    <button
+                      type="button"
+                      onClick={() => setStep(s as 1 | 2)}
+                      aria-label={`${COPY.goBackToStep}: ${label}`}
+                      className={`${stepClass} group relative cursor-pointer after:absolute after:-inset-2 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a6a35]`}
+                    >
+                      {circle}
+                    </button>
+                  ) : (
+                    <div className={stepClass} aria-current={current ? "step" : undefined}>
+                      {circle}
+                    </div>
+                  )}
+                  {s === 1 && (
+                    <span
+                      aria-hidden="true"
+                      className={`signup-wizard-connector col-start-2 row-start-1 mt-4 flex h-px w-16 items-center sm:w-32 md:w-44 ${step > 1 ? "text-[#8a6a35]" : "text-[#b89a63]"}`}
+                    >
+                      <span className="h-px flex-1 bg-current" />
+                    </span>
+                  )}
+                </Fragment>
+              );
+            })}
+        </div>
 
         {/* ── Step 1: Terms ── */}
         {step === 1 && (
-          <div className="signup-wrap relative z-20 mx-auto grid max-w-[84rem] grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[1.35fr_1fr] lg:gap-28 min-[1400px]:grid-cols-[36rem_35rem] min-[1400px]:justify-center min-[1400px]:gap-20">
-            <div className="parch-sheet relative p-8 sm:p-10">
+          <div className="signup-wrap relative z-20 mx-auto grid max-w-[84rem] grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 xl:grid-cols-[minmax(0,40rem)_minmax(0,30rem)] xl:justify-center xl:gap-13">
+            <div className="parch-sheet relative p-8 max-xl:mx-auto max-xl:max-w-3xl sm:p-10">
               <h2 className="font-jimthompson signup-terms-title mt-4 text-center text-3xl text-[#3a2c1a]">
                 {COPY.termsHeading}
               </h2>
@@ -356,26 +434,30 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
 
               <button
                 type="button"
-                className="parch-btn"
+                className="parch-btn signup-btn cursor-pointer"
                 disabled={!agree || !readAll}
                 onClick={() => setStep(2)}
               >
-                {COPY.next}
+                <span>{COPY.next}</span>
               </button>
             </div>
 
-            <div className="relative hidden h-[460px] lg:block">
+            <div className="signup-art relative hidden h-[460px] xl:block">
               <LetterStack />
             </div>
           </div>
         )}
 
-        {/* ── Step 2: Account form ── */}
-        {step === 2 && (
-          <div className="signup-wrap relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 lg:grid-cols-[28rem_35rem] lg:justify-center lg:gap-16">
+        {/* ── Step 2: Account form (stays rendered behind the step 3 popup) ── */}
+        {(step === 2 || step === 3) && (
+          <div
+            className="signup-wrap relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 py-12 sm:px-12 xl:grid-cols-[32rem_30rem] xl:justify-center xl:gap-13"
+            inert={step === 3}
+          >
+            <div className="w-full max-w-md justify-self-center lg:max-xl:max-w-3xl xl:max-w-lg xl:justify-self-start">
             <form
               onSubmit={handleSubmit}
-              className="parch-sheet relative mx-auto w-full max-w-md p-8 sm:p-10 lg:mx-0"
+              className="parch-sheet relative w-full p-8 sm:p-10"
             >
               <h2 className="font-jimthompson signup-terms-title mt-4 text-center text-3xl text-[#3a2c1a]">
                 {COPY.formHeading}
@@ -383,6 +465,26 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
               <InkDivider>
                 <Flourish className="h-4 w-4" />
               </InkDivider>
+
+              {pendingEmail && step === 2 && (
+                <div
+                  role="status"
+                  className="mb-4 border border-amber-700/60 bg-amber-100/60 p-3 font-ui text-sm text-amber-900"
+                >
+                  {VCOPY.resumeBefore}{" "}
+                  <strong className="wrap-break-word font-medium">{pendingEmail}</strong>{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVerifyPreview((v) => ({ key: v.key + 1, id: "code" }));
+                      setStep(3);
+                    }}
+                    className="cursor-pointer underline underline-offset-2 hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a6a35]"
+                  >
+                    {VCOPY.resumeAction}
+                  </button>
+                </div>
+              )}
 
               {showApiError && (
                 <div className="mb-4 border border-[#8a2a1f]/40 bg-red-50/60 p-3 font-ui text-sm text-[#8a2a1f]">
@@ -400,7 +502,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
                 id="signup-username"
                 className="parch-input w-full font-serithai"
                 style={
-                  touched.user && userErr
+                  (touched.user && userErr) || userAvail === "taken"
                     ? { borderColor: "#8a2a1f" }
                     : undefined
                 }
@@ -410,30 +512,32 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
                   setForm((f) => ({ ...f, username: e.target.value }));
                   setTouched((t) => ({ ...t, user: true }));
                 }}
-                onFocus={() => setUserFocus(true)}
-                onBlur={() => setUserFocus(false)}
+                aria-describedby="signup-username-hint"
                 required
               />
-              {userFocus && (
-                <div className="mt-2 border border-[#c9ad77] bg-[rgba(255,250,235,0.45)] p-3 font-ui text-[12px]">
-                  <p className="parch-label signup-hint-title mb-1">
-                    {COPY.usernameRequirements}
-                  </p>
-                  <ul className="space-y-1 text-[#4a3820]">
-                    {COPY.usernameRules.map((r) => (
-                      <li key={r} className="flex items-baseline gap-3">
-                        <span aria-hidden="true">✦</span>
-                        <span>{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {touched.user && userErr && (
-                <p className="mt-1.5 font-ui text-[12px] text-[#8a2a1f]">
-                  ✕ {userErr}
-                </p>
-              )}
+              {/* One-line helper, always visible: the rules hint; a rule broken -> red error message; valid and not taken -> green "available";
+                  valid but taken -> red "already taken" (while the availability check is pending the plain hint stays). */}
+              <p
+                id="signup-username-hint"
+                aria-live="polite"
+                className={`mt-1.5 font-ui text-[12px] ${
+                  touched.user && userErr
+                    ? "text-[#8a2a1f]"
+                    : userAvail === "available"
+                      ? "text-[#5b7a3d]"
+                      : userAvail === "taken"
+                        ? "text-[#8a2a1f]"
+                        : "text-[#8a7350]"
+                }`}
+              >
+                {touched.user && userErr
+                  ? userErr
+                  : userAvail === "available"
+                    ? COPY.usernameAvailable
+                    : userAvail === "taken"
+                      ? COPY.usernameTaken
+                      : COPY.usernameHint}
+              </p>
 
               <label
                 htmlFor="signup-email"
@@ -461,7 +565,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
               />
               {touched.email && emailErr && (
                 <p className="mt-1.5 font-ui text-[12px] text-[#8a2a1f]">
-                  ✕ {emailErr}
+                  {emailErr}
                 </p>
               )}
 
@@ -507,89 +611,79 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
                 </ul>
               )}
 
-              <div className="mt-8">
+              {/* Back (outline, left) + submit (filled, right). Back returns to step 1; what was typed and the ticked checkbox are kept.
+                  Below 640px they stack, submit on top. */}
+              <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  disabled={showLoading}
+                  className="parch-btn-outline signup-btn signup-btn-back cursor-pointer sm:basis-2/5"
+                >
+                  <span>
+                    <span aria-hidden="true">← </span>
+                    {COPY.back}
+                  </span>
+                </button>
                 <button
                   id="signup-submit"
                   type="submit"
                   disabled={showLoading}
-                  className="parch-btn"
+                  className="parch-btn signup-btn cursor-pointer sm:basis-3/5"
                 >
-                  {showLoading ? COPY.submitting : COPY.submit}
+                  <span>{showLoading ? COPY.submitting : COPY.submit}</span>
                 </button>
               </div>
 
               <p className="mt-6 text-center font-ui text-[13px] text-[#8a7350]">
                 {COPY.alreadyHaveAccount}{" "}
-                <Link
-                  href={routes.login}
-                  className="font-medium text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
+                <button
+                  type="button"
+                  onClick={() => setLoginOpen(true)}
+                  className="cursor-pointer font-medium text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a6a35]"
                 >
                   {COPY.signIn}
-                </Link>
+                </button>
               </p>
             </form>
+            </div>
 
-            <div className="relative hidden h-[460px] lg:block">
+            <div className="signup-art relative hidden h-[460px] xl:block">
               <LetterStack />
             </div>
           </div>
         )}
 
-        {/* ── Step 3: Email verification (fantasy letter: paper.png + Letter seal.png) ── */}
+        {/* ── Step 3: Email verification: a modal (paper letter) over the dimmed step 2 form. X / Esc ask "leave?" first; "Later" closes it
+            back to step 2 (a notice there reopens it). The pending account is kept (re-submitting the form overwrites it). ── */}
         {step === 3 && (
-          <div className="signup-wrap relative z-20 mx-auto flex min-h-[calc(100vh-11rem)] max-w-3xl items-center justify-center px-6 py-14">
-            {/* Both images are 1500x1500 canvases with transparent margins. The box has the aspect of the visible paper
-                (1370x809 px), and the paper image is offset inside it, so the whole sheet (tilt, torn edge) shows uncropped
-                and un-stretched. Everything is positioned in % of this box, so it scales with it. */}
-            <div className="signup-verify relative mx-auto aspect-[1370/809] w-full max-w-[38rem]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/paper.png"
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute top-[-36.6%] left-[-4.53%] w-[109.5%] max-w-none select-none [filter:drop-shadow(0_14px_18px_rgba(60,40,15,.3))]"
-              />
-
-              <div className="absolute inset-x-[12%] top-[14%] bottom-[12%] z-10 flex flex-col items-center justify-center text-center">
-                <h2 className="font-jimthompson verify-title text-3xl text-[#3a2c1a]">
-                  {COPY.verifyHeading}
-                </h2>
-                <div className="verify-divider w-full">
-                  <InkDivider>
-                    <Flourish className="h-4 w-4" />
-                  </InkDivider>
-                </div>
-
-                <p className="font-serif2 text-[15px] leading-relaxed text-[#4a3820]">
-                  {COPY.verifyBody}
-                </p>
-                <p className="font-ui mt-2 text-[13px] text-[#6b5533]">
-                  {COPY.verifyLetterSent}{" "}
-                  <span className="font-medium text-[#3a2c1a]">
-                    {form.email || SAMPLE_EMAIL}
-                  </span>
-                </p>
-
-                <p className="font-ui mt-4 text-[13px] text-[#6b5533]">
-                  {COPY.alreadyVerified}{" "}
-                  <Link
-                    href={routes.login}
-                    className="font-medium text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
-                  >
-                    {COPY.signIn}
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </div>
+          <VerifyEmailModal
+            key={verifyPreview.key}
+            variant="signup"
+            lang={lang}
+            email={pendingEmail ?? (form.email || SAMPLE_EMAIL)}
+            initial={verifyPreview.initial}
+            onClose={() => setStep(2)}
+            onVerified={() => setPendingEmail(null)}
+            onEmailChanged={(next) => {
+              setPendingEmail(next);
+              setForm((f) => ({ ...f, email: next }));
+            }}
+          />
         )}
         </div>
       </ParchShell>
 
+      {/* The landing's login dialog. Its sign-up links close it (we are already on the signup page) and its own Preview panel is hidden: this
+          page has one. Rendered before the Preview panel below so that panel stays on top and usable. */}
+      {loginOpen && (
+        <LoginModal onClose={() => setLoginOpen(false)} lang={lang} closeOnSignup showPreviewPanel={false} />
+      )}
+
       {/* Preview state (draft only); hidden inside the mobile preview frame, whose host has its own controls */}
       {!preview.embed && (
       <div className="fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow">
-        <p className="parch-label mb-1.5">Preview state (draft only)</p>
+        <PreviewCollapsible title="Preview state (draft only)">
         {DEV_PREVIEW_ENABLED && (
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
             <span className="parch-label mr-1">Device</span>
@@ -604,14 +698,35 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
             <button
               key={s}
               type="button"
-              onClick={() => setStep(s)}
+              onClick={() => {
+                if (s === 3) setVerifyPreview((v) => ({ key: v.key + 1, id: "code" }));
+                setStep(s);
+              }}
               aria-pressed={step === s}
-              className={`border px-2.5 py-1 ${step === s ? "border-[#5c1d17] bg-[#5c1d17] text-[#f3ddc0]" : "border-[#b89a63] text-[#6b5533]"}`}
+              className={buttonClass(step === s)}
             >
               ขั้นตอน {s}
             </button>
           ))}
         </div>
+        {step === 3 && (
+          <div className="mt-2">
+            <p className="parch-label mb-1">หน้าต่างยืนยันอีเมล (รหัสที่ถูกต้อง: 123456)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {VERIFY_PREVIEW_OPTIONS.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => setVerifyPreview((v) => ({ key: v.key + 1, id: o.id, initial: o.initial }))}
+                  aria-pressed={verifyPreview.id === o.id}
+                  className={buttonClass(verifyPreview.id === o.id)}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {step === 2 && (
           <div className="mt-2 flex flex-col gap-1">
             <label className="flex items-center gap-2">
@@ -634,6 +749,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
             </label>
           </div>
         )}
+        </PreviewCollapsible>
       </div>
       )}
     </>

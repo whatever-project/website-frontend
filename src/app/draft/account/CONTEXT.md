@@ -25,6 +25,7 @@ Draft of the character picker ("Choose Your Soul") with account settings. It liv
 
 ## 2b. Changes since promotion
 n/a (no revision round has been logged yet). The draft may differ from the live pages in either direction: check both before changing or promoting anything.
+Dev tool, not part of the page (nothing to promote): in development builds a **Device** pill (top centre) opens this route in a phone / tablet / laptop / desktop-sized iframe (`?device=` and `?embed=1`). It comes from `landing/_components/draft-tools/GenericDevicePreview.tsx`, mounted in `draft/layout.tsx`.
 
 ## 2d. Unused files (dev may delete)
 - none

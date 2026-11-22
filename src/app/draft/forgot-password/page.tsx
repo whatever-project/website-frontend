@@ -6,6 +6,7 @@ import { useState, FormEvent } from "react"
 import { ParchShell, InkDivider, Flourish, WaxSeal, SheetCorners } from "@/components/Parchment"
 import { routes } from "@/config/routes"
 import { COPY_BY_LANG, STATE_OPTIONS, type ForgotState } from "./_mock/copy"
+import { PreviewCollapsible } from "../landing/_components/draft-tools/PreviewCollapse"
 
 export default function ForgotPasswordDraft() {
   const { lang } = useDraftLang();
@@ -91,7 +92,7 @@ export default function ForgotPasswordDraft() {
 
       {/* Preview state (draft only) */}
       <div className="fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow">
-        <p className="parch-label mb-1.5">Preview state (draft only)</p>
+        <PreviewCollapsible title="Preview state (draft only)">
         <div className="flex flex-wrap gap-1.5">
           {STATE_OPTIONS.map((o) => (
             <button
@@ -105,6 +106,7 @@ export default function ForgotPasswordDraft() {
             </button>
           ))}
         </div>
+        </PreviewCollapsible>
       </div>
     </>
   )

@@ -10,9 +10,9 @@ export const LOGIN_COPY = {
   submitting: "กำลังเข้าสู่ระบบ…",
   noAccount: "ยังไม่มีบัญชี?",
   createOne: "สร้างบัญชีใหม่",
-  errorUnverified: "อีเมลของคุณยังไม่ได้รับการยืนยัน กรุณาตรวจสอบกล่องจดหมายก่อนเข้าสู่ระบบ",
+  errorUnverified: "อีเมลของคุณยังไม่ได้รับการยืนยัน กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ",
   errorGeneric: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
-  backToSignup: "กลับไปสมัครสมาชิก →",
+  enterCode: "กรอกรหัสยืนยัน",
   // Thai for the API's "Invalid credentials" (the English copy below keeps the English text).
   sampleApiError: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง",
 }
@@ -40,9 +40,9 @@ export const LOGIN_COPY_EN: typeof LOGIN_COPY = {
   submitting: "LOGGING IN…",
   noAccount: "Don't have an account?",
   createOne: "Create one",
-  errorUnverified: "Your email is not verified yet. Please check your inbox before logging in.",
+  errorUnverified: "Your email has not been verified yet. Please verify your email before signing in.",
   errorGeneric: "Something went wrong. Please try again.",
-  backToSignup: "Back to sign up →",
+  enterCode: "Enter verification code",
   sampleApiError: "Invalid credentials",
 }
 

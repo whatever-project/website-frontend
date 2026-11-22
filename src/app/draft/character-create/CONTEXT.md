@@ -45,6 +45,7 @@ A 6-step character-creation wizard for Arcane Vale (public/guest, no login) endi
 
 ## 2b. Changes since promotion
 n/a (never picked up by dev yet). Round 3 changes are listed in `DESIGN-REQUEST.md` § 2b and the Iteration log.
+Dev tool, not part of the page (nothing to promote): in development builds a **Device** pill (top centre) opens this route in a phone / tablet / laptop / desktop-sized iframe (`?device=` and `?embed=1`). It comes from `landing/_components/draft-tools/GenericDevicePreview.tsx`, mounted in `draft/layout.tsx`.
 
 ## 2d. Unused files (dev may delete)
 - none

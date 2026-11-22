@@ -28,13 +28,19 @@
   border-left-color: #a8742a;
   background: linear-gradient(rgba(168, 116, 42, 0.1), rgba(168, 116, 42, 0.1)), rgba(255, 252, 240, 0.55);
 }
-/* ลิงก์ "กลับไปสมัครสมาชิก" หน้าตาเดียวกับลิงก์ "สร้างบัญชีใหม่" */
-.classic [data-layout="notice"] a {
+/* "กรอกรหัสยืนยัน": a button (it opens the code dialog) that looks like a link (the "back to sign up" link next to it was removed) */
+.classic [data-layout="notice"] button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
   color: #3a2c1a;
   text-decoration: underline;
   text-underline-offset: 4px;
+  cursor: pointer;
   transition: color 0.2s;
 }
-.classic [data-layout="notice"] a:hover {
+.classic [data-layout="notice"] button:hover {
   color: #6b4f22;
 }

@@ -38,6 +38,7 @@ The original HTML is kept as a reference copy in `_assets/source/` (not imported
 
 ## 2b. Changes since promotion
 n/a (never picked up by dev yet).
+Dev tool, not part of the page (nothing to promote): in development builds a **Device** pill (top centre) opens this route in a phone / tablet / laptop / desktop-sized iframe (`?device=` and `?embed=1`). It comes from `landing/_components/draft-tools/GenericDevicePreview.tsx`, mounted in `draft/layout.tsx`.
 
 ## 2d. Unused files (dev may delete)
 - none (`_assets/source/…html` is a reference copy, not an unused import)

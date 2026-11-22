@@ -3,7 +3,7 @@
 import { DEVICE_PRESETS, type DeviceId, type DeviceSpec } from "./previewRoute"
 import { buttonClass } from "./previewStyles"
 
-const SHORT_LABEL: Record<DeviceSpec["id"], string> = { "mobile-s": "Mobile S", "mobile-m": "Mobile M", "mobile-l": "Mobile L", tablet: "Tablet", custom: "Custom" }
+const SHORT_LABEL: Record<DeviceSpec["id"], string> = { "mobile-s": "Mobile S", "mobile-m": "Mobile M", "mobile-l": "Mobile L", tablet: "Tablet", "tablet-landscape": "Tablet L", laptop: "Laptop", "desktop-hd": "Desktop HD", custom: "Custom" }
 
 interface DeviceButtonsProps {
   /** The device that is currently shown ("desktop" = the normal page). */

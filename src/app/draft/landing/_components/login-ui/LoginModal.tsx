@@ -14,6 +14,12 @@ import { useNoticeExtra } from "./shared/useNoticeExtra"
 import { useFlatSheetSize } from "./shared/useFlatSheetSize"
 import LoginForm from "./shared/LoginForm"
 import LoginNotice from "./shared/LoginNotice"
+// The 6-digit email-verification dialog is shared with the signup draft (candidate to promote to a shared component).
+import VerifyEmailModal from "../../../signup/_components/verify/VerifyEmailModal"
+import { VERIFY_PREVIEW_OPTIONS, type VerifyInitial } from "../../../signup/_mock/verify"
+import { SAMPLE_EMAIL } from "../../../signup/_mock/copy"
+import { EMAIL_RE } from "@/utils/validation"
+import { DEV_PREVIEW_ENABLED } from "../draft-tools/devPreviewFlag"
 import styles from "./LoginModal.module.css"
 import "./shared/LoginFontFaces.module.css"
 import classicStyles from "./classic/ClassicLogin.module.css"
@@ -27,7 +33,19 @@ import classicTypography from "./classic/ClassicLoginTypography.module.css"
  * and on the notice. Layout (size / spacing / gaps) works the same way: classic/ClassicLoginLayout.module.css;
  * this file keeps only the shared modal behaviour.
  */
-export default function LoginModal({ onClose, lang = "th" }: { onClose: () => void; lang?: DraftLang }) {
+export default function LoginModal({
+  onClose,
+  lang = "th",
+  closeOnSignup = false,
+  showPreviewPanel = true,
+}: {
+  onClose: () => void
+  lang?: DraftLang
+  /** Used on the signup page itself: the "sign up" links close the dialog (the sheet rolls up) instead of navigating to the page the user is already on. */
+  closeOnSignup?: boolean
+  /** False hides this dialog's own draft Preview panel (the host page has its own). */
+  showPreviewPanel?: boolean
+}) {
   // Language of the login dialog (starts from the landing page language). Thai is the original copy.
   // The developer device preview (draft-tools/previewRoute.ts) can start the dialog from earlier preview selections; null on the normal page.
   const [uiLang, setUiLang] = useState<DraftLang>(() => getCurrentSnapshot()?.uiLang ?? lang)
@@ -37,6 +55,29 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
   const [forceFlat, setForceFlat] = useState(() => getCurrentSnapshot()?.forceFlat ?? false)
   const [closing, setClosing] = useState(false)
   const closingRef = useRef(false)
+
+  // Email-verification dialog: a correct password with an unverified e-mail opens it over the login sheet. Closing it keeps the "unverified"
+  // notice in the form (with an "Enter verification code" button). `key` remounts it into a draft preview state.
+  const [verifyOpen, setVerifyOpen] = useState(() => (getCurrentSnapshot()?.loginState ?? "idle") === "unverified")
+  const [verifyPreview, setVerifyPreview] = useState<{ key: number; id: string; initial?: VerifyInitial }>({ key: 0, id: "code" })
+  const [verifyEmail, setVerifyEmail] = useState(SAMPLE_EMAIL)
+  const verifyOpenRef = useRef(verifyOpen)
+  useEffect(() => {
+    verifyOpenRef.current = verifyOpen
+  }, [verifyOpen])
+  const openVerify = useCallback((id = "code") => {
+    const option = VERIFY_PREVIEW_OPTIONS.find((o) => o.id === id)
+    setVerifyPreview((v) => ({ key: v.key + 1, id, initial: option?.initial }))
+    setState("unverified")
+    setVerifyOpen(true)
+  }, [])
+  // Draft preview only: &verify=wrong|locked|expired|resend|change|verified opens the dialog in that state.
+  useEffect(() => {
+    if (!DEV_PREVIEW_ENABLED) return
+    const id = new URLSearchParams(window.location.search).get("verify")
+    const option = VERIFY_PREVIEW_OPTIONS.find((o) => o.id === id)
+    if (option) openVerify(option.id)
+  }, [openVerify])
   const stageRef = useRef<HTMLDivElement>(null)
   const identifierRef = useRef<HTMLInputElement>(null)
   const { error: sceneError, formActive, quillVisible, close, setContentExtra } = useScrollLoginAnimation(stageRef)
@@ -76,7 +117,10 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
     () =>
       listenPreviewCommands((command) => {
         if (command.uiLang) setUiLang(command.uiLang)
-        if (command.loginState) setState(command.loginState)
+        if (command.loginState) {
+          setState(command.loginState)
+          setVerifyOpen(command.loginState === "unverified")
+        }
         if (command.forceFlat !== undefined) setForceFlat(command.forceFlat)
         if (command.loginOpen === false) void requestCloseRef.current()
       }),
@@ -102,7 +146,8 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") void requestClose()
+      // While the verification dialog is open, Esc closes only that dialog (its own handler), not the login sheet.
+      if (event.key === "Escape" && !verifyOpenRef.current) void requestClose()
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
@@ -122,6 +167,9 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
   const layoutClass = classicLayout.layout
   const sheetBoxClass = classicLayout.sheetBox
 
+  // Sign-up links: normally real links; with `closeOnSignup` they close this dialog instead (see the prop).
+  const onSignupClick = closeOnSignup ? () => void requestClose() : undefined
+
   // The login notice is rendered INSIDE the form (above the first label) through LoginForm's `notice` slot, on the 3D sheet and on the
   // flat fallback card alike; the form grows to fit it. It carries the same typography / layout classes as the box that wraps it.
   const notice = (
@@ -130,17 +178,28 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
       copy={copy}
       visible={interactive}
       className={`${classicTypography.typography} ${classicLayout.layout}`}
+      onEnterCode={() => openVerify()}
     />
   )
 
   const form = (
     <LoginForm
       state={state}
-      onSubmit={() => setState("error")}
+      onSubmit={(values) => {
+        // Draft: no real login. An identifier containing "unverified" simulates "correct password, e-mail not verified yet"
+        // (the real server then sends a fresh code and returns verification_required); anything else shows the red error.
+        if (values.usernameOrEmail.toLowerCase().includes("unverified")) {
+          setVerifyEmail(EMAIL_RE.test(values.usernameOrEmail) ? values.usernameOrEmail : SAMPLE_EMAIL)
+          openVerify()
+          return
+        }
+        setState("error")
+      }}
       interactive={interactive}
       identifierRef={identifierRef}
       copy={copy}
       notice={notice}
+      onSignupClick={onSignupClick}
     />
   )
 
@@ -167,6 +226,7 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
             aria-modal="true"
             aria-labelledby="landing-login-title"
             className={`${styles.sheet} ${classicTypography.typography} ${classicStyles.classic} ${classicLayout.layout} ${classicLayout.flatCard} parch-sheet`}
+            inert={verifyOpen}
             onClick={(event) => event.stopPropagation()}
           >
             {form}
@@ -186,7 +246,7 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
           {showQuill && <QuillShadow visible={quillVisible} />}
 
           <div
-            inert={!interactive}
+            inert={!interactive || verifyOpen}
             className={`${styles.formReveal} ${layoutClass} ${sheetBoxClass} ${typographyClass} ${variantClass} ${interactive ? "" : styles.formHidden} overflow-y-auto`}
             onClick={(event) => event.stopPropagation()}
           >
@@ -197,11 +257,39 @@ export default function LoginModal({ onClose, lang = "th" }: { onClose: () => vo
         </div>
       )}
 
+      {/* Email-verification dialog over the login sheet. Rendered before the preview panel (same stacking context) so the panel stays on top
+          and usable; clicks must not reach the backdrop above, which closes the login sheet. */}
+      {verifyOpen && (
+        <div onClick={(event) => event.stopPropagation()}>
+          <VerifyEmailModal
+            key={verifyPreview.key}
+            variant="login"
+            lang={uiLang}
+            email={verifyEmail}
+            initial={verifyPreview.initial}
+            onClose={() => setVerifyOpen(false)}
+            onUseDifferentAccount={() => {
+              setVerifyOpen(false)
+              setState("idle")
+            }}
+          />
+        </div>
+      )}
+
       {/* In the device preview the controls are in the host, OUTSIDE the simulated viewport, so the panel is not drawn inside it. */}
-      {!isEmbedded() && (
+      {!isEmbedded() && showPreviewPanel && (
       <PreviewPanel
         state={state}
-        onStateChange={setState}
+        onStateChange={(next) => {
+          if (next === "unverified") openVerify()
+          else {
+            setVerifyOpen(false)
+            setState(next)
+          }
+        }}
+        verifyOpen={verifyOpen}
+        verifyActiveId={verifyPreview.id}
+        onVerifyPreview={openVerify}
         flat={flat}
         sceneError={sceneError}
         onForceFlatChange={setForceFlat}
