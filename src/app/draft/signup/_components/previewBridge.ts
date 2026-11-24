@@ -1,5 +1,6 @@
 import { DEV_PREVIEW_ENABLED } from "../../landing/_components/draft-tools/devPreviewFlag"
 import { VERIFY_PREVIEW_OPTIONS } from "../_mock/verify"
+import type { DraftLang } from "@/components/DraftLang"
 
 /**
  * Signup's part of the developer device preview. The device preview itself (route params ?device= &w= &h= &embed=, usePreviewRoute,
@@ -20,12 +21,25 @@ export interface SignupPreviewState {
   showLoading: boolean
   /** Step 3 modal state: an id of VERIFY_PREVIEW_OPTIONS. */
   verify: string
+  /** Page language (th / en): the host's Language buttons. */
+  lang: DraftLang
 }
 
 export const SIGNUP_PREVIEW_SET_EVENT = "draft-signup-preview-set"
 export const SIGNUP_PREVIEW_STATUS_EVENT = "draft-signup-preview-status"
 
-const STATE_KEYS = ["step", "err", "loading", "verify"]
+const STATE_KEYS = ["step", "err", "loading", "verify", "lang"]
+
+/** &lang= if present, else the language the draft pages remember (DraftLang's localStorage key), else Thai. */
+function readLang(p: URLSearchParams): DraftLang {
+  const fromUrl = p.get("lang")
+  if (fromUrl === "th" || fromUrl === "en") return fromUrl
+  try {
+    const saved = localStorage.getItem("draft-lang")
+    if (saved === "th" || saved === "en") return saved
+  } catch {}
+  return "th"
+}
 
 export function readSignupState(search: string): SignupPreviewState {
   const p = new URLSearchParams(search)
@@ -35,6 +49,7 @@ export function readSignupState(search: string): SignupPreviewState {
     showApiError: p.get("err") === "1",
     showLoading: p.get("loading") === "1",
     verify: VERIFY_PREVIEW_OPTIONS.find((o) => o.id === p.get("verify"))?.id ?? "code",
+    lang: readLang(p),
   }
 }
 
@@ -44,6 +59,7 @@ export function writeSignupStateParams(p: URLSearchParams, s: SignupPreviewState
   if (s.showApiError) p.set("err", "1")
   if (s.showLoading) p.set("loading", "1")
   if (s.step === 3 && s.verify !== "code") p.set("verify", s.verify)
+  p.set("lang", s.lang)
 }
 
 /** The URL the host loads in its iframe: the real signup route, flagged as embedded, with the current state (no device parameters). */

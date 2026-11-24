@@ -100,6 +100,15 @@ export default function DevicePreviewHost({ device, initial }: { device: DeviceS
         </div>
 
         <div className={rowClass}>
+          <span className="parch-label mr-1">Language</span>
+          {([["th", "ไทย"], ["en", "English"]] as const).map(([code, label]) => (
+            <button key={code} type="button" onClick={() => update({ lang: code })} aria-pressed={state.lang === code} className={buttonClass(state.lang === code)}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className={rowClass}>
           <span className="parch-label mr-1">Step</span>
           {([1, 2, 3] as const).map((s) => (
             <button key={s} type="button" onClick={() => update({ step: s, verify: "code" })} aria-pressed={state.step === s} className={buttonClass(state.step === s)}>

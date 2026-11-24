@@ -10,7 +10,7 @@ export const COPY = {
   next: "ถัดไป",
   back: "ย้อนกลับ",
   goBackToStep: "กลับไปที่ขั้นตอน",
-  formHeading: "ทะเบียนนักเดินทาง",
+  formHeading: "ลงทะเบียนนักเดินทาง",
   username: "ชื่อผู้ใช้",
   email: "อีเมล",
   emailPlaceholder: "wanderer@example.com",
@@ -38,7 +38,8 @@ export const COPY = {
   usernameErr: {
     spaces: "ชื่อผู้ใช้ต้องไม่มีช่องว่าง",
     length: "ชื่อผู้ใช้ต้องมี 3–25 ตัวอักษร",
-    chars: "ชื่อผู้ใช้ต้องไม่มีอักขระพิเศษ",
+    language: "ใช้ได้เฉพาะ A–Z และ 0–9 เท่านั้น", // พิมพ์ภาษาอื่น (ไทย ฯลฯ)
+    special: "ชื่อผู้ใช้ต้องไม่มีอักขระพิเศษ", // พิมพ์สัญลักษณ์ เช่น ! = - . <
   },
   emailErrFormat: "กรุณากรอกอีเมลให้ถูกต้อง",
   /** Sample server error, shown by the "error" preview toggle on step 2. */
@@ -64,7 +65,7 @@ export const SAMPLE_EMAIL = "wanderer@example.com"
 export const COPY_EN: typeof COPY = {
   pageTitle: "Sign Up",
   stepTerms: "Terms",
-  stepAccountInfo: "Registry",
+  stepAccountInfo: "Register",
   termsHeading: "Terms & Conditions",
   iAgree: "I have read and agree to the Terms & Conditions",
   iAgreeRequired: "(Required)",
@@ -72,7 +73,7 @@ export const COPY_EN: typeof COPY = {
   next: "Next",
   back: "Back",
   goBackToStep: "Go back to step",
-  formHeading: "Wayfarer Registry",
+  formHeading: "Wayfarer Registration",
   username: "Username",
   email: "Email Address",
   emailPlaceholder: "wanderer@example.com",
@@ -99,7 +100,8 @@ export const COPY_EN: typeof COPY = {
   usernameErr: {
     spaces: "Username must not contain spaces",
     length: "Username must be 3–25 characters",
-    chars: "Only A–Z and 0–9 are allowed",
+    language: "Only A–Z and 0–9 are allowed", // typed another language
+    special: "Username must not contain special characters", // typed a symbol such as ! = - . <
   },
   emailErrFormat: "Please enter a valid email address",
   sampleError: "Something went wrong. Please try again.",

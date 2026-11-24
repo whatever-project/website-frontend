@@ -82,8 +82,8 @@ const SIGNUP_FONT_CSS = `
   font-size: 16px; line-height: 1.7; font-variant-numeric: tabular-nums;
 }
 /* buttons: same as the landing login dialog's submit button (draft/landing/_components/login-ui/classic/*.module.css, copied because those
-   modules are scoped to the whole login form). Colour, border, hover and disabled still come from .parch-btn. Montserrat for Latin, Jim Thompson
-   Roman for Thai; in English the label <span> is scaled to 0.8 with 4px letter-spacing (needs lang on .signup-scope). */
+   modules are scoped to the whole login form). Colour, border, hover and disabled still come from .parch-btn. Magical Horison for English (Montserrat
+   is only the base stack), Jim Thompson Roman for Thai; in English the label <span> is scaled to 0.8 with 4px letter-spacing (needs lang on .signup-scope). */
 .signup-scope .signup-btn {
   font-family: 'Montserrat', 'Jim Thompson Roman', 'Google Sans', sans-serif;
   font-weight: 400; font-size: 16px; letter-spacing: 0.22em; line-height: 1.5;
@@ -94,7 +94,7 @@ const SIGNUP_FONT_CSS = `
   box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
 }
 .signup-scope .signup-btn:lang(th) { letter-spacing: normal; } /* Thai: normal letter spacing */
-.signup-scope .signup-btn:lang(en) { font-weight: 500; letter-spacing: 4px; }
+.signup-scope .signup-btn:lang(en) { font-family: 'Magical Horison', 'Jim Thompson Roman', 'Google Sans', sans-serif; font-weight: 500; letter-spacing: 4px; } /* English only: Magical Horison (Thai keeps the stack above) */
 .signup-scope .signup-btn:lang(en) > span { display: inline-block; transform: scale(0.8); }
 /* step 2 Back button: the outline look (colour, border, hover fill come from .parch-btn-outline), without the filled button's dark shadow */
 .signup-scope .signup-btn.signup-btn-back { box-shadow: none; color: #5d4626; }
@@ -213,10 +213,11 @@ export default function SignupDraft() {
     setStep(next.step);
     setShowApiError(next.showApiError);
     setShowLoading(next.showLoading);
+    setLang(next.lang);
     // &verify=wrong|locked|expired|resend|change|verified starts the step 3 modal in that state (draft preview only)
     const opt = VERIFY_PREVIEW_OPTIONS.find((o) => o.id === next.verify);
     if (opt && next.verify !== "code") setVerifyPreview({ key: 1, id: opt.id, initial: opt.initial });
-  }, [inHost]);
+  }, [inHost, setLang]);
   // Host -> this page (embedded): preview selections arrive as events, so the form is never reloaded.
   useEffect(() => {
     if (!preview.embed) return;
@@ -225,6 +226,7 @@ export default function SignupDraft() {
       if (d.step) setStep(d.step);
       if (typeof d.showApiError === "boolean") setShowApiError(d.showApiError);
       if (typeof d.showLoading === "boolean") setShowLoading(d.showLoading);
+      if (d.lang === "th" || d.lang === "en") setLang(d.lang);
       // the host's verification-state buttons; entering step 3 without one starts on "code"
       if (d.verify !== undefined || d.step === 3) {
         const id = d.verify ?? "code";
@@ -234,7 +236,7 @@ export default function SignupDraft() {
     };
     window.addEventListener(SIGNUP_PREVIEW_SET_EVENT, onSet);
     return () => window.removeEventListener(SIGNUP_PREVIEW_SET_EVENT, onSet);
-  }, [preview.embed]);
+  }, [preview.embed, setLang]);
   // This page (embedded) -> host: report the step so the host's buttons follow Next / submit.
   useEffect(() => {
     if (!preview.embed || window.parent === window) return;
@@ -246,7 +248,7 @@ export default function SignupDraft() {
   const enterDevice = (device: DeviceSpec) =>
     replacePreviewSearch((p) => {
       writeDeviceParams(p, device);
-      writeSignupStateParams(p, { step, showApiError, showLoading, verify: verifyPreview.id });
+      writeSignupStateParams(p, { step, showApiError, showLoading, verify: verifyPreview.id, lang });
     });
 
   const userErrCode = validateUsername(form.username);

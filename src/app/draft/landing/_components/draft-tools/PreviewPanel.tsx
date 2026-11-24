@@ -9,6 +9,7 @@ import { DEV_PREVIEW_ENABLED } from "./devPreviewFlag"
 import { enterDevicePreview } from "./previewRoute"
 import { buttonClass } from "./previewStyles"
 import { PreviewCollapsible } from "./PreviewCollapse"
+import DraggablePanel from "./DraggablePanel"
 
 // The language / mode / device switches are design-review tools: they exist in development only and never in a production build.
 const SHOW_PREVIEW_TOOLS = DEV_PREVIEW_ENABLED
@@ -117,7 +118,7 @@ export default function PreviewPanel({
       )}
 
       {/* Preview state (draft only) */}
-      <div
+      <DraggablePanel
         className={`${styles.panel} fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow`}
         onClick={(event) => event.stopPropagation()}
       >
@@ -163,7 +164,7 @@ export default function PreviewPanel({
           <div className="mt-2 hidden flex-wrap items-center gap-1.5 border-t border-[#c9ad77]/60 pt-2 sm:flex">{langToggle}</div>
         )}
         </PreviewCollapsible>
-      </div>
+      </DraggablePanel>
     </>
   )
 }

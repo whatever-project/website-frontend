@@ -109,10 +109,12 @@ export default function LoginModal({
   // Developer device preview only (inert unless this page is the embedded page inside the preview host's iframe): the host drives the
   // preview selections through same-window events and is told whether the dialog is open / the 3D scene really failed. A close request
   // goes through requestClose, so the sheet rolls up exactly as it does for Esc.
+  const openVerifyRef = useRef(openVerify)
   const requestCloseRef = useRef(requestClose)
   useEffect(() => {
     requestCloseRef.current = requestClose
-  }, [requestClose])
+    openVerifyRef.current = openVerify
+  }, [requestClose, openVerify])
   useEffect(
     () =>
       listenPreviewCommands((command) => {
@@ -122,10 +124,15 @@ export default function LoginModal({
           setVerifyOpen(command.loginState === "unverified")
         }
         if (command.forceFlat !== undefined) setForceFlat(command.forceFlat)
+        if (command.verifyId) openVerifyRef.current(command.verifyId)
         if (command.loginOpen === false) void requestCloseRef.current()
       }),
     [],
   )
+  // Tell the preview host whether the verification dialog is open, and in which state, so it can list that dialog's preview states.
+  useEffect(() => {
+    reportPreviewStatus({ verifyOpen, verifyId: verifyPreview.id })
+  }, [verifyOpen, verifyPreview.id])
   useEffect(() => {
     reportPreviewStatus({ modalOpen: true })
     return () => reportPreviewStatus({ modalOpen: false })

@@ -69,7 +69,11 @@ const VERIFY_CSS = `
 .verify-modal .verify-btn:disabled { cursor: not-allowed; }
 .verify-modal .verify-btn:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2); }
 .verify-modal .verify-btn:focus-visible { outline: 2px solid #8a6a35; outline-offset: 3px; }
-.verify-modal .verify-btn:lang(en) { font-weight: 500; letter-spacing: 4px; }
+/* the new-email input (typed text and placeholder): IBM Plex Sans Thai, same as the signup form's inputs */
+.verify-modal .parch-input { font-family: 'IBM Plex Sans Thai', 'Google Sans', sans-serif; font-size: 15px; font-weight: 400; line-height: 1.5; letter-spacing: normal; } /* same values as the login dialog's inputs (15px / 400) */
+.verify-modal .verify-btn:lang(th) { letter-spacing: normal; } /* same as the landing page's Thai buttons */
+/* English only: Magical Horison (the same font as the login dialog button); Thai keeps the stack above */
+.verify-modal .verify-btn:lang(en) { font-family: 'Magical Horison', 'Jim Thompson Roman', 'Google Sans', sans-serif; font-weight: 500; letter-spacing: 4px; }
 .verify-modal .verify-btn:lang(en) > span { display: inline-block; transform: scale(0.8); }
 
 /* text links (also real <button>s): plain inline hyperlinks that take no extra space around the text; they follow the surrounding font.
@@ -111,8 +115,7 @@ const VERIFY_CSS = `
   .verify-modal .verify-small, .verify-modal .verify-label { font-size: 12px; }
   .verify-modal .verify-digits { gap: 5px; }
   .verify-modal .verify-digit { height: 3.1rem; font-size: 20px; }
-  .verify-modal .verify-btn { min-height: 42px; font-size: 14px; padding: 9px 0 11px; }
-  .verify-modal .verify-close { top: 6px; right: 6px; width: 40px; height: 40px; }
+  .verify-modal .verify-btn { min-height: 42px; font-size: 14px; padding: 9px 0 11px; }  .verify-modal .verify-close { top: 6px; right: 6px; width: 40px; height: 40px; }
   .verify-modal .ink-divider { margin: 0.45rem 0 0.9rem; }
 }
 `;
