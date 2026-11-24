@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import { LOGIN_STATE_OPTIONS } from "../../_mock/login"
+import { VERIFY_PREVIEW_OPTIONS } from "../../../signup/_mock/verify"
 import DeviceButtons from "./DeviceButtons"
 import { getModeNote } from "./PreviewPanel"
 import { INITIAL_STATUS, PREVIEW_SET_EVENT, PREVIEW_STATUS_EVENT, type PreviewCommand, type PreviewStatus } from "./previewBridge"
@@ -203,6 +204,18 @@ function HostInner({ device, snapshot }: { device: DeviceSpec; snapshot: Preview
             </button>
           ))}
         </div>
+
+        {/* Email-verification dialog states: listed while that dialog is open over the login sheet (same list as the desktop panel). */}
+        {status.verifyOpen && (
+          <div className={rowClass}>
+            <span className="parch-label mr-1">หน้าต่างยืนยันอีเมล (รหัสที่ถูกต้อง: 123456)</span>
+            {VERIFY_PREVIEW_OPTIONS.map((option) => (
+              <button key={option.id} type="button" onClick={() => send({ verifyId: option.id })} aria-pressed={status.verifyId === option.id} className={buttonClass(status.verifyId === option.id)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* The simulated viewport. If it is larger than the available area, this area scrolls: the viewport is never shrunk. */}

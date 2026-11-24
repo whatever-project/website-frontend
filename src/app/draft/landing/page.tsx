@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { getTimeState } from "@/utils/timeOfDay";
-import { routes } from "@/config/routes";
+import { routes, DRAFT_PREFIX } from "@/config/routes";
 import { FaGlobe } from "react-icons/fa";
 import { MdSunny } from "react-icons/md";
 import { BsMoonStarsFill } from "react-icons/bs";
@@ -154,7 +154,7 @@ function LandingDraft({ embed }: { embed: boolean }) {
       <img
         src={BACKDROP_SRC}
         alt="Whatever Village"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover max-sm:object-[74%_50%] sm:max-[979px]:object-[65%_50%]"
         draggable={false}
       />
 
@@ -286,13 +286,13 @@ function LandingDraft({ embed }: { embed: boolean }) {
             onPointerEnter={preloadScrollLogin}
             onFocus={preloadScrollLogin}
             data-typo="auth"
-            className={AUTH_BTN}
+            className={`${AUTH_BTN} cursor-pointer`}
             style={AUTH_BTN_STYLE}
           >
             <span>{COPY.logIn}</span>
           </button>
           <Link
-            href={routes.signup}
+            href={`${DRAFT_PREFIX}${routes.signup}`}
             data-typo="auth"
             className={AUTH_BTN}
             style={AUTH_BTN_STYLE}

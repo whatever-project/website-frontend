@@ -2,11 +2,14 @@
 
 import { LOGIN_STATE_OPTIONS, type LoginState } from "../../_mock/login"
 import type { DraftLang } from "../../_mock/copy"
+import { VERIFY_PREVIEW_OPTIONS } from "../../../signup/_mock/verify"
 import styles from "./PreviewPanel.module.css"
 import DeviceButtons from "./DeviceButtons"
 import { DEV_PREVIEW_ENABLED } from "./devPreviewFlag"
 import { enterDevicePreview } from "./previewRoute"
 import { buttonClass } from "./previewStyles"
+import { PreviewCollapsible } from "./PreviewCollapse"
+import DraggablePanel from "./DraggablePanel"
 
 // The language / mode / device switches are design-review tools: they exist in development only and never in a production build.
 const SHOW_PREVIEW_TOOLS = DEV_PREVIEW_ENABLED
@@ -29,6 +32,11 @@ interface PreviewPanelProps {
   sceneError: boolean
   /** Preview switch: true forces the existing flat fallback card, false returns to the 3D scroll (no reload). */
   onForceFlatChange: (force: boolean) => void
+  /** True while the email-verification dialog is open: its own preview states (wrong code, locked, ...) are then listed. */
+  verifyOpen?: boolean
+  /** Id (VERIFY_PREVIEW_OPTIONS) of the verification state last chosen here: that button is shown selected. */
+  verifyActiveId?: string
+  onVerifyPreview?: (id: string) => void
 }
 
 /**
@@ -43,6 +51,9 @@ export default function PreviewPanel({
   flat,
   sceneError,
   onForceFlatChange,
+  verifyOpen = false,
+  verifyActiveId,
+  onVerifyPreview,
 }: PreviewPanelProps) {
   const modeNote = getModeNote(flat, sceneError)
   // Device preview: leave the normal page and inspect the real page at a mobile / tablet viewport (the login stays open with these selections).
@@ -107,11 +118,11 @@ export default function PreviewPanel({
       )}
 
       {/* Preview state (draft only) */}
-      <div
+      <DraggablePanel
         className={`${styles.panel} fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow`}
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="parch-label mb-1.5">Preview state (draft only)</p>
+        <PreviewCollapsible title="Preview state (draft only)">
         <div className="flex flex-wrap gap-1.5">
           {LOGIN_STATE_OPTIONS.map((option) => (
             <button
@@ -125,6 +136,25 @@ export default function PreviewPanel({
             </button>
           ))}
         </div>
+        {/* Email-verification dialog states (draft only), listed while the dialog is open. The correct code is 123456. */}
+        {verifyOpen && onVerifyPreview && (
+          <div className="mt-2 border-t border-[#c9ad77]/60 pt-2">
+            <p className="parch-label mb-1">หน้าต่างยืนยันอีเมล (รหัสที่ถูกต้อง: 123456)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {VERIFY_PREVIEW_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onVerifyPreview(option.id)}
+                  aria-pressed={verifyActiveId === option.id}
+                  className={buttonClass(verifyActiveId === option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {/* Preview mode (draft only): 3D scroll <-> the existing flat fallback card. */}
         {modeToggle}
         {/* Preview device (draft only): desktop <-> mobile / tablet viewport. */}
@@ -133,7 +163,8 @@ export default function PreviewPanel({
         {langToggle && (
           <div className="mt-2 hidden flex-wrap items-center gap-1.5 border-t border-[#c9ad77]/60 pt-2 sm:flex">{langToggle}</div>
         )}
-      </div>
+        </PreviewCollapsible>
+      </DraggablePanel>
     </>
   )
 }

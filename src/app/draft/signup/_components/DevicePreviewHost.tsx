@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import DeviceButtons from "../../landing/_components/draft-tools/DeviceButtons"
 import { buttonClass } from "../../landing/_components/draft-tools/previewStyles"
+import { VERIFY_PREVIEW_OPTIONS } from "../_mock/verify"
 import {
   CUSTOM_LIMITS,
   exitDevicePreview,
@@ -64,7 +65,7 @@ export default function DevicePreviewHost({ device, initial }: { device: DeviceS
   useEffect(() => {
     const onStatus = (event: Event) => {
       const { step } = (event as CustomEvent<{ step: SignupStep }>).detail
-      if (step !== stateRef.current.step) apply({ ...stateRef.current, step })
+      if (step !== stateRef.current.step) apply({ ...stateRef.current, step, verify: "code" })
     }
     window.addEventListener(SIGNUP_PREVIEW_STATUS_EVENT, onStatus)
     return () => window.removeEventListener(SIGNUP_PREVIEW_STATUS_EVENT, onStatus)
@@ -99,9 +100,18 @@ export default function DevicePreviewHost({ device, initial }: { device: DeviceS
         </div>
 
         <div className={rowClass}>
+          <span className="parch-label mr-1">Language</span>
+          {([["th", "ไทย"], ["en", "English"]] as const).map(([code, label]) => (
+            <button key={code} type="button" onClick={() => update({ lang: code })} aria-pressed={state.lang === code} className={buttonClass(state.lang === code)}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className={rowClass}>
           <span className="parch-label mr-1">Step</span>
           {([1, 2, 3] as const).map((s) => (
-            <button key={s} type="button" onClick={() => update({ step: s })} aria-pressed={state.step === s} className={buttonClass(state.step === s)}>
+            <button key={s} type="button" onClick={() => update({ step: s, verify: "code" })} aria-pressed={state.step === s} className={buttonClass(state.step === s)}>
               ขั้นตอน {s}
             </button>
           ))}
@@ -118,6 +128,17 @@ export default function DevicePreviewHost({ device, initial }: { device: DeviceS
             </>
           )}
         </div>
+
+        {state.step === 3 && (
+          <div className={rowClass}>
+            <span className="parch-label mr-1">หน้าต่างยืนยันอีเมล (รหัสที่ถูกต้อง: 123456)</span>
+            {VERIFY_PREVIEW_OPTIONS.map((o) => (
+              <button key={o.id} type="button" onClick={() => update({ verify: o.id })} aria-pressed={state.verify === o.id} className={buttonClass(state.verify === o.id)}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* The simulated viewport. If it is larger than the available area, this area scrolls: the viewport is never shrunk. */}

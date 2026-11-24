@@ -17,9 +17,11 @@ Revision of the already-live `/login` page. Round 2 replaces the two-column page
 | File | Purpose |
 |---|---|
 | `page.tsx` | Centred single-card login page and in-flow draft-only Preview state switch |
-| `_mock/copy.ts` | Existing Thai login copy, sample API error, login state type, and preview options |
+| `_mock/copy.ts` | Existing Thai login copy, sample API error, login state type, and preview options (round 3: + `enterCode`) |
 
 ## 2b. Changes since promotion
+**Not used anymore (2026-11-15):** the designer no longer uses this page; the login UI is the popup on `/draft/landing`, which also carries the email-verification modal (see `draft/landing/CONTEXT.md`, round 13). The earlier verification-modal wiring on this page was reverted.
+
 n/a — this draft has not previously been picked up by dev. Round 2 file-level changes are recorded in the Iteration log.
 
 ## 2d. Unused files (dev may delete)
@@ -38,7 +40,7 @@ n/a — this draft has not previously been picked up by dev. Round 2 file-level 
 | Preview state switch | `page.tsx` | Existing draft-only control from round 1, now below the card so it does not cover small screens | no; remove on promotion |
 
 New colours / fonts / spacing / animations / CSS:
-- none; round 2 recomposes existing classes and removes the old shell, wax seal, and side illustration.
+- none otherwise; round 2 recomposes existing classes and removes the old shell, wax seal, and side illustration.
 
 ## 5. Needs dev (couldn't be done inside the draft)
 - Apply the centred single-card layout to the live page; remove the old `ParchShell` header/footer, `WaxSeal`, and `LetterStack` usage there. No global or shared-component edits are required by this draft.

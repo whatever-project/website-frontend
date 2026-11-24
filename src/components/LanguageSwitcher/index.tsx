@@ -49,7 +49,7 @@ export default function LanguageSwitcher({ tone = "parch" }: { tone?: keyof type
       onClick={switchLocale}
       aria-label={SWITCH_LABEL[next]}
       title={SWITCH_LABEL[next]}
-      className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 font-ui text-[11px] tracking-[0.2em] uppercase transition ${TONES[tone]}`}
+      className={`flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 font-ui text-[11px] tracking-[0.2em] uppercase transition ${TONES[tone]}`}
     >
       <span aria-hidden className="text-sm leading-none tracking-normal"><FaGlobe /></span>
       {current}

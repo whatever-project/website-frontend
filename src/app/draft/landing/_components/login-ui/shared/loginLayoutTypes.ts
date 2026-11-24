@@ -19,4 +19,6 @@ export interface LoginLayoutProps {
    * 3D paper and on the flat fallback card alike (the form grows to fit it); it is undefined while there is no message.
    */
   notice?: ReactNode
+  /** When set, the "create an account" link calls this instead of navigating (LoginModal `closeOnSignup`, used on the signup page itself). */
+  onSignupClick?: () => void
 }

@@ -5,6 +5,7 @@ import { messages } from "@/messages/index"
 import HtmlLang from "@/components/HtmlLang"
 import { DraftLangProvider, useDraftLang } from "@/components/DraftLang"
 import type { ReactNode } from "react"
+import GenericDevicePreview from "./landing/_components/draft-tools/GenericDevicePreview"
 
 interface DraftLayoutProps {
   children: ReactNode
@@ -15,7 +16,7 @@ function DraftIntl({ children }: { children: ReactNode }) {
   return (
     <NextIntlClientProvider locale={lang} messages={messages[lang]}>
       <HtmlLang lang={lang} />
-      {children}
+      <GenericDevicePreview>{children}</GenericDevicePreview>
     </NextIntlClientProvider>
   )
 }

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Flourish, InkDivider, PasswordInput } from "@/components/Parchment"
-import { routes } from "@/config/routes"
+import { routes, DRAFT_PREFIX } from "@/config/routes"
 import type { LoginLayoutProps } from "../shared/loginLayoutTypes"
 
 /**
@@ -19,6 +19,7 @@ export default function ClassicLoginLayout({
   onRememberChange,
   identifierRef,
   notice,
+  onSignupClick,
 }: LoginLayoutProps) {
   return (
     <>
@@ -91,7 +92,15 @@ export default function ClassicLoginLayout({
         {copy.noAccount}{" "}
         <Link
           data-typo="signup"
-          href={routes.signup}
+          href={`${DRAFT_PREFIX}${routes.signup}`}
+          onClick={
+            onSignupClick
+              ? (event) => {
+                  event.preventDefault()
+                  onSignupClick()
+                }
+              : undefined
+          }
           className="text-[#3a2c1a] underline underline-offset-4 hover:text-[#6b4f22]"
         >
           {copy.createOne}

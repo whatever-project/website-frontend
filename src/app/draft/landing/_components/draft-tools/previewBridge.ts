@@ -21,12 +21,19 @@ export interface PreviewStatus {
   modalOpen: boolean
   /** The 3D scene really failed to start (WebGL / model): the flat fallback is then not a preview choice. */
   sceneError: boolean
+  /** The email-verification dialog is open over the login sheet (its own preview states can then be chosen). */
+  verifyOpen: boolean
+  /** Id (VERIFY_PREVIEW_OPTIONS) of the verification state last opened; the matching host button is shown selected. */
+  verifyId: string
 }
 
-export const INITIAL_STATUS: PreviewStatus = { ready: false, modalOpen: false, sceneError: false }
+export const INITIAL_STATUS: PreviewStatus = { ready: false, modalOpen: false, sceneError: false, verifyOpen: false, verifyId: "code" }
 
 /** A command from the host: any subset of the snapshot. `loginOpen: true` opens the login, `loginOpen: false` closes it (rolling the sheet up first). */
-export type PreviewCommand = Partial<PreviewSnapshot>
+export type PreviewCommand = Partial<PreviewSnapshot> & {
+  /** Opens the email-verification dialog in that state (an id from VERIFY_PREVIEW_OPTIONS). Not part of the snapshot / URL. */
+  verifyId?: string
+}
 
 declare global {
   interface Window {

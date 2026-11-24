@@ -9,14 +9,14 @@ import { DEV_PREVIEW_ENABLED } from "./devPreviewFlag"
  * Developer preview ROUTE state. Everything lives in the URL of the one landing route (/draft/landing), so a reload keeps the preview and
  * nothing is stored anywhere else:
  *
- *   ?device=mobile-s|mobile-m|mobile-l|tablet|custom[&w=&h=]   show the device preview HOST (toolbar + iframe of the real page)
+ *   ?device=mobile-s|mobile-m|mobile-l|tablet|tablet-landscape|laptop|desktop-hd|custom[&w=&h=]   show the device preview HOST (toolbar + iframe of the real page)
  *   ?embed=1                                                    this page IS the real page inside the host's iframe (no preview chrome)
  *   ?open=1 &lang=th|en &state=<login state> &flat=1     the login preview selections (the "snapshot")
  *
  * In a production build every function here returns the neutral route, so the tools can never be reached.
  */
 
-export type DeviceId = "desktop" | "mobile-s" | "mobile-m" | "mobile-l" | "tablet" | "custom"
+export type DeviceId = "desktop" | "mobile-s" | "mobile-m" | "mobile-l" | "tablet" | "tablet-landscape" | "laptop" | "desktop-hd" | "custom"
 
 export interface DeviceSpec {
   id: Exclude<DeviceId, "desktop">
@@ -27,13 +27,16 @@ export interface DeviceSpec {
 
 /** The device presets (CSS pixels). The iframe gets EXACTLY this size, so real CSS media queries respond to it. */
 export const DEVICE_PRESETS: DeviceSpec[] = [
-  { id: "mobile-s", label: "Mobile Small", width: 375, height: 667 },
+  { id: "mobile-s", label: "Mobile Small", width: 360, height: 800 },
   { id: "mobile-m", label: "Mobile Standard", width: 390, height: 844 },
   { id: "mobile-l", label: "Mobile Large", width: 430, height: 932 },
   { id: "tablet", label: "Tablet", width: 768, height: 1024 },
+  { id: "tablet-landscape", label: "Tablet Landscape", width: 1024, height: 768 },
+  { id: "laptop", label: "Laptop", width: 1366, height: 768 },
+  { id: "desktop-hd", label: "Desktop HD", width: 1920, height: 1080 },
 ]
 
-export const CUSTOM_LIMITS = { min: 240, max: 1600 }
+export const CUSTOM_LIMITS = { min: 240, max: 1920 }
 
 /** The login preview selections that survive switching between desktop and a device (and reloads). */
 export interface PreviewSnapshot {

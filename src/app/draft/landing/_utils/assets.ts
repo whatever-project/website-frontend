@@ -10,7 +10,7 @@
 //  rewritten to /en/assets/....glb and 404 (verified). Its Blender sources, older exports and previews are NOT here any more:
 //  they were removed (recoverable from git history) and are not referenced by any code.
 
-export const BACKDROP_SRC = "/assets/Snow%20Landing.png"
+export const BACKDROP_SRC = "/assets/landing-autumn.png"
 
 export const QUILL_SRC = "/assets/landing/quill/midnight-arcane-quill.png"
 
