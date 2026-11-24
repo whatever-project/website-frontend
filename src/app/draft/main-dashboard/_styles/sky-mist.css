@@ -1,0 +1,150 @@
+/*
+ * Fantasy sky + mist: background of the main content below the Hero (home view only). CSS only, no images. Replaces the earlier ivory parchment.
+ * The painted cloud artwork (sky-mist-wash) is a single layer near the top of the content, not stretched over the page; below it a CSS sky takes over.
+ * Loaded after the other style files. Scope = `#view-home` (the home <main>); nothing else is touched:
+ *   - exterior purple = `.sk-root { background: var(--bg) }`, the frame, its masks and the HUD are NOT edited here,
+ *   - the Hero keeps its own opaque background and artwork; the hand-over into the sky is drawn BELOW it (see "Hero -> sky"),
+ *   - the sky lives inside `.mf-inner`, which is already clipped to the frame's opening, so it cannot appear outside the frame.
+ * Cards keep their own backgrounds. Only text that sits directly on the page background (section titles, sub-lines, event captions,
+ * crystal names) uses dark ink, because the old light text is unreadable on a pale sky.
+ */
+.sk-root {
+  --sm-blue: #c9d6f2;        /* pale blue */
+  --sm-lav: #cfc6e8;         /* misty lavender */
+  --sm-peri: #b8c3e7;        /* soft periwinkle */
+  --sm-cloud: #f4f1f8;       /* light cloud white */
+  --sm-dusk: #9ea9d6;        /* muted dusk blue (edges) */
+  --sm-cream: #f6f2ee;       /* very soft cream mist */
+  --sm-ink: #261f3a;         /* text on the sky (deep indigo, ~11:1 on #c9d6f2) */
+  --sm-ink-soft: #4a4676;    /* secondary text (~6:1 on the darkest sky tone) */
+  --sm-tile: 1600px;         /* height of one repeating mist tile */
+  --sm-wash: url(/assets/main-dashboard/sky-mist-wash.webp.png); /* painted clouds, 1672 x 941 */
+}
+
+/* ---------- surface: CSS sky (below the artwork) ---------- */
+.sk-root #view-home {
+  position: relative; isolation: isolate;
+  background-color: #ddd5f9; /* = the artwork's bottom colour, so the artwork fades into it without a seam */
+  background-image:
+    /* hand-off to the dark footer (only when the footer exists): the sky fades into the page purple over its last 70px */
+    linear-gradient(0deg, #161326, rgba(22, 19, 38, 0)),
+    /* edge shading: soft dusk blue toward the left and right sides */
+    linear-gradient(90deg, rgba(158, 169, 214, 0.34), rgba(158, 169, 214, 0) 12%, rgba(158, 169, 214, 0) 88%, rgba(158, 169, 214, 0.34)),
+    /* faint mist banks (one tile = --sm-tile tall, repeated down the page; every ellipse ends inside its tile so tiles join without a seam) */
+    radial-gradient(ellipse 78% 7% at 24% 16%, rgba(244, 241, 248, 0.5), rgba(244, 241, 248, 0)),
+    radial-gradient(ellipse 70% 8% at 80% 34%, rgba(246, 242, 238, 0.4), rgba(246, 242, 238, 0)),
+    radial-gradient(ellipse 60% 9% at 12% 56%, rgba(207, 198, 232, 0.5), rgba(207, 198, 232, 0)),
+    radial-gradient(ellipse 80% 7% at 66% 72%, rgba(244, 241, 248, 0.45), rgba(244, 241, 248, 0)),
+    radial-gradient(ellipse 66% 8% at 30% 90%, rgba(246, 242, 238, 0.35), rgba(246, 242, 238, 0)),
+    /* the sky colour, drifting from the artwork's lavender toward periwinkle and back to a pale cloud tone */
+    linear-gradient(180deg, #ddd5f9 0, #d5d6f6 14%, #cdd3f1 34%, #d2cdee 58%, #d9def2 80%, #e6e6f4 100%);
+  background-size: 100% var(--sm-fade, 70px), 100% 100%, 100% var(--sm-tile), 100% var(--sm-tile), 100% var(--sm-tile), 100% var(--sm-tile), 100% var(--sm-tile), 100% 100%;
+  background-repeat: no-repeat, no-repeat, repeat-y, repeat-y, repeat-y, repeat-y, repeat-y, no-repeat;
+  background-position: 0 100%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  padding-bottom: 44px; /* room under the last card so the sky can fade into the footer */
+}
+
+/* ---------- the painted sky: a backdrop OWNED BY THE PAGE (not by the cards), see SkyBackdrop.tsx ----------
+   One absolutely positioned layer that fills the whole home <main> (so it is exactly as tall as the page, with or without cards), clipped to it, behind the hero, the drifting
+   clouds and the cards. It holds a stack of bands of the same painting. Each band is placed by `margin-top` in % of the WIDTH (the artwork's aspect ratio is fixed, so it is
+   never stretched), alternately flipped / mirrored / zoomed and given a mask that fades both its ends, so neighbouring bands cross-fade (no seams, no visible repeat), and
+   its opacity falls down the page, so the clouds are recognisable near the top and become a soft haze far below. Band 0 starts behind the lower part of the hero:
+   the banner fades out over the same area, so the landscape dissolves straight into these clouds. */
+.sk-root .sk-backdrop { position: absolute; inset: 0; overflow: hidden; z-index: -3; pointer-events: none; }
+.sk-root .sk-band {
+  position: absolute; top: 0; left: var(--l, 0%); width: var(--w, 100%); margin-top: var(--y); aspect-ratio: 1672 / 941;
+  background: var(--sm-wash) center / 100% 100% no-repeat; opacity: var(--o, 1); transform: scale(var(--sx, 1), var(--sy, 1));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24%, #000 62%, transparent 100%);
+}
+.sk-root .sk-band-0 { /* behind the hero: opaque until the banner has faded, then fades into the next band */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+}
+
+/* ---------- temporary preview (cards hidden): the sky is the whole page, with no dark band at the bottom ----------
+   The footer is not rendered, so the "fade to the dark footer" is switched off, and the room that is normally reserved under the content for the HUD is made of sky
+   (inside <main>) instead of page purple (root / scroll-container padding). */
+/* The footer is no longer rendered, so the home page always ends in sky: no fade to a dark footer, and the room reserved for the HUD is made of sky inside <main>. */
+.sk-root:has(#view-home:not([hidden])) { padding-bottom: 0; }
+.sk-root:has(#view-home:not([hidden])) .mf-inner { padding-bottom: 0; }
+.sk-root #view-home { --sm-fade: 0px; padding-bottom: calc(var(--hud) + 34px); }
+/* ---------- Hero: no dark navy fade. The landscape itself fades out toward the clouds behind it ---------- */
+.sk-root #view-home .hero:not(.is-map) { background: transparent; }
+.sk-root #view-home .hero:not(.is-map) .banner-img {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 54%, rgba(0, 0, 0, 0.78) 64%, rgba(0, 0, 0, 0.5) 74%, rgba(0, 0, 0, 0.22) 84%, rgba(0, 0, 0, 0.05) 93%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 54%, rgba(0, 0, 0, 0.78) 64%, rgba(0, 0, 0, 0.5) 74%, rgba(0, 0, 0, 0.22) 84%, rgba(0, 0, 0, 0.05) 93%, transparent 100%);
+}
+/* banner shade: now graded from the TOP downward (it used to run from the left side). Darkest at the top edge, gone by about half the height; the old bottom navy ramp
+   stays removed, and a mask fades the shade out toward the bottom so it cannot leave a dark edge. The hand-over into the sky is the banner's own fade-out above (a mask). */
+.sk-root #view-home .hero:not(.is-map) .banner-shade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 50%, rgba(0, 0, 0, 0.4) 68%, transparent 86%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 50%, rgba(0, 0, 0, 0.4) 68%, transparent 86%);
+  background: linear-gradient(180deg, rgba(22, 19, 38, 0.72) 0%, rgba(22, 19, 38, 0.5) 12%, rgba(22, 19, 38, 0.28) 26%, rgba(22, 19, 38, 0.1) 40%, rgba(22, 19, 38, 0) 54%);
+}/* navigation: horizontal row at the top centre of the banner, text only (no backing band or scrim, only a soft text-shadow). Responsive: a share of the hero height, with limits. */
+.sk-root #view-home .hn { top: clamp(28px, 6.5%, 56px); bottom: auto; }
+/* the thin vertical dividers between the menu items are removed (spacing unchanged) */
+.sk-root #view-home .hn li + li::before { display: none; }
+/* equal gaps: the row is sized by its content (it used to be 5 equal columns, so the visible gaps between words of different lengths were uneven) and the items are spaced with one fixed gap */
+.sk-root #view-home .hn { width: auto; max-width: calc(100% - 24px); }
+.sk-root #view-home .hn ul { display: flex; justify-content: center; gap: clamp(24px, 3vw, 56px); }
+.sk-root #view-home .hn li { flex: none; display: block; }
+.sk-root #view-home .hn-item { width: auto; }
+.sk-root #view-home .hn-item { text-shadow: 0 1px 3px rgba(22, 16, 42, 0.65), 0 2px 8px rgba(22, 16, 42, 0.3); }
+/* hover / keyboard focus: the golden glow of fantasy.css, with only a thin dark under-shadow (this selector is more specific than the rule above, which would otherwise replace the glow) */
+.sk-root #view-home .hn-item:hover:not([data-clicked]), .sk-root #view-home .hn-item:focus-visible { text-shadow: 0 1px 3px rgba(22, 16, 42, 0.5), 0 0 10px rgba(240, 210, 130, 0.75), 0 0 24px rgba(240, 210, 130, 0.4); }
+
+/* temporary preview (dashboard content hidden): this spacer gives the sky room below the hero (a deliberate ~1.2 x the width, about 2.4 screens at 1440: enough to inspect the hand-over and the cloud bands by scrolling) */
+.sk-root #view-home .sk-preview-sky { padding-top: 120%; }
+/* ---------- drifting clouds: three independent atmospheric layers (CSS only; see SkyDrift.tsx) ----------
+   NOTE: the painted sky is ONE flattened picture, so its own clouds cannot move on their own; these layers are soft white / periwinkle cloud puffs drawn with gradients
+   that drift in front of it. Each layer is a wide strip (300% of the content width) tiled with a puff cluster; translating it by exactly ONE tile loops perfectly (no jump).
+   They sit above both painted copies of the sky and below the hero and the page content. Only transform animates (compositor only); no filters.
+   Speed = tile width / duration: near 50% of the width in 44s, middle 40% in 66s, far 30% in 96s (about 16 / 8 / 4 px per second at 1440px). */
+.sk-root .sd { position: absolute; z-index: -1; left: 0; top: 0; width: 100%; overflow: hidden; pointer-events: none; }
+.sk-root .sd-l { position: absolute; left: 0; top: 0; width: 300%; height: 100%; background-repeat: repeat-x; will-change: transform; }
+.sk-root .sd-far  { margin-top: 40%; aspect-ratio: 1672 / 200; }
+.sk-root .sd-mid  { margin-top: 52%; aspect-ratio: 1672 / 260; }
+.sk-root .sd-near { margin-top: 62%; aspect-ratio: 1672 / 320; }
+.sk-root .sd-far .sd-l {
+  opacity: 0.6; background-size: 10% 100%; animation: sd-far 96s linear infinite;
+  background-image:
+    radial-gradient(ellipse 22% 34% at 30% 58%, rgba(236, 232, 252, 0.8), rgba(236, 232, 252, 0) 72%),
+    radial-gradient(ellipse 16% 26% at 46% 48%, rgba(246, 242, 255, 0.75), rgba(246, 242, 255, 0) 72%),
+    radial-gradient(ellipse 20% 30% at 66% 60%, rgba(224, 224, 250, 0.7), rgba(224, 224, 250, 0) 72%);
+}
+.sk-root .sd-mid .sd-l {
+  opacity: 0.7; background-size: 13.3333% 100%; animation: sd-mid 66s linear infinite;
+  background-image:
+    radial-gradient(ellipse 22% 30% at 26% 64%, rgba(150, 160, 214, 0.34), rgba(150, 160, 214, 0) 72%),
+    radial-gradient(ellipse 20% 34% at 30% 52%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 15% 26% at 44% 56%, rgba(250, 246, 255, 0.78), rgba(250, 246, 255, 0) 70%),
+    radial-gradient(ellipse 18% 28% at 66% 48%, rgba(255, 252, 255, 0.8), rgba(255, 252, 255, 0) 70%),
+    radial-gradient(ellipse 14% 22% at 80% 60%, rgba(236, 230, 252, 0.7), rgba(236, 230, 252, 0) 70%);
+}
+.sk-root .sd-near .sd-l {
+  opacity: 0.8; background-size: 16.6667% 100%; animation: sd-near 44s linear infinite;
+  background-image:
+    radial-gradient(ellipse 24% 24% at 24% 72%, rgba(140, 150, 212, 0.36), rgba(140, 150, 212, 0) 72%),
+    radial-gradient(ellipse 18% 30% at 20% 56%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 15% 26% at 32% 48%, rgba(255, 250, 255, 0.88), rgba(255, 250, 255, 0) 70%),
+    radial-gradient(ellipse 14% 22% at 40% 62%, rgba(246, 240, 255, 0.82), rgba(246, 240, 255, 0) 70%),
+    radial-gradient(ellipse 17% 28% at 68% 52%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 13% 22% at 80% 64%, rgba(255, 246, 240, 0.8), rgba(255, 246, 240, 0) 70%);
+}
+@keyframes sd-near { from { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-8.3333%, -6px, 0); } to { transform: translate3d(-16.6667%, 0, 0); } }
+@keyframes sd-mid  { from { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-6.6667%, 5px, 0); } to { transform: translate3d(-13.3333%, 0, 0); } }
+@keyframes sd-far  { from { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-5%, -4px, 0); } to { transform: translate3d(-10%, 0, 0); } }
+@media (prefers-reduced-motion: reduce) { .sk-root .sd-l { animation: none; } } /* respects the operating-system "reduce motion" setting */
+.sk-root.no-drift .sd-l { animation: none; } /* development preview switch (FrameToggle dock) */
+/* ---------- text that sits directly on the sky (cards are left alone) ---------- */
+.sk-root #view-home .sec-head h2 { color: var(--sm-ink); text-shadow: 0 1px 10px rgba(244, 241, 248, 0.8); }
+.sk-root #view-home .sec-head .rule { background: linear-gradient(90deg, rgba(110, 96, 150, 0.6), rgba(110, 96, 150, 0)); }
+.sk-root #view-home .sec-sub { color: var(--sm-ink-soft); }
+.sk-root #view-home .sub-head { color: var(--sm-ink); }
+.sk-root #view-home .vf3-meta b { color: var(--sm-ink); }
+.sk-root #view-home .vf3-meta > span { color: var(--sm-ink-soft); }
+.sk-root #view-home .vf3:hover .vf3-meta b { color: #5a3f8f; }
+.sk-root #view-home .crys b { color: var(--sm-ink); }
+.sk-root #view-home .crys span { color: var(--sm-ink-soft); }
+.sk-root #view-home .status-cell .c-label { color: var(--sm-ink); border-bottom-color: rgba(110, 96, 150, 0.45); }

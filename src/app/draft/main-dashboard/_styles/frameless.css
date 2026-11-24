@@ -1,0 +1,40 @@
+/*
+ * Frame visibility (preview). Loaded last. The framed layout (frame.css / hud-compact.css) is the baseline and is NOT changed: everything here
+ * is scoped to `.sk-root.no-frame`, which SkeletonRoot sets while frameVisible is false. (Frame ON = no extra class = the unchanged layout.)
+ *
+ * Frameless layout = the same fallback the page already uses below 900px, plus a centred, viewport-anchored bottom HUD:
+ *  - the frame, the corner decorations and the mask are not rendered / not applied (PageFrame + the rules below);
+ *  - the scroll container stops being a fixed, clipped box, so the page scrolls with the window and uses the whole width;
+ *  - every frame inset (--i-*) is 0, so overlays and popovers use the whole viewport;
+ *  - the bottom HUD hangs off the viewport bottom (+ safe area) instead of the frame's lower border.
+ * --u / --fm / --f-x0 keep their frame-mode values on purpose: the HUD is sized from --u, so it looks the same in both modes.
+ */
+.sk-root.no-frame {
+  --i-l: 0px; --i-r: 0px; --i-t: 0px; --i-b: 0px;
+  --f-hud-l: 0px; --f-hud-r: 0px; --f-hud-b: max(14px, env(safe-area-inset-bottom));
+}
+.sk-root.no-frame .mf-scroll {
+  position: static; overflow: visible; clip-path: none; overscroll-behavior: auto;
+  -webkit-mask: none; mask: none;
+}
+.sk-root.no-frame .mf-inner { padding-bottom: 0; } /* the root already reserves room under the page for the HUD (padding-bottom: --hud + 34px) */
+.sk-root.no-frame .bh-root { left: 0; right: 0; bottom: var(--f-hud-b); padding: 0 16px; }
+.sk-root.no-frame .bh-wrap { max-width: 1180px; }
+
+/* ---------- preview dock (visible in both modes, above the frame layer; draggable, see FrameToggle.tsx) ---------- */
+.sk-root .fv-dock { position: fixed; z-index: 150; top: 12px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.sk-root .fv-dock[data-dragging] { cursor: grabbing; }
+.sk-root .fv-dock[data-dragging] .fv-toggle { pointer-events: none; }
+.sk-root .fv-toggle {
+  display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 8px 0 11px; border-radius: 13px; cursor: inherit;
+  font: 500 11.5px/1 var(--sans); color: #f3e6c4; letter-spacing: 0.02em;
+  background: rgba(22, 19, 38, 0.82); border: 1px solid rgba(214, 183, 123, 0.55);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 2px 10px rgba(6, 4, 16, 0.4);
+}
+.sk-root .fv-toggle:hover { border-color: #d6b77b; }
+.sk-root .fv-toggle:focus-visible { outline: 2px solid #d6b77b; outline-offset: 2px; }
+.sk-root .fv-track { position: relative; width: 28px; height: 14px; border-radius: 7px; background: rgba(255, 244, 225, 0.2); transition: background 0.18s; }
+.sk-root .fv-knob { position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #f3e6c4; transition: transform 0.18s; }
+.sk-root .fv-toggle[aria-checked="true"] .fv-track { background: #b08a3e; }
+.sk-root .fv-toggle[aria-checked="true"] .fv-knob { transform: translateX(14px); }
+@media (max-width: 900px) { .sk-root .fv-dock { top: 8px; right: 8px; } }

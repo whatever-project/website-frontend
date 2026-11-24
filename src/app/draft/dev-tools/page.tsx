@@ -20,6 +20,11 @@ const DRAFTS = [
     draft: "/draft/skeleton-mockup",
     live: "/skeleton-mockup",
   },
+  {
+    label: "หน้าหลักแดชบอร์ด (Main Dashboard)",
+    draft: "/draft/main-dashboard",
+    live: "/main-dashboard",
+  },
   { label: "หน้าแรก (Landing)", draft: "/draft/landing", live: routes.home },
   { label: "เข้าสู่ระบบ (Login)", draft: "/draft/login", live: routes.login },
   {

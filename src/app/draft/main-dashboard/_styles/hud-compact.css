@@ -1,0 +1,95 @@
+/*
+ * Compact bottom HUD for the framed layout (desktop, >= 901px). Loaded after frame.css, so it overrides the older tall 4-zone / arc-shortcut layout
+ * without touching the HUD's markup, data or behaviour. Everything is sized from --u (one source px of summer-main-frame.png), so it scales with the frame.
+ *
+ * Region: between the two bottom corner decorations (left cluster ends ~x 261u, right cluster starts ~x 1295u of the artwork), centred in that gap
+ * (the same area as the red rectangle in the design reference), one slim row high (--hb), resting above the bottom gold border.
+ */
+@media (min-width: 901px) {
+  .sk-root {
+    --hb: max(54px, calc(var(--u) * 60));                 /* bar height */
+    --hf: clamp(10.5px, calc(var(--u) * 13.5), 15px);     /* base font */
+    --f-hud-l: calc(var(--f-x0) + var(--u) * 285);
+    --f-hud-r: calc(var(--f-x0) + var(--u) * 377);        /* 1672 - 1295 */
+    --f-hud-b: calc(var(--fm) + var(--u) * 60);
+  }
+  .sk-root .bh-root { left: var(--f-hud-l); right: var(--f-hud-r); bottom: var(--f-hud-b); }
+  .sk-root .bh-wrap { max-width: none; }
+
+  /* the bar: one flex row; the old arc-shortcut mask / lead margin are not used any more */
+  .sk-root .bh-bar:not(.is-mini) {
+    display: flex; align-items: center; gap: calc(var(--u) * 12); height: var(--hb); margin-left: 0; padding: 0 calc(var(--u) * 14) 0 calc(var(--u) * 8);
+    border-radius: 14px; border-color: rgba(255, 244, 225, 0.2); container-type: inline-size;
+  }
+  .sk-root .bh-bar:not(.is-mini)::before { border-radius: 14px; -webkit-mask-image: none; mask-image: none; border-color: transparent; }
+  .sk-root .bh-bar:not(.is-mini) .bh-sec { padding: 0; height: 100%; min-width: 0; flex: none; gap: calc(var(--u) * 10); }
+  .sk-root .bh-bar:not(.is-mini) .bh-sec + .bh-sec::before { top: 22%; bottom: 22%; }
+  .sk-root .bh-bar:not(.is-mini) .bh-sec:not(:first-child) { padding-left: calc(var(--u) * 12); }
+
+  /* A: portrait (inside the bar) | name + role + wallet | shortcuts */
+  .sk-root .bh-bar:not(.is-mini) .bh-a { --pa: calc(var(--hb) - 10px); min-height: 0; padding-left: 0; position: static; }
+  .sk-root .bh-bar:not(.is-mini) .bh-portrait { position: relative; left: auto; bottom: auto; flex: none; order: 1; width: var(--pa); height: var(--pa); box-shadow: 0 3px 10px rgba(5, 4, 18, 0.5); }
+  .sk-root .bh-bar:not(.is-mini) .bh-portrait-ph { font-size: calc(var(--pa) * 0.32); }
+  .sk-root .bh-bar:not(.is-mini) .bh-info { order: 2; display: grid; grid-template-columns: auto auto; grid-template-areas: "n w" "r w"; column-gap: calc(var(--u) * 12); row-gap: 0; align-items: center; }
+  .sk-root .bh-bar:not(.is-mini) .bh-name { grid-area: n; font-size: calc(var(--hf) * 1.2); line-height: 1.1; }
+  .sk-root .bh-bar:not(.is-mini) .bh-role { grid-area: r; font-size: calc(var(--hf) * 0.82); }
+  .sk-root .bh-bar:not(.is-mini) .bh-wallet { grid-area: w; margin: 0; gap: 5px; font-size: calc(var(--hf) * 0.92); flex-wrap: nowrap; }
+  .sk-root .bh-bar:not(.is-mini) .bh-wallet-item { padding: 2px 8px 2px 5px; }
+  .sk-root .bh-bar:not(.is-mini) .bh-coin { width: calc(var(--hf) * 1.1); height: calc(var(--hf) * 1.1); }
+  .sk-root .bh-bar:not(.is-mini) .bh-shortcuts { position: static; inset: auto; order: 3; display: flex; flex-direction: row; gap: calc(var(--u) * 6); z-index: auto; pointer-events: auto; }
+  .sk-root .bh-bar:not(.is-mini) .bh-short { position: static; left: auto; bottom: auto; width: calc(var(--hb) * 0.44); height: calc(var(--hb) * 0.44); min-width: 24px; min-height: 24px; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .sk-root .bh-bar:not(.is-mini) .bh-short .ico { width: 55%; height: 55%; }
+  .sk-root .bh-bar:not(.is-mini) .bh-short .badge { top: -5px; right: -5px; }
+
+  /* B: HP / Mana */
+  .sk-root .bh-bar:not(.is-mini) .bh-b { flex: 1 1 0; }
+  .sk-root .bh-bar:not(.is-mini) .bh-resources { gap: calc(var(--hb) * 0.1); }
+  .sk-root .bh-bar:not(.is-mini) .bh-res { grid-template-columns: calc(var(--hf) * 2.6) minmax(0, 1fr) calc(var(--hf) * 4.8); gap: calc(var(--u) * 7); }
+  .sk-root .bh-bar:not(.is-mini) .bh-res-label { font-size: calc(var(--hf) * 0.95); }
+  .sk-root .bh-bar:not(.is-mini) .bh-bar-track { height: calc(var(--hb) * 0.3); }
+  .sk-root .bh-bar:not(.is-mini) .bh-bar-val { font-size: calc(var(--hf) * 0.8); }
+  .sk-root .bh-bar:not(.is-mini) .bh-res-regen { font-size: calc(var(--hf) * 0.78); }
+
+  /* C: world time / date / chips */
+  .sk-root .bh-bar:not(.is-mini) .bh-time { font-size: calc(var(--hb) * 0.46); }
+  .sk-root .bh-bar:not(.is-mini) .bh-world { gap: 3px; }
+  .sk-root .bh-bar:not(.is-mini) .bh-date { font-size: calc(var(--hf) * 0.95); }
+  .sk-root .bh-bar:not(.is-mini) .bh-chips { flex-wrap: nowrap; gap: 4px; font-size: calc(var(--hf) * 0.8); }
+  .sk-root .bh-bar:not(.is-mini) .bh-chips span { padding: 1px 7px 1px 5px; }
+  .sk-root .bh-bar:not(.is-mini) .bh-chips svg { width: calc(var(--hf) * 0.95); height: calc(var(--hf) * 0.95); }
+
+  /* D: two action buttons (icon + short label side by side) and the collapse handle inline at the right */
+  .sk-root .bh-bar:not(.is-mini) .bh-d { gap: calc(var(--u) * 8); }
+  .sk-root .bh-bar:not(.is-mini) .bh-nav-btn { width: auto; min-height: 0; height: calc(var(--hb) * 0.7); flex-direction: row; gap: 7px; padding: 0 calc(var(--u) * 11) 0 calc(var(--u) * 7); border-radius: 12px; }
+  .sk-root .bh-bar:not(.is-mini) .bh-nav-ico { width: calc(var(--hb) * 0.46); height: calc(var(--hb) * 0.46); }
+  .sk-root .bh-bar:not(.is-mini) .bh-nav-ico svg { width: 58%; height: 58%; }
+  .sk-root .bh-bar:not(.is-mini) .bh-nav-label { font-size: calc(var(--hf) * 0.85); text-align: left; max-width: calc(var(--hf) * 6); }
+  .sk-root .bh-bar:not(.is-mini) .bh-toggle { position: static; align-self: center; width: 22px; height: 22px; border-radius: 50%; }
+  .sk-root .bh-bar:not(.is-mini) .bh-toggle svg { width: 14px; height: 14px; }
+
+  /* minimised: the whole bar collapses into just the expand control (a floating double chevron); the bar itself loses its glass panel.
+     Everything else in the minimised markup (avatar, bars, wallet, clock, menu buttons) is hidden until the HUD is expanded again. */
+  .sk-root .bh-bar.is-mini {
+    display: flex; width: max-content; height: auto; margin: 0 auto; padding: 0; gap: 0;
+    background: none; border: 0; border-radius: 50%; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .sk-root .bh-bar.is-mini > :not(.bh-toggle) { display: none !important; }
+  /* the toggle itself (icon-only double chevron) is styled in hud-toggle.css */
+
+  /* progressively drop secondary details as the available width shrinks (everything stays reachable: tooltips / panels / menus) */
+  @container (max-width: 1300px) {
+    .bh-res-regen { display: none; }
+    .bh-res { grid-template-columns: calc(var(--hf) * 2.6) minmax(0, 1fr) !important; }
+    .bh-chips span:nth-child(1), .bh-chips span:nth-child(3) { display: none; }
+    .bh-unit-full { display: none !important; }
+    .bh-nav-label { display: none; }
+    .bh-nav-btn { padding: 0 8px !important; }
+    .bh-bar-val { font-size: calc(var(--hf) * 0.74) !important; }
+  }
+  @container (max-width: 900px) {
+    .bh-role { display: none; }
+    .bh-info { grid-template-areas: "n w" "n w"; }
+    .bh-wallet-item abbr { display: none; }
+    .bh-bar-val { font-size: calc(var(--hf) * 0.7) !important; }
+  }
+}

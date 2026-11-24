@@ -1,0 +1,33 @@
+/*
+ * Bottom HUD expand / collapse toggle: icon only (two stacked chevrons, see HudToggle.tsx). No fill, border or shadow; the invisible hit area is larger than the icon.
+ * Loaded last. Overrides the older circular / rounded-square toggle rules in fantasy.css and hud-compact.css (it keeps their class `bh-toggle` for positioning).
+ * Colour: `data-tone` = what is behind the button (set by HudToggle from the real page): light backdrop -> dark icon, dark backdrop -> light icon.
+ */
+.sk-root .bh-bar .bh-toggle.bh-dc[type="button"] {
+  --dc-ink: #f5ebdd;                 /* icon colour on a dark backdrop */
+  --dc-halo: rgba(12, 9, 24, 0.55);  /* faint shadow so thin strokes stay crisp on mid-tones */
+  box-sizing: border-box; padding: 0; margin: 0;
+  background: none; border: 0; border-radius: 6px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  color: var(--dc-ink); opacity: 0.86; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s ease, filter 0.2s ease, color 0.2s ease;
+}
+.sk-root .bh-bar .bh-toggle.bh-dc[data-tone="light"] { --dc-ink: #2a2038; --dc-halo: rgba(255, 250, 238, 0.7); }
+.sk-root .bh-bar .bh-toggle.bh-dc svg { display: block; width: 22px; height: 22px; filter: drop-shadow(0 0 1px var(--dc-halo)); transition: transform 0.2s ease; }
+
+/* size: collapsed = floating icon box; expanded (inline in the bar) keeps its 22px slot, so nothing moves */
+.sk-root .bh-bar.is-mini .bh-toggle.bh-dc { position: relative; width: 28px; height: 28px; align-self: center; }
+/* expanded, desktop: in the bar's flow exactly like before (the older rules' top / right offsets must not move a positioned button); on mobile the handle keeps its absolute spot on the bar's edge */
+@media (min-width: 901px) { .sk-root .bh-bar:not(.is-mini) .bh-toggle.bh-dc { position: relative; top: auto; right: auto; } }
+.sk-root .bh-bar:not(.is-mini) .bh-toggle.bh-dc { width: 22px; height: 22px; }
+.sk-root .bh-bar .bh-toggle.bh-dc::after { content: ""; position: absolute; inset: -8px; } /* invisible hit area: ~44px (collapsed) / ~38px (expanded) */
+
+/* hover: a little brighter, a very soft golden glow, a 1px nudge in the arrow direction */
+.sk-root .bh-bar .bh-toggle.bh-dc:hover { background: none; opacity: 1; filter: drop-shadow(0 0 5px rgba(214, 183, 123, 0.55)); }
+.sk-root .bh-bar.is-mini .bh-toggle.bh-dc:hover svg { transform: translateY(-1px); }
+.sk-root .bh-bar:not(.is-mini) .bh-toggle.bh-dc:hover svg { transform: translateY(1px); }
+.sk-root .bh-bar .bh-toggle.bh-dc:active { opacity: 0.8; }
+/* keyboard focus: a thin ring only while focused (no permanent shape) */
+.sk-root .bh-bar .bh-toggle.bh-dc:focus-visible { outline: 1px solid var(--bh-gold, #d6b77b); outline-offset: 3px; opacity: 1; }
+.sk-root .bh-bar .bh-toggle.bh-dc[data-tone="light"]:focus-visible { outline-color: #8f6a35; }
+@media (hover: none) { .sk-root .bh-bar .bh-toggle.bh-dc:hover { filter: none; opacity: 0.86; } .sk-root .bh-bar .bh-toggle.bh-dc:hover svg { transform: none; } } /* no sticky hover after a tap */
+@media (prefers-reduced-motion: reduce) { .sk-root .bh-bar .bh-toggle.bh-dc, .sk-root .bh-bar .bh-toggle.bh-dc svg { transition: none; } .sk-root .bh-bar .bh-toggle.bh-dc:hover svg { transform: none; } }
