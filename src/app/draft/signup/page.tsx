@@ -30,6 +30,7 @@ import {
   type DeviceSpec,
 } from "../landing/_components/draft-tools/previewRoute";
 import DevicePreviewHost from "./_components/DevicePreviewHost";
+import DraggablePanel from "./_components/DraggablePanel";
 import {
   SIGNUP_PREVIEW_SET_EVENT,
   SIGNUP_PREVIEW_STATUS_EVENT,
@@ -57,10 +58,15 @@ const SIGNUP_FONT_CSS = `
 .signup-scope .parch-input::placeholder { font-size: 15px; }
 /* wizard step names: 13px, vertically centred with the circle */
 .signup-scope .signup-wizard-label { font-size: 14px; line-height: 1; letter-spacing: normal; }
-/* digits in IBM Plex Sans Thai sit slightly high: nudge them down so they look centred in the circle (all sizes) */
-.signup-scope .signup-wizard-circle { line-height: 1; padding: 0.28em 0 0; }
-/* the check mark is an SVG, so it needs no digit nudge */
-.signup-scope .signup-wizard-circle--check { padding: 0; }
+.signup-scope .signup-wizard-label:lang(en) { font-size: 12px; } /* English labels (uppercase) look larger: smaller */
+/* digits in the circles: IBM Plex Sans Thai leaves extra room above/below its digits (Thai marks), so a plain flex-centred line box
+   puts them off-centre. Trimming the line box to the digit's own height (text-box: cap alphabetic) centres the glyph itself, at every
+   circle size; browsers without text-box get a small fixed nudge instead. The check mark is an SVG and needs neither. */
+.signup-scope .signup-wizard-circle { line-height: 1; padding: 0; }
+.signup-scope .signup-wizard-num { display: block; line-height: 1; position: relative; top: 0.08em; }
+@supports (text-box: trim-both cap alphabetic) {
+  .signup-scope .signup-wizard-num { text-box: trim-both cap alphabetic; top: 0; }
+}
 /* "scroll to the end" notice (after the .font-ui 13px rule so it wins) */
 .signup-scope .signup-agree-hint { font-size: 11px; line-height: 1.4; }
 /* form labels: wider letters, equal 10px gap to the input */
@@ -87,6 +93,7 @@ const SIGNUP_FONT_CSS = `
 .signup-scope .signup-btn:hover:not(:disabled) {
   box-shadow: 0 4px 12px rgba(50, 36, 14, 0.3), 0 0 10px rgba(190, 150, 80, 0.2);
 }
+.signup-scope .signup-btn:lang(th) { letter-spacing: normal; } /* Thai: normal letter spacing */
 .signup-scope .signup-btn:lang(en) { font-weight: 500; letter-spacing: 4px; }
 .signup-scope .signup-btn:lang(en) > span { display: inline-block; transform: scale(0.8); }
 /* step 2 Back button: the outline look (colour, border, hover fill come from .parch-btn-outline), without the filled button's dark shadow */
@@ -133,6 +140,7 @@ html::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
   .signup-scope .parch-sheet h2.signup-terms-title { margin-top: 1.25rem; }
   /* wizard: same circle / label sizes as the other viewports (the compact phone overrides were removed), only a slightly tighter top margin */
   .signup-scope .signup-wizard { margin-top: -0.25rem; }
+  .signup-scope .signup-wizard-label:lang(en) { font-size: 11px; }
   .signup-scope .signup-terms { max-height: min(22rem, 46vh); padding: 0.75rem; }
   .signup-scope .signup-agree { padding-left: 0.75rem; }
   .signup-scope .signup-terms li { grid-template-columns: 1.5rem 1fr; column-gap: 0.5rem; }
@@ -149,7 +157,7 @@ html::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 `;
 
 export default function SignupDraft() {
-  const { lang } = useDraftLang();
+  const { lang, setLang } = useDraftLang();
   const COPY = COPY_BY_LANG[lang];
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [agree, setAgree] = useState(false);
@@ -336,7 +344,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
                         <path d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
                     ) : (
-                      s
+                      <span className="signup-wizard-num">{s}</span>
                     )}
                   </div>
                   <span
@@ -621,7 +629,6 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
                   className="parch-btn-outline signup-btn signup-btn-back cursor-pointer sm:basis-2/5"
                 >
                   <span>
-                    <span aria-hidden="true">← </span>
                     {COPY.back}
                   </span>
                 </button>
@@ -682,7 +689,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
 
       {/* Preview state (draft only); hidden inside the mobile preview frame, whose host has its own controls */}
       {!preview.embed && (
-      <div className="fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow">
+      <DraggablePanel className="fixed bottom-3 left-3 z-50 max-w-[calc(100vw-1.5rem)] border border-[#c9ad77] bg-[#f6ecd2]/95 p-3 font-ui text-[12px] text-[#3a2c1a] shadow">
         <PreviewCollapsible title="Preview state (draft only)">
         {DEV_PREVIEW_ENABLED && (
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
@@ -693,6 +700,20 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
             />
           </div>
         )}
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <span className="parch-label mr-1">Language</span>
+          {([["th", "ไทย"], ["en", "English"]] as const).map(([code, label]) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setLang(code)}
+              aria-pressed={lang === code}
+              className={buttonClass(lang === code)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-wrap gap-1.5">
           {([1, 2, 3] as const).map((s) => (
             <button
@@ -750,7 +771,7 @@ html::-webkit-scrollbar { display: none; width: 0; height: 0; }`}</style>
           </div>
         )}
         </PreviewCollapsible>
-      </div>
+      </DraggablePanel>
       )}
     </>
   );

@@ -91,7 +91,7 @@ export const COPY_EN: typeof COPY = {
   resendDone: "Letter sent again.",
   usernameRequirements: "Username Requirements",
   usernameRules: ["3 – 25 characters", "Only English letters (A–Z) and digits (0–9) are allowed", "No spaces or other special characters"],
-  usernameHint: "Please use only English letters (A-Z) and digits.",
+  usernameHint: "Please use only English letters (A-Z) and digits (0-9).",
   usernameAvailable: "Great! This username is available",
   usernameTaken: "This username is already taken",
   passwordRequirements: "Password Requirements",

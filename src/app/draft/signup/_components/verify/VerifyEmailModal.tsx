@@ -12,7 +12,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import type { DraftLang } from "@/components/DraftLang";
-import { Flourish, InkDivider, WaxSeal } from "@/components/Parchment";
+import { Flourish, InkDivider } from "@/components/Parchment";
 import { DRAFT_PREFIX } from "@/config/routes";
 import { EMAIL_RE } from "@/utils/validation";
 import {
@@ -96,7 +96,25 @@ const VERIFY_CSS = `
 @media (prefers-reduced-motion: reduce) { .verify-modal .verify-fade { animation: none; } }
 /* the seal's check mark: same size and font on every page (the signup page's own ".signup-scope .font-display" rule would shrink it to 13px) */
 .verify-modal .wax-seal > span { font-family: 'Cormorant Garamond', 'Prompt', serif; font-size: 24px; font-weight: 600; line-height: 1; }
-.verify-modal .ink-divider { margin: 0.6rem 0; }
+.verify-modal .ink-divider { margin: 0.6rem 0 1.15rem; }
+/* Thai button labels: normal letter spacing (the global .parch-btn spreads letters by 0.22em, which suits Latin only) */
+.verify-modal .parch-btn:lang(th) { letter-spacing: normal; }
+
+/* phones (<480px): everything a step smaller so the content keeps a comfortable margin from the paper's edge, in every state
+   (code entry, error, locked, expired, change email, exit confirmation, verified). */
+/* Mobile S / M (<420px): the end of the exit-confirmation sentence goes on its own line */
+@media (max-width: 419px) { .verify-modal .verify-tail { display: block; } }
+@media (max-width: 479px) {
+  .verify-modal { font-size: 13px; }
+  .verify-modal .verify-title { font-size: clamp(1.2rem, 5.4vw, 1.45rem); }
+  .verify-modal .verify-text { font-size: 13.5px; line-height: 1.55; }
+  .verify-modal .verify-small, .verify-modal .verify-label { font-size: 12px; }
+  .verify-modal .verify-digits { gap: 5px; }
+  .verify-modal .verify-digit { height: 3.1rem; font-size: 20px; }
+  .verify-modal .verify-btn { min-height: 42px; font-size: 14px; padding: 9px 0 11px; }
+  .verify-modal .verify-close { top: 6px; right: 6px; width: 40px; height: 40px; }
+  .verify-modal .ink-divider { margin: 0.45rem 0 0.9rem; }
+}
 `;
 
 function formatTime(total: number) {
@@ -503,7 +521,17 @@ export default function VerifyEmailModal({
               {/* keyed by the state so only the content fades in on a switch (paper, backdrop and X stay still) */}
               <div key={exiting ? "exit" : "main"} className="verify-fade text-center">
                 {view === "verified" && (
-                  <WaxSeal letter="✓" size={60} className="mx-auto mb-4" />
+                  /* /assets/email-verified.png is 1254x1254 with transparent margins; the wax seal itself is the 927x962 box at
+                     (163,147), so the image is offset/oversized inside a box of exactly that size (nothing cropped or stretched). */
+                  <div className="relative mx-auto mb-4 aspect-[927/962] w-20" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/email-verified.png"
+                      alt=""
+                      draggable={false}
+                      className="absolute top-[-15.28%] left-[-17.58%] w-[135.28%] max-w-none select-none [filter:drop-shadow(0_4px_6px_rgba(60,20,12,.35))]"
+                    />
+                  </div>
                 )}
                 <h2
                   id={titleId}
@@ -520,8 +548,9 @@ export default function VerifyEmailModal({
                 {/* ── exit confirmation (same dialog) ── */}
                 {exiting && (
                   <>
-                    <p id={confirmBodyId} className="verify-text">
+                    <p id={confirmBodyId} className="verify-text whitespace-pre-line">
                       {COPY.confirmBody}
+                      {COPY.confirmBodyTail && <span className="verify-tail">{COPY.confirmBodyTail}</span>}
                     </p>
                     <button
                       type="button"
@@ -658,6 +687,7 @@ export default function VerifyEmailModal({
                       )}
                       <p className="verify-small">{COPY.spamHint}</p>
                       <p className="verify-small">
+                        {COPY.changeBefore}{" "}
                         <button
                           type="button"
                           className="verify-link"
@@ -699,8 +729,8 @@ export default function VerifyEmailModal({
                     noValidate
                     className="text-left"
                   >
-                    <p className="verify-small">{COPY.currentEmail}</p>
-                    <p className="verify-text mb-4 wrap-break-word font-medium text-[#3a2c1a]">
+                    <p className="verify-small text-center">{COPY.currentEmail}</p>
+                    <p className="verify-text mb-4 text-center wrap-break-word font-medium text-[#3a2c1a]">
                       {email}
                     </p>
 

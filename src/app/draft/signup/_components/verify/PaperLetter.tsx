@@ -29,9 +29,9 @@ const PAPER_CSS = `
   border-image-outset: calc(var(--u) * 296) calc(var(--u) * 66) calc(var(--u) * 396) calc(var(--u) * 62);
   border-image-repeat: stretch;
 }
-/* phones: the code boxes need the width, so the text may sit closer to the (stained) edge */
+/* phones: content a little smaller (see VERIFY_CSS) so it stays clear of the stained edge: 110 image px (about 29px on a 390px phone) instead of 150 */
 @media (max-width: 479px) {
-  .paper-letter-sheet { padding-inline: 16px; }
+  .paper-letter-sheet { padding-inline: calc(var(--u) * 110); padding-block: calc(var(--u) * 175); }
 }
 `;
 
