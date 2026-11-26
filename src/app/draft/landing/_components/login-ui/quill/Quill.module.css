@@ -496,6 +496,47 @@
   100% { opacity: 0.341; }
 }
 
+/* ---- Cast shadow on the BACKDROP (QuillBackdropShadow.tsx) ----
+   The part of the quill that sticks out past the paper also casts a shadow, onto the 3D scene's shadow-catcher plane
+   0.62 model units behind the sheet (scrollLoginAnimation.ts, addShadowCatcher). Same key light as the paper shadow, so the
+   same direction (right and down, 48 deg), and the same colour and strength as the parchment's own shadow there
+   (ShadowMaterial #10130d at 0.24, softened by the shadow map):
+     - extra offset for the 0.62 units of depth: 0.62 * (1.13, 1.25) = (0.70, 0.775) units; the paper is 5.29 units tall and
+       --sheet-h px on screen, so (0.1323, 0.1465) * --sheet-h: about (70, 77) px on a 1440x928 window. It scales with the paper.
+     - the mask is the paper shadow's mask turned round: transparent at the nib (that part is over the paper, whose own shadow
+       already darkens the backdrop there), full from about half-way up the shaft.
+   The box sits behind the 3D canvas, so the paper hides any part of it that would be under the sheet. */
+.quillBackdropBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.quillBackdropRig {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(calc(var(--sheet-h, 526px) * 0.1323), calc(var(--sheet-h, 526px) * 0.1465), 0);
+}
+
+/* The whole feather casts here, and it reaches ~200 px past the art box on the right (the image is wider than the box), so the
+   mask box is widened to the right: a mask hides everything outside its box, which cut the shadow off in a straight line.
+   Only the right edge moves, so the projection's origin (40px, 307px from the top-left) stays on the nib. */
+.quillShadowRig.quillBackdropMask {
+  right: -220px;
+  -webkit-mask-image: linear-gradient(to top right, transparent 0%, transparent 22%, #000 42%);
+  mask-image: linear-gradient(to top right, transparent 0%, transparent 22%, #000 42%);
+}
+
+.quillBackdropImage {
+  filter: url(#quillBackdropShadow);
+  /* Matched to the parchment's own shadow on the backdrop, measured on screen (1440x928): the sheet's shadow darkens the village by
+     up to 22.5% (mean 12.8%), this one by up to 23.6% (mean 15.1% inside the shadow). Change it together with the ShadowMaterial
+     opacity in scroll/scrollLoginAnimation.ts (0.24) if the two should stay equal. */
+  opacity: 0.31;
+}
+
 /* Decorative only: dropped where the larger feather would run off the screen or cover the form. */
 @media (max-width: 979px) {
   .quill { display: none; }

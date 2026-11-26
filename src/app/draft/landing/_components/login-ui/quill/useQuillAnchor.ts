@@ -30,7 +30,10 @@ export function useQuillAnchor(boxRef: RefObject<HTMLElement | null>, enabled: b
       }
       if (node !== box) return // the prompt is not laid out inside this box (yet): keep the CSS fallback
       const centre = top + prompt.offsetHeight / 2
-      box.style.setProperty("--quill-bottom", `${Math.round(box.clientHeight - centre)}px`)
+      const value = `${Math.round(box.clientHeight - centre)}px`
+      box.style.setProperty("--quill-bottom", value)
+      // Also on the modal root: the backdrop shadow (QuillBackdropShadow) is a sibling box behind the 3D canvas, not inside this box.
+      box.parentElement?.style.setProperty("--quill-bottom", value)
     }
 
     update()
@@ -41,6 +44,7 @@ export function useQuillAnchor(boxRef: RefObject<HTMLElement | null>, enabled: b
     return () => {
       observer.disconnect()
       box.style.removeProperty("--quill-bottom")
+      box.parentElement?.style.removeProperty("--quill-bottom")
     }
   }, [boxRef, enabled])
 }

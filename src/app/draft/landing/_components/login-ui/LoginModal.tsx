@@ -6,6 +6,7 @@ import type { DraftLang } from "../../_mock/copy"
 import { useScrollLoginAnimation } from "./scroll/useScrollLoginAnimation"
 import PreviewPanel from "../draft-tools/PreviewPanel"
 import { getCurrentSnapshot, isEmbedded, listenPreviewCommands, reportPreviewStatus } from "../draft-tools/previewBridge"
+import QuillBackdropShadow from "./quill/QuillBackdropShadow"
 import QuillFeather from "./quill/QuillFeather"
 import QuillShadow from "./quill/QuillShadow"
 import { useQuillAnchor } from "./quill/useQuillAnchor"
@@ -218,6 +219,9 @@ export default function LoginModal({
       className={`${styles.backdrop} fixed inset-0 z-50 overflow-hidden bg-[#10131f]/65 backdrop-blur-[2px]`}
       onClick={() => void requestClose()}
     >
+      {/* The quill's cast shadow on the backdrop: BEFORE the canvas, so the 3D paper covers it wherever the sheet is. */}
+      {showQuill && !flat && <QuillBackdropShadow visible={quillVisible} />}
+
       {/* Three.js canvas: transparent, so the dimmed village stays visible around the sheet */}
       {/* Preview only: while the flat card is forced the (still running) 3D canvas is hidden, not unmounted, so switching back needs no reload. */}
       <div
